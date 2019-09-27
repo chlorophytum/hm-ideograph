@@ -15,7 +15,7 @@
 		"@chlorophytum/arch": "^0.2.0",
 		"@chlorophytum/final-hint-format-hltt": "^0.2.0",
 		"@chlorophytum/hint-embox": "0.2.0",
-		"@chlorophytum/hint-programs-stoke-adjust": "^0.2.0",
+		"@chlorophytum/hint-programs-stoke-adjust": "0.2.0",
 		"@chlorophytum/hltt": "^0.2.0",
 		"lodash": "^4.17.11",
 		"tslib": "^1.9.3"
