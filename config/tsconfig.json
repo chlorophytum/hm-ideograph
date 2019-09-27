@@ -1,0 +1,12 @@
+{
+	"files": [],
+	"references": [
+		{"path": "../packages/hint-embox"},
+		{"path": "../packages/hint-multi-stroke"},
+		{"path": "../packages/hint-programs-stroke-adjust"},
+		{"path": "../packages/hm-ideograph"},
+		{"path": "../packages/ideograph-hint-generator-1"},
+		{"path": "../packages/ideograph-shape-analyzer-1"},
+		{"path": "../packages/ideograph-shape-analyzer-shared"}
+	]
+}

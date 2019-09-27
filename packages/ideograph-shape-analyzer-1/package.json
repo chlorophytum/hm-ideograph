@@ -1,0 +1,25 @@
+{
+	"name": "@chlorophytum/ideograph-shape-analyzer-1",
+	"version": "0.50.1",
+	"description": "",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"scripts": {
+		"clean": "rimraf lib .build-cache",
+		"build": "tsc --build"
+	},
+	"author": "Renzhi Li (aka. Belleve Invis)",
+	"license": "MIT",
+	"dependencies": {
+		"@chlorophytum/arch": "^0.50.0",
+		"@chlorophytum/ideograph-shape-analyzer-shared": "0.50.1",
+		"lodash": "^4.17.11",
+		"tslib": "^2.0.1"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.14.134"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

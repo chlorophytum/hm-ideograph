@@ -1,0 +1,13 @@
+{
+	"extends": "../../config/tsconfig.settings.json",
+	"references": [
+		{"path": "../ideograph-hint-generator-1"},
+		{"path": "../ideograph-shape-analyzer-1"},
+		{"path": "../ideograph-shape-analyzer-shared"}
+	],
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"tsBuildInfoFile": ".build-cache/src"
+	}
+}

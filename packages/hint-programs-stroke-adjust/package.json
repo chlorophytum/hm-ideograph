@@ -1,0 +1,24 @@
+{
+	"name": "@chlorophytum/hint-programs-stroke-adjust",
+	"version": "0.50.1",
+	"description": "",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"scripts": {
+		"clean": "rimraf lib .build-cache",
+		"build": "tsc --build"
+	},
+	"author": "Renzhi Li (aka. Belleve Invis)",
+	"license": "MIT",
+	"dependencies": {
+		"@chlorophytum/arch": "^0.50.0",
+		"@chlorophytum/hltt-next": "^0.50.0",
+		"@chlorophytum/hltt-next-expr": "^0.50.0",
+		"@chlorophytum/hltt-next-stmt": "^0.50.0",
+		"@chlorophytum/hltt-next-type-system": "^0.50.0",
+		"tslib": "^2.0.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

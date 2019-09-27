@@ -1,0 +1,23 @@
+{
+	"name": "@chlorophytum/hm-ideograph",
+	"version": "0.50.1",
+	"description": "",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"scripts": {
+		"clean": "rimraf lib .build-cache",
+		"build": "tsc --build"
+	},
+	"author": "Renzhi Li (aka. Belleve Invis)",
+	"license": "MIT",
+	"dependencies": {
+		"@chlorophytum/arch": "^0.50.0",
+		"@chlorophytum/ideograph-hint-generator-1": "0.50.1",
+		"@chlorophytum/ideograph-shape-analyzer-1": "0.50.1",
+		"@chlorophytum/ideograph-shape-analyzer-shared": "0.50.1",
+		"tslib": "^2.0.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

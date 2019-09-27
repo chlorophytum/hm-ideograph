@@ -1,0 +1,9 @@
+{
+	"extends": "../../config/tsconfig.settings.json",
+	"references": [],
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"tsBuildInfoFile": ".build-cache/src"
+	}
+}

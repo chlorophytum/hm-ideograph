@@ -1,0 +1,40 @@
+{
+	"version": "0.50.1",
+	"devDependencies": {
+		"@chlorophytum/cli": "^0.50.0",
+		"@chlorophytum/final-hint-format-hltt": "^0.50.0",
+		"@chlorophytum/font-format-otd": "^0.50.0",
+		"@chlorophytum/font-format-ttf": "^0.50.0",
+		"@chlorophytum/hint-store-provider-file": "^0.50.0",
+		"@chlorophytum/hm-combine": "^0.50.0",
+		"@chlorophytum/hm-select-glyphs": "^0.50.0",
+		"@types/node": "^17.0.23",
+		"@typescript-eslint/eslint-plugin": "^7.17.0",
+		"@typescript-eslint/parser": "^7.17.0",
+		"eslint": "^8.20.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-import": "^2.29.1",
+		"eslint-plugin-prettier": "^5.2.1",
+		"json-stringify-pretty-compact": "^3.0.0",
+		"prettier": "^3.3.3",
+		"prettier-eslint": "^16.3.0",
+		"rimraf": "^6.0.1",
+		"typescript": "^5.5"
+	},
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"init": "npm install && node common/layermap",
+		"build": "tsc --build config",
+		"watch": "tsc --build --watch config",
+		"lint": "eslint . --ext .ts,.tsx",
+		"lint:eslint-fix": "eslint . --ext .ts,.tsx --fix",
+		"reset": "npm run --workspaces clean && npm run init",
+		"create-package": "node common/create-package",
+		"rebuild": "npm run reset && npm run build",
+		"prepack": "npm run init && npm run build",
+		"publish": "npm run build && npm publish --workspaces",
+		"sync-external-links": "node common/sync-external-links"
+	}
+}

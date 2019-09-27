@@ -1,0 +1,12 @@
+{
+	"extends": "../../config/tsconfig.settings.json",
+	"references": [
+		{"path": "../hint-embox"},
+		{"path": "../hint-programs-stroke-adjust"}
+	],
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"tsBuildInfoFile": ".build-cache/src"
+	}
+}
