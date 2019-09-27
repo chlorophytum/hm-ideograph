@@ -1,0 +1,24 @@
+defaults: &defaults
+  working_directory: /tmp/repo
+  docker:
+    - image: circleci/node:lts
+
+version: 2
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - run:
+          name: install-npm
+          command: npm install
+      - run:
+          name: build typescript
+          command: npm run rebuild
+      - run:
+          name: unit test
+          command: npm run test

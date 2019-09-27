@@ -1,0 +1,4 @@
+src/
+lib/**/*.map
+tsconfig.json
+.build-cache

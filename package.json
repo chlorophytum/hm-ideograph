@@ -1,0 +1,24 @@
+{
+	"devDependencies": {
+		"json-stringify-pretty-compact": "^2.0.0",
+		"lerna": "^3.4.0",
+		"prettier": "^1.15.2",
+		"prettier-tslint": "^0.4.0",
+		"rimraf": "^2.6.2",
+		"tslint": "^5.11.0",
+		"tslint-lerna-rules": "^1.0.4",
+		"typescript": "^3.3"
+	},
+	"scripts": {
+		"init": "node common/layermap && lerna bootstrap --hoist --no-ci",
+		"build": "tsc --build liblet",
+		"watch": "tsc --build --watch liblet",
+		"lint": "tslint -c tslint.json --fix liblet/*/src/**/*.ts",
+		"reset": "lerna run clean && lerna clean --yes && npm run init",
+		"create-liblet": "node common/create-liblet",
+		"rebuild": "npm run reset && npm run build",
+		"test": "lerna run --stream test",
+		"prepack": "npm run init && npm run build",
+		"add-dep": "lerna add"
+	}
+}

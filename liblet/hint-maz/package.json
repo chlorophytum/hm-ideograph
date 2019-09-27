@@ -1,0 +1,35 @@
+{
+	"name": "@chlorophytum/hint-maz",
+	"version": "0.2.0",
+	"description": "",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"scripts": {
+		"clean": "rimraf lib .build-cache",
+		"build": "tsc --build",
+		"test": "ava --verbose"
+	},
+	"author": "Renzhi Li (aka. Belleve Invis)",
+	"license": "MIT",
+	"dependencies": {
+		"@chlorophytum/arch": "^0.2.0",
+		"@chlorophytum/final-hint-format-hltt": "^0.2.0",
+		"@chlorophytum/hint-embox": "0.2.0",
+		"@chlorophytum/hint-programs-stoke-adjust": "^0.2.0",
+		"@chlorophytum/hltt": "^0.2.0",
+		"lodash": "^4.17.11",
+		"tslib": "^1.9.3"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.14.134",
+		"ava": "^1.4.1"
+	},
+	"ava": {
+		"files": [
+			"lib/**/*.test.js"
+		]
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

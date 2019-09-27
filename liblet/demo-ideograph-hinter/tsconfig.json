@@ -1,0 +1,9 @@
+{
+	"extends": "../tsconfig.settings.json",
+	"references": [{"path": "../ideograph-shape-analyzer-1"}],
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"tsBuildInfoFile": ".build-cache/src"
+	}
+}

@@ -1,0 +1,8 @@
+dist
+.idea
+node_modules
+liblet/*/lib
+*.log
+tmp
+payloads
+.build-cache
