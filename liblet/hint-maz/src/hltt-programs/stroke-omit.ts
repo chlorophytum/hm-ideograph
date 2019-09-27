@@ -2,7 +2,7 @@ import { Lib } from "./commons";
 
 export const ProcessCollidedStrokeWidth = Lib.Func(function*(e) {
 	const [w0] = e.args(1);
-	yield e.return(e.max(e.coerce.toF26D6(1 / 2), e.mul(e.coerce.toF26D6(1 / 2), w0)));
+	yield e.return(e.max(e.coerce.toF26D6(2 / 5), e.mul(e.coerce.toF26D6(1 / 2), w0)));
 });
 
 export const CollideHangBottom = Lib.Func(function*(e) {
