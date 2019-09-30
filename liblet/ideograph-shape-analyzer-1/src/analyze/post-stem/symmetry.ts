@@ -13,20 +13,27 @@ export default function analyzeSymmetry(
 	for (let j = 0; j < stems.length; j++) {
 		sym[j] = [];
 		for (let k = 0; k < j; k++) {
-			sym[j][k] =
-				!directOverlaps[j][k] &&
-				!stems[j].diagHigh &&
-				!stems[k].diagHigh &&
-				Math.abs(stems[j].y - stems[k].y) < limit &&
-				Math.abs(stems[j].y - stems[j].width - stems[k].y + stems[k].width) < limit &&
-				Math.abs(stems[j].xMax - stems[j].xMin - (stems[k].xMax - stems[k].xMin)) <
-					limitX &&
+			const yDiff = Math.abs(stems[j].y - stems[k].y);
+			const yBotDiff = Math.abs(stems[j].y - stems[j].width - stems[k].y + stems[k].width);
+			const lengthDiff = Math.abs(
+				stems[j].xMaxExP - stems[j].xMinExP - (stems[k].xMaxExP - stems[k].xMinExP)
+			);
+
+			const topologicalSimilar =
+				!directOverlaps[j][k] && !stems[j].diagHigh && !stems[k].diagHigh;
+			const positionalSimilar =
+				yDiff < limit &&
+				yBotDiff < limit &&
+				Math.max(1, yDiff, yBotDiff) * lengthDiff < limit * limitX;
+			const spatialRelationshipSimilar =
 				(stems[j].hasSameRadicalStemAbove === stems[k].hasSameRadicalStemAbove ||
 					stems[j].hasSameRadicalStemBelow === stems[k].hasSameRadicalStemBelow) &&
 				(stems[j].hasGlyphStemAbove === stems[k].hasGlyphStemAbove ||
 					stems[j].hasGlyphStemBelow === stems[k].hasGlyphStemBelow) &&
 				(atGlyphTop(stems[j], strategy) === atGlyphTop(stems[k], strategy) ||
 					atGlyphBottom(stems[j], strategy) === atGlyphBottom(stems[k], strategy));
+
+			sym[j][k] = topologicalSimilar && positionalSimilar && spatialRelationshipSimilar;
 		}
 	}
 	return sym;
