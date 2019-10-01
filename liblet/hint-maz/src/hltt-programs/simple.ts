@@ -1,56 +1,79 @@
 import { Lib } from "./commons";
 
-const IP2Sh = Lib.Func(function*(e) {
-	const [zBot, zTop, zA, zB, sh] = e.args(5);
-	yield e.ip(zBot, zTop, zA, zB);
-	const y1 = e.local(),
-		y2 = e.local(),
-		yM = e.local();
-	yield e.set(y1, e.gc.cur(zA));
-	yield e.set(y2, e.gc.cur(zB));
-	yield e.set(yM, e.div(e.add(y1, y2), e.coerce.toF26D6(2)));
-	yield e.scfs(zA, e.add(yM, e.mul(sh, e.sub(y1, yM))));
-	yield e.scfs(zB, e.add(yM, e.mul(sh, e.sub(y2, yM))));
+const IP2Sh = Lib.Func(function*($) {
+	const [zBot, zTop, zA, zB, sh] = $.args(5);
+	yield $.ip(zBot, zTop, zA, zB);
+	const y1 = $.local(),
+		y2 = $.local(),
+		yM = $.local();
+	yield $.set(y1, $.gc.cur(zA));
+	yield $.set(y2, $.gc.cur(zB));
+	yield $.set(yM, $.div($.add(y1, y2), $.coerce.toF26D6(2)));
+	yield $.scfs(zA, $.add(yM, $.mul(sh, $.sub(y1, yM))));
+	yield $.scfs(zB, $.add(yM, $.mul(sh, $.sub(y2, yM))));
 });
 
 // This function is used at very small PPEM -- We can do almost nothing, just IP
-export const HintMultipleStrokesGiveUp = Lib.Func(function*(e) {
-	const [N, zBot, zTop, vpZMids] = e.args(4);
-	const pZMids = e.coerce.fromIndex.variable(vpZMids);
-	yield e.mdap(zBot);
-	yield e.mdap(zTop);
-	const j = e.local();
-	yield e.set(j, 0);
-	yield e.while(e.lt(j, N), function*() {
-		yield e.call(
+export const HintMultipleStrokesGiveUp = Lib.Func(function*($) {
+	const [N, zBot, zTop, vpZMids] = $.args(4);
+	const pZMids = $.coerce.fromIndex.variable(vpZMids);
+	yield $.mdap(zBot);
+	yield $.mdap(zTop);
+	const j = $.local();
+	yield $.set(j, 0);
+	yield $.while($.lt(j, N), function*() {
+		yield $.call(
 			IP2Sh,
 			zBot,
 			zTop,
-			e.part(pZMids, e.mul(e.coerce.toF26D6(2), j)),
-			e.part(pZMids, e.add(1, e.mul(e.coerce.toF26D6(2), j))),
-			e.min(e.coerce.toF26D6(1), e.mul(e.coerce.toF26D6(4), e.mppem()))
+			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),
+			$.part(pZMids, $.add(1, $.mul($.coerce.toF26D6(2), j))),
+			$.min($.coerce.toF26D6(1), $.mul($.coerce.toF26D6(4), $.mppem()))
 		);
-		yield e.set(j, e.add(1, j));
+		yield $.set(j, $.add(1, j));
 	});
 });
 
-// This function is used at very large PPEM -- whether to round is no longer important, just IP
-export const HintMultipleStrokesSimple = Lib.Func(function*(e) {
-	const [N, zBot, zTop, vpZMids] = e.args(4);
-	const pZMids = e.coerce.fromIndex.variable(vpZMids);
-	yield e.mdap(zBot);
-	yield e.mdap(zTop);
+const IpClose = Lib.Func(function*($) {
+	const [zBot, zTop, z1, z2] = $.args(4);
+	yield $.ip(zBot, zTop, z1, z2);
+	const distOrig = $.local();
+	const drTop = $.local();
+	const drBot = $.local();
+	yield $.set(distOrig, $.sub($.gc.orig(z2), $.gc.orig(z1)));
+	yield $.set(drTop, $.abs($.sub($.gc.cur(z1), $.round.gray($.gc.cur(z1)))));
+	yield $.set(drBot, $.abs($.sub($.gc.cur(z2), $.round.gray($.gc.cur(z2)))));
+	yield $.if(
+		$.lt(drTop, drBot),
+		function*() {
+			yield $.scfs(z2, $.round.gray($.gc.cur(z2)));
+			yield $.scfs(z1, $.sub($.round.gray($.gc.cur(z2)), distOrig));
+		},
+		function*() {
+			yield $.scfs(z1, $.round.gray($.gc.cur(z1)));
+			yield $.scfs(z2, $.add($.round.gray($.gc.cur(z1)), distOrig));
+		}
+	);
+});
 
-	const j = e.local();
-	yield e.set(j, 0);
-	yield e.while(e.lt(j, N), function*() {
-		yield e.ip(
+// This function is used at very large PPEM -- whether to round is no longer important, just IP
+export const HintMultipleStrokesSimple = Lib.Func(function*($) {
+	const [N, zBot, zTop, vpZMids] = $.args(4);
+	const pZMids = $.coerce.fromIndex.variable(vpZMids);
+	yield $.mdap(zBot);
+	yield $.mdap(zTop);
+
+	const j = $.local();
+	yield $.set(j, 0);
+	yield $.while($.lt(j, N), function*() {
+		yield $.call(
+			IpClose,
 			zBot,
 			zTop,
-			e.part(pZMids, e.mul(e.coerce.toF26D6(2), j)),
-			e.part(pZMids, e.add(1, e.mul(e.coerce.toF26D6(2), j)))
+			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),
+			$.part(pZMids, $.add(1, $.mul($.coerce.toF26D6(2), j)))
 		);
 
-		yield e.set(j, e.add(1, j));
+		yield $.set(j, $.add(1, j));
 	});
 });
