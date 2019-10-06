@@ -15,7 +15,7 @@
 	"dependencies": {
 		"@chlorophytum/cli": "^0.2.0",
 		"@chlorophytum/final-hint-format-hltt": "^0.2.0",
-		"@chlorophytum/font-format-otd": "^0.2.0",
+		"@chlorophytum/font-format-otd": "^0.2.3",
 		"@chlorophytum/hint-store-provider-file": "^0.2.0",
 		"@chlorophytum/ideograph-shape-analyzer-1": "0.2.2",
 		"tslib": "^1.9.3"
