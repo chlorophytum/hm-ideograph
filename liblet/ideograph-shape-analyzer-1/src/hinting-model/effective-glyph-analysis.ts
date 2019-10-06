@@ -1,4 +1,4 @@
-import { IFontSource, ITask, WellKnownGlyphRelation } from "@chlorophytum/arch";
+import { IFontEntry, ITask, WellKnownGlyphRelation } from "@chlorophytum/arch";
 
 import { HintingStrategy } from "../strategy";
 
@@ -26,10 +26,7 @@ for (let cv = 0; cv <= 99; cv++) {
 }
 
 export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
-	constructor(
-		private readonly font: IFontSource<GID>,
-		private readonly params: HintingStrategy
-	) {}
+	constructor(private readonly font: IFontEntry<GID>, private readonly params: HintingStrategy) {}
 	public async execute() {
 		const charSet = await this.font.getCharacterSet();
 		let gidSet: Set<GID> = new Set();

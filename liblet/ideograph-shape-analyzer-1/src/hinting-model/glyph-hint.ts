@@ -2,7 +2,7 @@ import {
 	EmptyImpl,
 	Glyph,
 	IArbitratorProxy,
-	IFontSource,
+	IFontEntry,
 	IFontSourceMetadata,
 	IHint,
 	IHintingModelExecEnv,
@@ -23,7 +23,7 @@ import { ModelVersionPrefix } from "./version-prefix";
 
 export class GlyphHintTask<GID> implements ITask<void> {
 	constructor(
-		private readonly font: IFontSource<GID>,
+		private readonly font: IFontEntry<GID>,
 		private readonly params: HintingStrategy,
 		private readonly ee: IHintingModelExecEnv,
 		private readonly gid: GID
@@ -93,7 +93,7 @@ export class ParallelGlyphHintCoTask<GID>
 			GlyphHintParallelResultRep
 		> {
 	constructor(
-		private readonly font: IFontSource<GID>,
+		private readonly font: IFontEntry<GID>,
 		private readonly ee: IHintingModelExecEnv,
 		private readonly params: HintingStrategy,
 
@@ -146,10 +146,7 @@ export class ParallelGlyphHintTask implements IParallelTask<GlyphHintParallelRes
 	}
 }
 
-export async function getGlyphRep<GID>(
-	font: IFontSource<GID>,
-	gid: GID
-): Promise<null | Glyph.Rep> {
+export async function getGlyphRep<GID>(font: IFontEntry<GID>, gid: GID): Promise<null | Glyph.Rep> {
 	const shapes: [(null | Variation.Master), Glyph.Shape][] = [];
 	const masters: (null | Variation.MasterRep)[] = [null, ...(await font.getGlyphMasters(gid))];
 	for (const m of masters) {
