@@ -56,9 +56,9 @@ export class IdeographHintingTask<GID> implements ITask<void> {
 		}
 
 		// Do per-glyph hinting
-		const perGlyphHinting = Array.from(glyphs).map(([gid, er]) => {
-			arb.demand(new GlyphHintTask(er.entry, er.parameter, this.ee, gid));
-		});
+		const perGlyphHinting = Array.from(glyphs).map(([gid, er]) =>
+			arb.demand(new GlyphHintTask(er.entry, er.parameter, this.ee, gid))
+		);
 		await Promise.all(perGlyphHinting);
 
 		// Do shared hinting
