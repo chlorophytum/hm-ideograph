@@ -13,10 +13,10 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"@chlorophytum/cli": "^0.3.0",
-		"@chlorophytum/final-hint-format-hltt": "^0.3.0",
-		"@chlorophytum/font-format-otd": "^0.3.0",
-		"@chlorophytum/hint-store-provider-file": "^0.3.0",
+		"@chlorophytum/cli": "^0.3.1",
+		"@chlorophytum/final-hint-format-hltt": "^0.3.1",
+		"@chlorophytum/font-format-otd": "^0.3.1",
+		"@chlorophytum/hint-store-provider-file": "^0.3.1",
 		"@chlorophytum/ideograph-shape-analyzer-1": "0.3.2",
 		"tslib": "^1.9.3"
 	},

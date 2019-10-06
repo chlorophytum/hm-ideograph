@@ -12,9 +12,9 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"@chlorophytum/arch": "^0.3.0",
-		"@chlorophytum/font-opentype": "^0.3.0",
-		"@chlorophytum/hint-common": "^0.3.0",
+		"@chlorophytum/arch": "^0.3.1",
+		"@chlorophytum/font-opentype": "^0.3.1",
+		"@chlorophytum/hint-common": "^0.3.1",
 		"@chlorophytum/hint-embox": "0.3.2",
 		"@chlorophytum/hint-maz": "0.3.2",
 		"lodash": "^4.17.11",
