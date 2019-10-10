@@ -2,36 +2,37 @@ import { IFontEntry, ITask, WellKnownGlyphRelation } from "@chlorophytum/arch";
 
 import { HintingStrategy } from "../strategy";
 
-import { isHangulCodePoint, isIdeographCodePoint } from "./unicode-kind";
-
-const acceptableLookupKinds = new Set([`gsub_single`, `gsub_multiple`, `gsub_alternate`]);
-const acceptableScriptTags = new Set([`hani`, `hang`]);
-const acceptableFeatureTags = new Set([
-	`locl`,
-	`smpl`,
-	`trad`,
-	`tnam`,
-	`jp78`,
-	`jp83`,
-	`jp90`,
-	`jp04`,
-	`hojo`,
-	`nlck`
-]);
-for (let cv = 0; cv <= 99; cv++) {
-	let cvTag: string = "" + cv;
-	while (cvTag.length < 2) cvTag = "0" + cvTag;
-	acceptableFeatureTags.add(`cv` + cvTag);
-	acceptableFeatureTags.add(`ss` + cvTag);
-}
+const DefaultLookupKinds = [`gsub_single`, `gsub_multiple`, `gsub_alternate`];
 
 export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
-	constructor(private readonly font: IFontEntry<GID>, private readonly params: HintingStrategy) {}
+	private acceptAllGlyphs: boolean;
+	private acceptableLookupKinds: ReadonlySet<string>;
+	private acceptableScriptTags: ReadonlySet<string>;
+	private acceptableFeatureTags: ReadonlySet<string>;
+	private acceptableUnicode: ReadonlySet<number>;
+
+	constructor(private readonly font: IFontEntry<GID>, params: HintingStrategy) {
+		this.acceptAllGlyphs = !!params.acceptAllGlyphs;
+
+		this.acceptableLookupKinds = new Set(DefaultLookupKinds);
+		this.acceptableScriptTags = new Set(params.trackScripts);
+		this.acceptableFeatureTags = new Set(params.trackFeatures);
+
+		const au: Set<number> = new Set();
+		for (const [start, end] of params.unicodeRanges) {
+			for (let c = start; c <= end; c++) au.add(c);
+		}
+		this.acceptableUnicode = au;
+	}
 	public async execute() {
-		const charSet = await this.font.getCharacterSet();
-		let gidSet: Set<GID> = new Set();
-		for (const ch of charSet) await this.analyzeEffectiveGlyphsForChar(gidSet, ch);
-		return gidSet;
+		if (this.acceptAllGlyphs) {
+			return new Set(await this.font.getGlyphSet());
+		} else {
+			const charSet = await this.font.getCharacterSet();
+			let gidSet: Set<GID> = new Set();
+			for (const ch of charSet) await this.analyzeEffectiveGlyphsForChar(gidSet, ch);
+			return gidSet;
+		}
 	}
 	private async analyzeEffectiveGlyphsForChar(gidSet: Set<GID>, ch: number) {
 		if (!this.unicodeAcceptable(ch)) return;
@@ -45,9 +46,7 @@ export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
 		}
 	}
 	private unicodeAcceptable(code: number) {
-		if (isIdeographCodePoint(code) && !this.params.ignoreIdeographs) return true;
-		if (isHangulCodePoint(code) && !this.params.ignoreHangul) return true;
-		return false;
+		return this.acceptableUnicode.has(code);
 	}
 	private relationshipAcceptable(relationTag: string) {
 		const selector = WellKnownGlyphRelation.UnicodeVariant.unApply(relationTag);
@@ -57,9 +56,9 @@ export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
 		if (!gsub) return false;
 		const [script, language, feature, kind] = gsub;
 		return (
-			acceptableScriptTags.has(script) &&
-			acceptableFeatureTags.has(feature.slice(0, 4)) &&
-			acceptableLookupKinds.has(kind)
+			this.acceptableScriptTags.has(script) &&
+			this.acceptableFeatureTags.has(feature.slice(0, 4)) &&
+			this.acceptableLookupKinds.has(kind)
 		);
 	}
 }
