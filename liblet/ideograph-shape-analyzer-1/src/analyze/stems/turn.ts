@@ -14,8 +14,8 @@ export class Bitmap {
 
 	constructor(strategy: HintingStrategy, public array: number[][]) {
 		let scale = strategy.UPM / SIZE;
-		let yMin = Math.floor((strategy.EMBOX_BOTTOM * strategy.UPM) / scale);
-		let yMax = Math.ceil((strategy.EMBOX_TOP * strategy.UPM) / scale);
+		let yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
+		let yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
 		this.scale = scale;
 		this.yMin = yMin;
 		this.yMax = yMax;
@@ -41,8 +41,8 @@ export class Bitmap {
 
 export function createImageBitmap(g: CGlyph, strategy: HintingStrategy) {
 	let scale = strategy.UPM / SIZE;
-	let yMin = Math.floor((strategy.EMBOX_BOTTOM * strategy.UPM) / scale);
-	let yMax = Math.ceil((strategy.EMBOX_TOP * strategy.UPM) / scale);
+	let yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
+	let yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
 	let bitmap = new Array(SIZE + 1);
 	for (let x = 0; x <= SIZE; x++) {
 		bitmap[x] = new Array(yMax - yMin + 1);

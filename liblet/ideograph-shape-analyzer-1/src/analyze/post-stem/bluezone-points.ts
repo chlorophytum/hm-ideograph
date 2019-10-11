@@ -95,8 +95,8 @@ export default function analyzeBlueZonePoints(
 				point,
 				bottomBluePoints,
 				topBluePoints,
-				strategy.EMBOX_BOTTOM_STROKE * strategy.UPM,
-				strategy.EMBOX_TOP_STROKE * strategy.UPM
+				strategy.EmBox.StrokeBottom * strategy.UPM,
+				strategy.EmBox.StrokeTop * strategy.UPM
 			);
 		}
 	}
@@ -110,8 +110,8 @@ export default function analyzeBlueZonePoints(
 				point,
 				bottomBluePoints,
 				topBluePoints,
-				strategy.EMBOX_BOTTOM_STROKE * strategy.UPM,
-				strategy.EMBOX_TOP_STROKE * strategy.UPM
+				strategy.EmBox.StrokeBottom * strategy.UPM,
+				strategy.EmBox.StrokeTop * strategy.UPM
 			);
 		}
 	}

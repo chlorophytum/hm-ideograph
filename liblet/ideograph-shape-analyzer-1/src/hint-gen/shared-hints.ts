@@ -7,13 +7,13 @@ export function createSharedHints(params: HintingStrategy) {
 	return new Sequence.Hint([
 		WithDirection.Y(
 			new EmBoxShared.Hint({
-				name: params.groupName,
-				strokeBottom: params.UPM * params.EMBOX_BOTTOM_STROKE,
-				strokeTop: params.UPM * params.EMBOX_TOP_STROKE,
-				archBottom: params.UPM * params.EMBOX_BOTTOM_ARCH,
-				archTop: params.UPM * params.EMBOX_TOP_ARCH,
-				spurBottom: params.UPM * params.EMBOX_BOTTOM_SPUR,
-				spurTop: params.UPM * params.EMBOX_TOP_SPUR
+				name: params.emboxSystemName,
+				strokeBottom: params.UPM * params.EmBox.StrokeBottom,
+				strokeTop: params.UPM * params.EmBox.StrokeTop,
+				archBottom: params.UPM * params.EmBox.ArchBottom,
+				archTop: params.UPM * params.EmBox.ArchTop,
+				spurBottom: params.UPM * params.EmBox.SpurBottom,
+				spurTop: params.UPM * params.EmBox.SpurTop
 			})
 		)
 	]);

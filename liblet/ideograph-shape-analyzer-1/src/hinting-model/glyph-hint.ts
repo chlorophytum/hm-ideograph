@@ -136,7 +136,7 @@ export class ParallelGlyphHintTask implements IParallelTask<GlyphHintParallelRes
 	public hintGlyphGeometry(geometry: Glyph.Shape, params: HintingStrategy) {
 		const glyph = createGlyph(geometry.eigen); // Care about outline glyphs only
 		const analysis = analyzeGlyph(glyph, params);
-		const sink = new HintGenSink(params.groupName);
+		const sink = new HintGenSink(params.emboxSystemName);
 		const ha = new HierarchyAnalyzer(analysis, params);
 		ha.pre(sink);
 		do {

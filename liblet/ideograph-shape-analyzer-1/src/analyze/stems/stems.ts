@@ -150,8 +150,7 @@ function identifyStem(
 	strategy: HintingStrategy
 ) {
 	let candidate = { high: [] as number[], low: [] as number[] };
-	const maxStemWidth =
-		strategy.UPM * strategy.CANONICAL_STEM_WIDTH * strategy.CANONICAL_STEM_WIDTH_LIMIT_X;
+	const maxStemWidth = strategy.UPM * strategy.CANONICAL_STEM_WIDTH * strategy.MAX_STEM_WDTH_X;
 	if (up[j]) {
 		candidate.high.push(j);
 	} else {

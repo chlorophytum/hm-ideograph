@@ -1,4 +1,4 @@
-import { StretchProps } from "@chlorophytum/hint-embox";
+import { EmBoxShared, StretchProps } from "@chlorophytum/hint-embox";
 
 const DEADLY = 1e12;
 
@@ -10,6 +10,28 @@ const DefaultStretch: StretchProps = {
 	STRETCH_TOP_A: -0.5,
 	STRETCH_TOP_X: 2.5,
 	CUTIN: 0
+};
+
+export type EmBoxProps = {
+	Bottom: number;
+	Top: number;
+	StrokeBottom: number;
+	StrokeTop: number;
+	ArchBottom: number;
+	ArchTop: number;
+	SpurBottom: number;
+	SpurTop: number;
+};
+
+export const DefaultEmBoxProps: EmBoxProps = {
+	Bottom: -120 / 1000,
+	Top: 880 / 1000,
+	StrokeBottom: (380 - 425) / 1000,
+	StrokeTop: (380 + 425) / 1000,
+	ArchBottom: (380 - 455) / 1000,
+	ArchTop: (380 + 455) / 1000,
+	SpurBottom: (380 - 475) / 1000,
+	SpurTop: (380 + 475) / 1000
 };
 
 const DefaultUnicodeRanges: [number, number][] = [
@@ -44,15 +66,19 @@ for (let cv = 0; cv <= 99; cv++) {
 
 const DefaultStrategy = {
 	// Coverage
-	groupName: "Ideographs",
+	emboxSystemName: "Ideographs",
 	acceptAllGlyphs: false,
+	unicodeRanges: DefaultUnicodeRanges,
 	trackScripts: DefaultScriptTags,
 	trackFeatures: DefaultFeatureTags,
-	unicodeRanges: DefaultUnicodeRanges,
 
-	// Parameters
+	// Em-box
+	EmBox: DefaultEmBoxProps,
+	EmBoxStretch: DefaultStretch,
+
+	// Stem identification
 	CANONICAL_STEM_WIDTH: 67 / 1000,
-	CANONICAL_STEM_WIDTH_LIMIT_X: 1.5,
+	MAX_STEM_WDTH_X: 1.5,
 	ABSORPTION_LIMIT: 120 / 1000,
 	STEM_SIDE_MIN_RISE: 36 / 1000,
 	STEM_SIDE_MIN_DESCENT: 53 / 1000,
@@ -60,17 +86,11 @@ const DefaultStrategy = {
 	STEM_CENTER_MIN_DESCENT: 50 / 1000,
 	STEM_SIDE_MIN_DIST_RISE: 75 / 1000,
 	STEM_SIDE_MIN_DIST_DESCENT: 75 / 1000,
+
+	// DO NOT TOUCH
 	X_FUZZ: 7 / 1000,
 	Y_FUZZ: 8 / 1000,
 	Y_FUZZ_DIAG: 15 / 1000,
-	EMBOX_BOTTOM: -120 / 1000,
-	EMBOX_TOP: 880 / 1000,
-	EMBOX_BOTTOM_STROKE: (380 - 425) / 1000,
-	EMBOX_TOP_STROKE: (380 + 425) / 1000,
-	EMBOX_BOTTOM_ARCH: (380 - 455) / 1000,
-	EMBOX_TOP_ARCH: (380 + 455) / 1000,
-	EMBOX_BOTTOM_SPUR: (380 - 475) / 1000,
-	EMBOX_TOP_SPUR: (380 + 475) / 1000,
 	SLOPE_FUZZ: 0.144,
 	SLOPE_FUZZ_POS: 0.156,
 	SLOPE_FUZZ_POST: 0.25,
@@ -104,8 +124,7 @@ const DefaultStrategy = {
 	TBST_LIMIT: 0.25,
 	DO_SHORT_ABSORPTION: true,
 	SYMMETRY_TEST_PPEM: 32,
-	DEADLY_MERGE: 1e10,
-	EmBoxStretch: DefaultStretch
+	DEADLY_MERGE: 1e10
 };
 
 export type HintingStrategy = Readonly<typeof DefaultStrategy> & { readonly UPM: number };
