@@ -16,6 +16,18 @@ function edgeTouch(s: Stem, t: Stem): boolean {
 	);
 }
 
+function stemYOverlapRatio(sj: Stem, sk: Stem) {
+	const overlapLength = Math.max(
+		0,
+		Math.min(sj.highKey.y, sk.highKey.y) - Math.max(sj.lowKey.y, sk.lowKey.y)
+	);
+	const unionLength = Math.max(
+		0,
+		Math.max(sj.highKey.y, sk.highKey.y) - Math.min(sj.lowKey.y, sk.lowKey.y)
+	);
+	return overlapLength / unionLength || 0;
+}
+
 export function analyzeDirectOverlaps(
 	stems: Stem[],
 	stemOverlaps: number[][],
@@ -32,6 +44,12 @@ export function analyzeDirectOverlaps(
 				!edgeTouch(stems[j], stems[k]);
 			if (loose && C[j][k] <= 0) d[j][k] = false;
 			if (stems[j].rid && stems[j].rid === stems[k].rid) d[j][k] = false;
+			else if (
+				stemOverlaps[j][k] > strategy.BOTH_OVERLAP_H &&
+				stemYOverlapRatio(stems[j], stems[k]) > strategy.BOTH_OVERLAP_V
+			) {
+				d[j][k] = false;
+			}
 		}
 	}
 	transitiveReduce(d);

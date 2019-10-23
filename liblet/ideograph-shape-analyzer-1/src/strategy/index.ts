@@ -124,7 +124,9 @@ const DefaultStrategy = {
 	TBST_LIMIT: 0.25,
 	DO_SHORT_ABSORPTION: true,
 	SYMMETRY_TEST_PPEM: 32,
-	DEADLY_MERGE: 1e10
+	DEADLY_MERGE: 1e10,
+	BOTH_OVERLAP_H: 0.8,
+	BOTH_OVERLAP_V: 0.85
 };
 
 export type HintingStrategy = Readonly<typeof DefaultStrategy> & { readonly UPM: number };
