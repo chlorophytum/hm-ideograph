@@ -1,6 +1,7 @@
 import { Geometry } from "@chlorophytum/arch";
 
 import { HintingStrategy } from "../../strategy";
+import Contour from "../../types/contour";
 import CGlyph from "../../types/glyph";
 import { AdjPoint, CPoint } from "../../types/point";
 import Stem from "../../types/stem";
@@ -27,18 +28,14 @@ function considerPoint(
 	for (let j = 0; j < glyph.contours.length; j++) {
 		for (let m = 0; m < glyph.contours[j].points.length - 1; m++) {
 			let zm = glyph.contours[j].points[m];
-			if (
-				(zm.touched || zm.dontTouch) &&
-				(CPoint.adjacent(point, zm) || CPoint.adjacentZ(point, zm)) &&
-				zm.y <= point.y &&
-				nearTop(point, zm, strategy.STEM_SIDE_MIN_RISE * strategy.UPM)
-			) {
+			if (!(CPoint.adjacent(point, zm) || CPoint.adjacentZ(point, zm))) continue;
+			if (!(zm.touched || zm.dontTouch)) continue;
+
+			if (zm.y <= point.y && nearTop(point, zm, strategy.STEM_SIDE_MIN_RISE * strategy.UPM)) {
 				isDecoTop = true;
 				point.dontTouch = true;
 			}
 			if (
-				(zm.touched || zm.dontTouch) &&
-				(CPoint.adjacent(point, zm) || CPoint.adjacentZ(point, zm)) &&
 				zm.y >= point.y &&
 				nearBot(point, zm, (strategy.STEM_SIDE_MIN_DIST_DESCENT * strategy.UPM) / 3)
 			) {
@@ -72,6 +69,11 @@ function considerPoint(
 	}
 }
 
+function* OrderedContourPoints(c: Contour) {
+	const zs = c.points.slice(0, -1).sort((a, b) => a.y - b.y);
+	yield* zs;
+}
+
 export default function analyzeBlueZonePoints(
 	glyph: CGlyph,
 	stems: Stem[],
@@ -85,8 +87,7 @@ export default function analyzeBlueZonePoints(
 
 	// We go two passes to get "better" results
 	for (let j = 0; j < glyph.contours.length; j++) {
-		for (let k = 0; k < glyph.contours[j].points.length - 1; k++) {
-			let point = glyph.contours[j].points[k];
+		for (const point of OrderedContourPoints(glyph.contours[j])) {
 			if (!point.yExtrema) continue;
 			considerPoint(
 				glyph,
@@ -101,8 +102,7 @@ export default function analyzeBlueZonePoints(
 		}
 	}
 	for (let j = 0; j < glyph.contours.length; j++) {
-		for (let k = 0; k < glyph.contours[j].points.length - 1; k++) {
-			let point = glyph.contours[j].points[k];
+		for (const point of OrderedContourPoints(glyph.contours[j])) {
 			considerPoint(
 				glyph,
 				strategy,
@@ -118,8 +118,7 @@ export default function analyzeBlueZonePoints(
 
 	// For some really "narrow" glyphs, we create a blue into some other array
 	for (let j = 0; j < glyph.contours.length; j++) {
-		for (let k = 0; k < glyph.contours[j].points.length - 1; k++) {
-			let point = glyph.contours[j].points[k];
+		for (const point of OrderedContourPoints(glyph.contours[j])) {
 			if (!point.yExtrema) continue;
 			considerPoint(
 				glyph,

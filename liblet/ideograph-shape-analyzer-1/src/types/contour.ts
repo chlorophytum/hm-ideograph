@@ -36,6 +36,22 @@ export default class Contour {
 		z.turn = cross > 0;
 	}
 
+	private amendExtrema(prev: CPoint, z: CPoint, next: CPoint) {
+		if (!(z.on && !prev.on && !next.on)) return;
+		if (z.y === prev.y && z.y === next.y && !z.yExtrema) {
+			z.yExtrema = prev.yExtrema || next.yExtrema;
+			z.yStrongExtrema = prev.yStrongExtrema || next.yStrongExtrema;
+			prev.yExtrema = next.yExtrema = false;
+			prev.yStrongExtrema = next.yStrongExtrema = false;
+		}
+		if (z.x === prev.x && z.x === next.x && !z.xExtrema) {
+			z.xExtrema = prev.xExtrema || next.xExtrema;
+			z.xStrongExtrema = prev.xStrongExtrema || next.xStrongExtrema;
+			prev.xExtrema = next.xExtrema = false;
+			prev.xStrongExtrema = next.xStrongExtrema = false;
+		}
+	}
+
 	public stat() {
 		let points = this.points;
 		this.checkExtrema(points[points.length - 2], points[0], points[1]);
@@ -43,6 +59,12 @@ export default class Contour {
 		for (let j = 1; j < points.length - 1; j++) {
 			this.checkExtrema(points[j - 1], points[j], points[j + 1]);
 		}
+		this.amendExtrema(points[points.length - 2], points[0], points[1]);
+		this.amendExtrema(points[points.length - 2], points[points.length - 1], points[1]);
+		for (let j = 1; j < points.length - 1; j++) {
+			this.amendExtrema(points[j - 1], points[j], points[j + 1]);
+		}
+
 		let xs = this.points.map(p => p.x);
 		let ys = this.points.map(p => p.y);
 		this.stats.xMax = Math.max.apply(Math, xs);
