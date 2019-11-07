@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/ideograph-shape-analyzer-1",
-	"version": "0.3.7",
+	"version": "0.3.8",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -14,8 +14,8 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.3.1",
 		"@chlorophytum/hint-common": "^0.3.1",
-		"@chlorophytum/hint-embox": "^0.3.3",
-		"@chlorophytum/hint-maz": "^0.3.3",
+		"@chlorophytum/hint-embox": "^0.3.8",
+		"@chlorophytum/hint-maz": "^0.3.8",
 		"lodash": "^4.17.11",
 		"tslib": "^1.9.3"
 	},

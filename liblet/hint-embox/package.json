@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-embox",
-	"version": "0.3.3",
+	"version": "0.3.8",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
