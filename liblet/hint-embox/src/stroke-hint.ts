@@ -95,11 +95,34 @@ export namespace EmBoxStroke {
 				const archBottom = $.symbol(Twilights.ArchBottom(boxName));
 				const archTop = $.symbol(Twilights.ArchTop(boxName));
 
+				const spurBottomOrig = $.symbol(Twilights.SpurBottomOrig(boxName));
+				const spurTopOrig = $.symbol(Twilights.SpurTopOrig(boxName));
+				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(boxName));
+				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(boxName));
+				const archBottomOrig = $.symbol(Twilights.ArchBottomOrig(boxName));
+				const archTopOrig = $.symbol(Twilights.ArchTopOrig(boxName));
+
 				if (spur) {
 					if (top) {
-						yield $.call(THintStrokeFreeAuto, spurBottom, spurTop, zsBot, zsTop);
+						yield $.call(
+							THintStrokeFreeAuto,
+							spurBottom,
+							spurTop,
+							spurBottomOrig,
+							spurTopOrig,
+							zsBot,
+							zsTop
+						);
 					} else {
-						yield $.call(THintStrokeFreeAuto, spurBottom, spurTop, zsBot, zsTop);
+						yield $.call(
+							THintStrokeFreeAuto,
+							spurBottom,
+							spurTop,
+							spurBottomOrig,
+							spurTopOrig,
+							zsBot,
+							zsTop
+						);
 					}
 				} else {
 					if (top) {
@@ -109,6 +132,10 @@ export namespace EmBoxStroke {
 							strokeTop,
 							archBottom,
 							archTop,
+							strokeBottomOrig,
+							strokeTopOrig,
+							archBottomOrig,
+							archTopOrig,
 							zsBot,
 							zsTop
 						);
@@ -119,6 +146,10 @@ export namespace EmBoxStroke {
 							strokeTop,
 							archBottom,
 							archTop,
+							strokeBottomOrig,
+							strokeTopOrig,
+							archBottomOrig,
+							archTopOrig,
 							zsBot,
 							zsTop
 						);

@@ -26,10 +26,10 @@ export type EmBoxProps = {
 export const DefaultEmBoxProps: EmBoxProps = {
 	Bottom: -120 / 1000,
 	Top: 880 / 1000,
-	StrokeBottom: (380 - 425) / 1000,
-	StrokeTop: (380 + 425) / 1000,
-	ArchBottom: (380 - 455) / 1000,
-	ArchTop: (380 + 455) / 1000,
+	StrokeBottom: (380 - 455) / 1000,
+	StrokeTop: (380 + 455) / 1000,
+	ArchBottom: (380 - 465) / 1000,
+	ArchTop: (380 + 465) / 1000,
 	SpurBottom: (380 - 475) / 1000,
 	SpurTop: (380 + 475) / 1000
 };

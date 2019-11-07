@@ -61,15 +61,15 @@ export namespace EmBoxEdge {
 				if (top) {
 					yield $.call(
 						THintTopEdge,
-						$.symbol(Twilights.SpurBottom(boxName)),
 						$.symbol(Twilights.SpurTop(boxName)),
+						$.symbol(Twilights.SpurTopOrig(boxName)),
 						zEdge
 					);
 				} else {
 					yield $.call(
 						THintBottomEdge,
 						$.symbol(Twilights.SpurBottom(boxName)),
-						$.symbol(Twilights.SpurTop(boxName)),
+						$.symbol(Twilights.SpurBottomOrig(boxName)),
 						zEdge
 					);
 				}

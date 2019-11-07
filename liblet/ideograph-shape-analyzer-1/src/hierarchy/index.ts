@@ -2,7 +2,12 @@ import * as _ from "lodash";
 
 import { GlyphAnalysis } from "../analyze/analysis";
 import { stemsAreSimilar } from "../analyze/stems/rel";
-import { atGlyphBottom, atGlyphTop } from "../si-common/stem-spatial";
+import {
+	atGlyphBottom,
+	atGlyphTop,
+	atRadicalBottomMost,
+	isHangingHookShape
+} from "../si-common/stem-spatial";
 import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
 
@@ -73,7 +78,9 @@ export default class HierarchyAnalyzer {
 
 	constructor(private analysis: GlyphAnalysis, private readonly strategy: HintingStrategy) {
 		this.stemMask = [];
-		for (let j = 0; j < analysis.stems.length; j++) this.stemMask[j] = MaskState.Available;
+		for (let j = 0; j < analysis.stems.length; j++) {
+			this.stemMask[j] = MaskState.Available;
+		}
 	}
 
 	public pre(sink: HierarchySink) {
@@ -319,7 +326,9 @@ export default class HierarchyAnalyzer {
 			topAtGlyphTop = false;
 		if (!this.stemMask[bot]) {
 			this.stemMask[bot] = MaskState.Hinted;
-			botAtGlyphBottom = atGlyphBottom(this.analysis.stems[bot], this.strategy);
+			botAtGlyphBottom =
+				atGlyphBottom(this.analysis.stems[bot], this.strategy) &&
+				!isHangingHookShape(this.analysis.stems[bot], this.strategy);
 			sink.addBoundaryStem(
 				this.analysis.stems[bot],
 				false,

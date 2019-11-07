@@ -51,6 +51,15 @@ export function atRadicalBottomMost(stem: Stem, strategy: HintingStrategy) {
 		)
 	);
 }
+export function isHangingHookShape(stem: Stem, strategy: HintingStrategy) {
+	return (
+		stem.xMaxExP - stem.xMinExP < strategy.UPM / 4 &&
+		((stem.hasRadicalLeftDistancedPointBelow &&
+			stem.radicalLeftDistancedDescent > strategy.CANONICAL_STEM_WIDTH * strategy.UPM) ||
+			(stem.hasRadicalRightDistancedPointBelow &&
+				stem.radicalRightDistancedDescent > strategy.CANONICAL_STEM_WIDTH * strategy.UPM))
+	);
+}
 export function isCapShape(stem: Stem, strategy: HintingStrategy) {
 	return (
 		atRadicalBottom(stem, strategy) &&

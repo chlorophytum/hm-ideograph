@@ -65,6 +65,7 @@ export namespace EmBoxShared {
 			this.sink.setDefaultControlValue(cvStrokeTop, props.strokeTop);
 			this.sink.setDefaultControlValue(cvArchBottom, props.archBottom);
 			this.sink.setDefaultControlValue(cvArchTop, props.archTop);
+
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(props.name));
 				const spurTop = $.symbol(Twilights.SpurTop(props.name));
@@ -73,12 +74,26 @@ export namespace EmBoxShared {
 				const archBottom = $.symbol(Twilights.ArchBottom(props.name));
 				const archTop = $.symbol(Twilights.ArchTop(props.name));
 
+				const spurBottomOrig = $.symbol(Twilights.SpurBottomOrig(props.name));
+				const spurTopOrig = $.symbol(Twilights.SpurTopOrig(props.name));
+				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(props.name));
+				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(props.name));
+				const archBottomOrig = $.symbol(Twilights.ArchBottomOrig(props.name));
+				const archTopOrig = $.symbol(Twilights.ArchTopOrig(props.name));
+
 				yield $.miap($.symbol(strokeBottom), $.symbol(cvStrokeBottom).ptr);
 				yield $.miap($.symbol(strokeTop), $.symbol(cvStrokeTop).ptr);
 				yield $.miap($.symbol(archBottom), $.symbol(cvArchBottom).ptr);
 				yield $.miap($.symbol(archTop), $.symbol(cvArchTop).ptr);
 				yield $.miap($.symbol(spurBottom), $.symbol(cvSpurBottom).ptr);
 				yield $.miap($.symbol(spurTop), $.symbol(cvSpurTop).ptr);
+
+				yield $.miap($.symbol(strokeBottomOrig), $.symbol(cvStrokeBottom).ptr);
+				yield $.miap($.symbol(strokeTopOrig), $.symbol(cvStrokeTop).ptr);
+				yield $.miap($.symbol(archBottomOrig), $.symbol(cvArchBottom).ptr);
+				yield $.miap($.symbol(archTopOrig), $.symbol(cvArchTop).ptr);
+				yield $.miap($.symbol(spurBottomOrig), $.symbol(cvSpurBottom).ptr);
+				yield $.miap($.symbol(spurTopOrig), $.symbol(cvSpurTop).ptr);
 
 				yield $.call(
 					TInitEmBoxTwilightPoints,
@@ -87,7 +102,13 @@ export namespace EmBoxShared {
 					$.symbol(archBottom),
 					$.symbol(archTop),
 					$.symbol(spurBottom),
-					$.symbol(spurTop)
+					$.symbol(spurTop),
+					$.symbol(strokeBottomOrig),
+					$.symbol(strokeTopOrig),
+					$.symbol(archBottomOrig),
+					$.symbol(archTopOrig),
+					$.symbol(spurBottomOrig),
+					$.symbol(spurTopOrig)
 				);
 			});
 		}
