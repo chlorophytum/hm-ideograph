@@ -1,4 +1,4 @@
-import { VisCeilT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stoke-adjust";
 
 import { BalanceStrokes } from "./balance";
 import { ConsideredDark, Lib } from "./commons";
@@ -24,7 +24,7 @@ export const DecideRequiredGap = Lib.Func(function*(e) {
 });
 
 export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: number) {
-	const [N, dist, frBot, zBot, zTop, vpZMids, vpGapMD, vpInkMD] = e.args(8);
+	const [N, dist, frBot, frTop, zBot, zTop, vpZMids, vpGapMD, vpInkMD] = e.args(9);
 
 	const pxReqGap = e.local();
 	const pxReqInk = e.local();
@@ -90,33 +90,37 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 	const aInkDist = e.local(NMax);
 	const inks = e.local(NMax);
 	const inkOcc = e.local(NMax);
+	const fStrokeBalanced = e.local(NMax);
 
 	yield e.call(splitGapInkArrayData, N, aDist.ptr, aGapDist.ptr, aInkDist.ptr);
 	yield e.call(splitGapInkArrayData, N, alloc.ptr, gaps.ptr, inks.ptr);
 
 	// Balance
+	const visPosBottom = e.local();
+	const visPosTop = e.local();
+	const bottomSeize = e.local();
+	const topSeize = e.local();
+	yield e.set(visPosBottom, e.call(VisCeilT(ConsideredDark), e.gc.cur(zBot), frBot));
+	yield e.set(visPosTop, e.call(VisFloorT(ConsideredDark), e.gc.cur(zTop), frTop));
+	yield e.set(bottomSeize, e.sub(e.gc.cur(zBot), visPosBottom));
+	yield e.set(topSeize, e.sub(visPosTop, e.gc.cur(zTop)));
+
 	yield e.call(
 		BalanceStrokes,
 		N,
 		scalar,
+		bottomSeize,
+		topSeize,
 		gapOcc.ptr,
 		inkOcc.ptr,
 		gaps.ptr,
 		inks.ptr,
 		aGapDist.ptr,
-		aInkDist.ptr
+		aInkDist.ptr,
+		fStrokeBalanced.ptr
 	);
 
-	yield e.call(
-		MovePointsForMiddleHint,
-		N,
-		zBot,
-		zTop,
-		e.call(VisCeilT(ConsideredDark), e.gc.cur(zBot), frBot),
-		gaps.ptr,
-		inks.ptr,
-		vpZMids
-	);
+	yield e.call(MovePointsForMiddleHint, N, zBot, zTop, visPosBottom, gaps.ptr, inks.ptr, vpZMids);
 });
 
 const splitGapInkArrayData = Lib.Func(function*($) {

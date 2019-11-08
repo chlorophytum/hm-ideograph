@@ -618,6 +618,7 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number)
 		N,
 		dist,
 		frBot,
+		frTop,
 		zBot,
 		zTop,
 		vpZMids,
