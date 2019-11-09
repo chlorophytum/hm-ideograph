@@ -4,7 +4,7 @@ import { Expression, ProgramDsl, Variable } from "@chlorophytum/hltt";
 
 export const Lib = new TtLibrary(`Chlorophytum::MultipleAlignZone::HlttPrograms`);
 
-export const ConsideredDark = 3 / 5;
+export const ConsideredDark = 3 / 4;
 
 function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
 	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));

@@ -171,7 +171,7 @@ export default class HierarchyAnalyzer {
 		}
 
 		let sidPile: number[] = [];
-		for (let s = ixTop; s < ixBot; s++) {
+		for (let s = ixTop; s <= ixBot; s++) {
 			if (this.stemIsValid(sidPath[s]) && this.stemIsNotAnalyzed(sidPath[s])) {
 				sidPile.push(sidPath[s]);
 			}
