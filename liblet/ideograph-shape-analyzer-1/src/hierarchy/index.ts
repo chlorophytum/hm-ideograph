@@ -94,14 +94,12 @@ export default class HierarchyAnalyzer {
 		this.loops++;
 
 		const sidPath = this.getKeyPath();
+		if (!sidPath.length) return;
+
 		const dependents = this.getDependents(sidPath);
 
-		const top = sidPath[0];
-		const bot = sidPath[sidPath.length - 1];
-		if (!this.stemIsValid(bot) || !this.stemIsValid(top)) return;
-
-		const sidPile = sidPath.filter(j => this.stemIsNotAnalyzed(j)).reverse();
-		if (!sidPile.length) return;
+		const { bot, top, sidPile } = this.getBotTopSid(sidPath);
+		if (!this.stemIsValid(bot) || !this.stemIsValid(top) || !sidPile.length) return;
 
 		const sp = this.analyzePileSpatial(bot, sink, top);
 
@@ -148,6 +146,37 @@ export default class HierarchyAnalyzer {
 		}
 
 		for (const j of sidPath) this.stemMask[j] = MaskState.Hinted;
+	}
+
+	private getBotTopSid(sidPath: number[]) {
+		let ixTop = 0;
+		while (
+			ixTop < sidPath.length &&
+			this.stemIsValid(sidPath[ixTop]) &&
+			this.stemIsValid(sidPath[ixTop + 1]) &&
+			!this.stemIsNotAnalyzed(sidPath[ixTop]) &&
+			!this.stemIsNotAnalyzed(sidPath[ixTop + 1])
+		) {
+			ixTop++;
+		}
+		let ixBot = sidPath.length - 1;
+		while (
+			ixBot > ixTop &&
+			this.stemIsValid(sidPath[ixBot]) &&
+			this.stemIsValid(sidPath[ixBot - 1]) &&
+			!this.stemIsNotAnalyzed(sidPath[ixBot]) &&
+			!this.stemIsNotAnalyzed(sidPath[ixBot - 1])
+		) {
+			ixBot--;
+		}
+
+		let sidPile: number[] = [];
+		for (let s = ixTop; s < ixBot; s++) {
+			if (this.stemIsValid(sidPath[s]) && this.stemIsNotAnalyzed(sidPath[s])) {
+				sidPile.push(sidPath[s]);
+			}
+		}
+		return { top: sidPath[ixTop], bot: sidPath[ixBot], sidPile: sidPile.reverse() };
 	}
 
 	private stemIsValid(j: number) {
@@ -226,14 +255,7 @@ export default class HierarchyAnalyzer {
 			} else {
 				const lastStem = this.analysis.stems[sidPileMiddle[patternEnd]];
 				const currentStem = this.analysis.stems[sidPileMiddle[sid]];
-				// console.log(
-				// 	sidPileMiddle[sid],
-				// 	sidPileMiddle[patternEnd],
-				// 	"A=",
-				// 	this.analysis.collisionMatrices.annexation[sidPileMiddle[sid]][
-				// 		sidPileMiddle[patternEnd]
-				// 	]
-				// );
+
 				if (stemsAreSimilar(this.strategy, currentStem, lastStem)) {
 					patternEnd = sid;
 				} else {

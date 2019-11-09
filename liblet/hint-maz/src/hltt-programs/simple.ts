@@ -41,8 +41,8 @@ const IpClose = Lib.Func(function*($) {
 	const drTop = $.local();
 	const drBot = $.local();
 	yield $.set(distOrig, $.sub($.gc.orig(z2), $.gc.orig(z1)));
-	yield $.set(drTop, $.abs($.sub($.gc.cur(z1), $.round.gray($.gc.cur(z1)))));
-	yield $.set(drBot, $.abs($.sub($.gc.cur(z2), $.round.gray($.gc.cur(z2)))));
+	yield $.set(drBot, $.abs($.sub($.gc.cur(z1), $.round.gray($.gc.cur(z1)))));
+	yield $.set(drTop, $.abs($.sub($.gc.cur(z2), $.round.gray($.gc.cur(z2)))));
 	yield $.if(
 		$.lt(drTop, drBot),
 		function*() {

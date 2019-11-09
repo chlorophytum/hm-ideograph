@@ -133,6 +133,10 @@ export const THintBottomStroke = Lib.Template(function*($, stretch: StretchProps
 		)
 	);
 
+	yield $.if($.lt($.add($.gc.cur(zsBot), dOffset), $.gc.cur(zaBot)), function*() {
+		yield $.set(dOffset, $.add(dOffset, $.coerce.toF26D6(+1)));
+	});
+
 	yield $.scfs(zsBot, $.add($.gc.cur(zsBot), dOffset));
 	yield $.scfs(zsTop, $.add($.gc.cur(zsTop), dOffset));
 });
@@ -151,7 +155,7 @@ export const THintBottomStrokeFree = Lib.Func(function*($) {
 	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
 	yield $.scfs(
 		zsBot,
-		$.round.white(
+		$.round.gray(
 			$.add($.gc.cur(zBot), $.mul(spaceCur, $.div(dBelowOrig, $.add(dBelowOrig, dAboveOrig))))
 		)
 	);
@@ -187,6 +191,10 @@ export const THintTopStroke = Lib.Template(function*($, stretch: StretchProps) {
 			$.coerce.toF26D6(-1)
 		)
 	);
+	yield $.if($.gt($.add($.gc.cur(zsTop), dOffset), $.gc.cur(zaTop)), function*() {
+		yield $.set(dOffset, $.add(dOffset, $.coerce.toF26D6(-1)));
+	});
+
 	yield $.scfs(zsBot, $.add($.gc.cur(zsBot), dOffset));
 	yield $.scfs(zsTop, $.add($.gc.cur(zsTop), dOffset));
 });
@@ -205,7 +213,7 @@ export const THintTopStrokeFree = Lib.Func(function*($) {
 	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
 	yield $.scfs(
 		zsTop,
-		$.round.white(
+		$.round.gray(
 			$.sub($.gc.cur(zTop), $.mul(spaceCur, $.div(dAboveOrig, $.add(dBelowOrig, dAboveOrig))))
 		)
 	);

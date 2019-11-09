@@ -44,31 +44,45 @@ The options include:
 
 - `trackScripts`: Scripts to track OpenType variants of Unicode glyphs. Defaults to
 
-  ```typescript
+  ```json
   ["hani", "hang"]
   ```
   
 - `trackFeatures`: Features to track OpenType variants of Unicode glyphs. Defaults to
 
-  ```typescript
+  ```json
   ["locl", "smpl", "trad", "tnam", "jp78", "jp83", "jp90", "jp04", "hojo", "nlck", "expt"]
   ```
 
 - `EmBox`: Vertical position of the Em-box. Defaults to
 
-  ```typescript
+  ```json
   {
   	"Bottom": -0.12,
   	"Top": 0.88,
-  	"StrokeBottom": -0.045,
-  	"StrokeTop": 0.805,
-  	"ArchBottom": -0.075,
-  	"ArchTop": 0.835,
+  	"StrokeBottom": -0.075,
+  	"StrokeTop": 0.835,
+  	"ArchBottom": -0.085,
+  	"ArchTop": 0.845,
   	"SpurBottom": -0.095,
   	"SpurTop": 0.855
   }
   ```
 
+- `EmBoxStretch`: Decides how to stretch strokes close to the top and bottom of the Em-box for better visual consistency. Defaults to
+
+  ```json
+  {
+  	"PIXEL_RATIO_TO_MOVE": 1.7,
+  	"PIXEL_SHIFT_TO_MOVE": 0.7,
+  	"STRETCH_BOTTOM_A": -0.5,
+  	"STRETCH_BOTTOM_X": 1.25,
+  	"STRETCH_TOP_A": -0.5,
+  	"STRETCH_TOP_X": 2.5,
+  	"CUTIN": 0
+  }
+  ```
+  
 - Stem identification options:
 
   - `CANONICAL_STEM_WIDTH`: Canonical width of stems in `em`. Defaults to `0.067`.
