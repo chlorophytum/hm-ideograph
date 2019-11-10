@@ -6,3 +6,4 @@ liblet/*/lib
 tmp
 payloads
 .build-cache
+samples

@@ -1,7 +1,6 @@
 {
 	"files": [],
 	"references": [
-		{"path": "./demo-ideograph-hinter"},
 		{"path": "./hint-embox"},
 		{"path": "./hint-maz"},
 		{"path": "./hint-programs-stoke-adjust"},
