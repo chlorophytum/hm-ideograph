@@ -1,13 +1,10 @@
 import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stoke-adjust";
 
-import { BalanceStrokes } from "./balance";
 import { ConsideredDark, Lib } from "./commons";
-import {
-	InitMSDGapEntries,
-	InitMSDInkEntries,
-	MaxAverageLoop,
-	MovePointsForMiddleHint
-} from "./loop";
+import { BalanceStrokes } from "./mid-size/balance";
+import { InitMSDGapEntries, InitMSDInkEntries } from "./mid-size/init";
+import { HighestAverageLoop } from "./mid-size/loop";
+import { MovePointsForMiddleHint } from "./mid-size/move";
 
 export const DecideRequiredGap = Lib.Func(function*(e) {
 	const [N, vpGapMD] = e.args(2);
@@ -34,7 +31,6 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 	const totalInk = e.local();
 	const totalGap = e.local();
 	const aDist = e.local(2 * NMax + 1);
-	const bDist = e.local(2 * NMax + 1);
 	const cDist = e.local(2 * NMax + 1);
 	const divisor = e.local(2 * NMax + 1);
 	const alloc = e.local(2 * NMax + 1);
@@ -50,7 +46,6 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 		N,
 		totalGap.ptr,
 		aDist.ptr,
-		bDist.ptr,
 		cDist.ptr,
 		divisor.ptr,
 		alloc.ptr,
@@ -64,7 +59,6 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 		N,
 		totalInk.ptr,
 		aDist.ptr,
-		bDist.ptr,
 		cDist.ptr,
 		divisor.ptr,
 		alloc.ptr,
@@ -73,10 +67,9 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 	);
 
 	yield e.call(
-		MaxAverageLoop,
+		HighestAverageLoop,
 		e.add(1, e.mul(e.coerce.toF26D6(2), N)),
 		aDist.ptr,
-		bDist.ptr,
 		cDist.ptr,
 		divisor.ptr,
 		alloc.ptr,

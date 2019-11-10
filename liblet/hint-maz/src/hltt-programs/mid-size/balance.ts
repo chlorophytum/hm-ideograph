@@ -1,4 +1,4 @@
-import { Lib } from "./commons";
+import { Lib } from "../commons";
 
 enum GapOcc {
 	OnePx,
@@ -261,7 +261,8 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		aGapBelow = e.local(),
 		cInk = e.local(),
 		cGapAbove = e.local(),
-		aGapAbove = e.local();
+		aGapAbove = e.local(),
+		lowerIsLarger = e.local();
 
 	yield e.set(aInk, e.part(pAInk, j));
 	yield e.set(cGapBelow, e.part(pGaps, j));
@@ -274,10 +275,18 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		yield e.return();
 	});
 
+	yield e.set(
+		lowerIsLarger,
+		e.or(
+			e.gt(cGapBelow, cGapAbove),
+			e.and(e.eq(cGapBelow, cGapAbove), e.gteq(aGapBelow, aGapAbove))
+		)
+	);
+
 	// Extend
 	yield e.if(e.lt(cInk, aInk), function*() {
 		yield e.if(
-			e.gteq(e.sub(cGapBelow, aGapBelow), e.sub(cGapAbove, aGapAbove)),
+			lowerIsLarger,
 			function*() {
 				yield e.if(
 					e.not(
@@ -328,7 +337,7 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 	// Shrink
 	yield e.if(e.gt(cInk, aInk), function*() {
 		yield e.if(
-			e.gt(cGapBelow, cGapAbove),
+			lowerIsLarger,
 			function*() {
 				yield e.if(
 					e.gt(aGapAbove, e.coerce.toF26D6(1 / 8)),
