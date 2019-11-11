@@ -7,7 +7,7 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import { TInitEmBoxTwilightPoints } from "./programs/program";
+import { TInitEmBoxTwilightPoints } from "./programs/init";
 import { ControlValues, Twilights } from "./programs/twilight";
 
 export namespace EmBoxShared {

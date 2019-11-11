@@ -9,9 +9,6 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import { TInitEmBoxTwilightPoints } from "./programs/program";
-import { Twilights } from "./programs/twilight";
-
 export namespace UseEmBox {
 	export const ReadyPropT = new TypeRep<boolean>("Chlorophytum::EmBox::Init::Ready");
 

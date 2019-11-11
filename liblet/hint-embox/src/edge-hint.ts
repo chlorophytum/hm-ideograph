@@ -7,7 +7,7 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import { THintBottomEdge, THintTopEdge } from "./programs/program";
+import { THintBottomEdge, THintTopEdge } from "./programs/edge";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 

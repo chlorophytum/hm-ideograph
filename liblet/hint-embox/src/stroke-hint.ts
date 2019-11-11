@@ -7,12 +7,8 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import {
-	StretchProps,
-	THintBottomStroke,
-	THintStrokeFreeAuto,
-	THintTopStroke
-} from "./programs/program";
+import { StretchProps, THintBottomStroke, THintTopStroke } from "./programs/boundary";
+import { THintStrokeFreeAuto } from "./programs/free";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 

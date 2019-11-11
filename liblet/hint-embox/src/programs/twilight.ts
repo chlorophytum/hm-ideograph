@@ -1,5 +1,7 @@
 import { TtLibrary } from "@chlorophytum/hltt";
 
+export const ProgramLib = new TtLibrary(`Chlorophytum::EmBox::HlttSupportPrograms`);
+
 export namespace Twilights {
 	const Lib = new TtLibrary(`Chlorophytum::EmBox::HlttSupportTwilights`);
 	export const StrokeBottom = Lib.TwilightTemplate<[string]>();
