@@ -36,11 +36,12 @@ export namespace EmBoxStroke {
 			};
 		}
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
-			const ready = UseEmBox.ReadyPropT.suffix(this.boxName);
+			const ready = UseEmBox.ReadyPropT(this.boxName);
 			if (!bag.get(ready)) throw new Error(`Em box ${this.boxName} is not initialized.`);
-			if (sink instanceof HlttProgramSink) {
+			const hlttSink = sink.dynamicCast(HlttProgramSink);
+			if (hlttSink) {
 				return new HlttCompiler(
-					sink,
+					hlttSink,
 					this.boxName,
 					this.top,
 					this.spur,
@@ -49,6 +50,7 @@ export namespace EmBoxStroke {
 					this.stretch
 				);
 			}
+
 			return null;
 		}
 		public traverse() {}

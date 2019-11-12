@@ -37,9 +37,8 @@ export namespace MultipleAlignZone {
 			return { type: TAG, props: this.props };
 		}
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
-			if (sink instanceof HlttProgramSink) {
-				return new HlttCompiler(sink, this.props);
-			}
+			const hlttSink = sink.dynamicCast(HlttProgramSink);
+			if (hlttSink) return new HlttCompiler(hlttSink, this.props);
 			return null;
 		}
 		public traverse() {}

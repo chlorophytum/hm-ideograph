@@ -28,11 +28,10 @@ export namespace EmBoxEdge {
 			};
 		}
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
-			const ready = UseEmBox.ReadyPropT.suffix(this.boxName);
+			const ready = UseEmBox.ReadyPropT(this.boxName);
 			if (!bag.get(ready)) throw new Error(`Em box ${this.boxName} is not initialized.`);
-			if (sink instanceof HlttProgramSink) {
-				return new HlttCompiler(sink, this.boxName, this.top, this.zEdge);
-			}
+			const hlttSink = sink.dynamicCast(HlttProgramSink);
+			if (hlttSink) return new HlttCompiler(hlttSink, this.boxName, this.top, this.zEdge);
 			return null;
 		}
 		public traverse() {}

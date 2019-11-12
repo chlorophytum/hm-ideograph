@@ -4,13 +4,14 @@ import {
 	IHintCompiler,
 	IHintFactory,
 	IHintTraveller,
-	PropertyBag,
-	TypeRep
+	PropertyBag
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
+import { TypeRep } from "typable";
 
 export namespace UseEmBox {
-	export const ReadyPropT = new TypeRep<boolean>("Chlorophytum::EmBox::Init::Ready");
+	export const ReadyPropT = (name: string) =>
+		new TypeRep<boolean>("Chlorophytum::EmBox::Init::Ready::" + name);
 
 	const TAG = "Chlorophytum::EmBox::Init";
 	export class Hint implements IHint {
@@ -20,7 +21,7 @@ export namespace UseEmBox {
 		}
 
 		private createInnerBag(bag: PropertyBag) {
-			const ready = ReadyPropT.suffix(this.name);
+			const ready = ReadyPropT(this.name);
 			const bag1 = bag.extend();
 			bag1.set(ready, true);
 			return bag1;
@@ -28,10 +29,8 @@ export namespace UseEmBox {
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
 			const inner = this.inner.createCompiler(this.createInnerBag(bag), sink);
 			if (!inner) return null;
-
-			if (sink instanceof HlttProgramSink) {
-				return new HlttCompiler(sink, this.name, inner);
-			}
+			const hlttSink = sink.dynamicCast(HlttProgramSink);
+			if (hlttSink) return new HlttCompiler(hlttSink, this.name, inner);
 			return null;
 		}
 		public traverse(bag: PropertyBag, traveller: IHintTraveller) {
