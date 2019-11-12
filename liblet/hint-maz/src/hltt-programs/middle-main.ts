@@ -176,8 +176,8 @@ const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(
 	N: number
 ) {
 	const [
-		fb,
-		ft,
+		forceRoundBottom,
+		forceRoundTop,
 		zBot,
 		zTop,
 		vpOGapMD,
@@ -226,8 +226,8 @@ const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(
 	yield $.if(
 		$.call(
 			THintMultipleStrokesMainImpl(N - 1),
-			fb,
-			ft,
+			forceRoundBottom,
+			forceRoundTop,
 			zBot,
 			zTop,
 			oGapMD1.ptr,
@@ -303,8 +303,8 @@ const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Te
 	N: number
 ) {
 	const [
-		fb,
-		ft,
+		forceRoundBottom,
+		forceRoundTop,
 		zBot,
 		zTop,
 		vpOGapMD,
@@ -359,8 +359,8 @@ const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Te
 	yield $.if(
 		$.call(
 			THintMultipleStrokesMainImpl(N - 1),
-			fb,
-			ft,
+			forceRoundBottom,
+			forceRoundTop,
 			zBot,
 			zTop,
 			oGapMD1.ptr,
@@ -478,8 +478,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function*($, N: number) {
 	const [
 		dist,
 		reqDist,
-		fb,
-		ft,
+		forceRoundBottom,
+		forceRoundTop,
 		zBot,
 		zTop,
 		vpOGapMD,
@@ -510,8 +510,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function*($, N: number) {
 			yield $.return(
 				$.call(
 					THintMultipleStrokes_DoCollideMerge(N),
-					fb,
-					ft,
+					forceRoundBottom,
+					forceRoundTop,
 					zBot,
 					zTop,
 					vpOGapMD,
@@ -527,8 +527,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function*($, N: number) {
 			yield $.return(
 				$.call(
 					THintMultipleStrokes_DoMerge(N),
-					fb,
-					ft,
+					forceRoundBottom,
+					forceRoundTop,
 					zBot,
 					zTop,
 					vpOGapMD,
@@ -545,8 +545,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function*($, N: number) {
 
 export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number) {
 	const [
-		fb,
-		ft,
+		forceRoundBottom,
+		forceRoundTop,
 		zBot,
 		zTop,
 		vpOGapMD,
@@ -560,8 +560,8 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number)
 	const dist = $.local();
 	const frBot = $.local();
 	const frTop = $.local();
-	yield $.set(frBot, $.mul(fb, $.call(GetFillRate, N, zBot, zTop, vpZMids)));
-	yield $.set(frTop, $.mul(ft, $.call(GetFillRate, N, zBot, zTop, vpZMids)));
+	yield $.set(frBot, $.call(GetFillRate, N, zBot, zTop, vpZMids));
+	yield $.set(frTop, $.call(GetFillRate, N, zBot, zTop, vpZMids));
 	yield $.set(dist, $.call(VisDistT(ConsideredDark), zBot, zTop, frBot, frTop));
 
 	const pxReqGap = $.local();
@@ -588,8 +588,8 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number)
 				THintMultipleStrokes_OmitImpl(N),
 				dist,
 				$.add(pxReqGap, pxReqInk),
-				fb,
-				ft,
+				forceRoundBottom,
+				forceRoundTop,
 				zBot,
 				zTop,
 				vpOGapMD,
@@ -606,7 +606,15 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number)
 	yield $.if(
 		$.gteq(dist, $.mul($.coerce.toF26D6(4), $.add(pxReqGapOrig, pxReqInk))),
 		function*() {
-			yield $.call(HintMultipleStrokesSimple, N, zBot, zTop, vpZMids);
+			yield $.call(
+				HintMultipleStrokesSimple,
+				N,
+				forceRoundBottom,
+				forceRoundTop,
+				zBot,
+				zTop,
+				vpZMids
+			);
 			yield $.return(1);
 		}
 	);
@@ -617,6 +625,8 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function*($, N: number)
 		THintMultipleStrokesMidSize(allocN),
 		N,
 		dist,
+		forceRoundBottom,
+		forceRoundTop,
 		frBot,
 		frTop,
 		zBot,

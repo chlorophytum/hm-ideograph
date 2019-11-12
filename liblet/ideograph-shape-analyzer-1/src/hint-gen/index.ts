@@ -2,16 +2,11 @@ import * as _ from "lodash";
 
 import { GlyphAnalysis } from "../analyze/analysis";
 import { stemsAreSimilar } from "../analyze/stems/rel";
-import {
-	atGlyphBottom,
-	atGlyphTop,
-	atRadicalBottomMost,
-	isHangingHookShape
-} from "../si-common/stem-spatial";
+import { atGlyphBottom, atGlyphTop, isHangingHookShape } from "../si-common/stem-spatial";
 import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
 
-import HierarchySink, { DependentHintType } from "./sink";
+import { DependentHintType, HintGenSink } from "./glyph-hints";
 
 interface LpRec {
 	weight: number;
@@ -73,6 +68,8 @@ interface StemPileSpatial {
 
 export default class HierarchyAnalyzer {
 	private stemMask: number[];
+	private bottomMostStems: Stem[] = [];
+	private topMostStems: Stem[] = [];
 	public lastPathWeight = 0;
 	public loops = 0;
 
@@ -83,14 +80,14 @@ export default class HierarchyAnalyzer {
 		}
 	}
 
-	public pre(sink: HierarchySink) {
+	public pre(sink: HintGenSink) {
 		for (const z of this.analysis.blueZone.topZs) sink.addBlue(true, z);
 		for (const z of this.analysis.blueZone.bottomZs) sink.addBlue(false, z);
 		for (const z of this.analysis.nonBlueTopBottom.topZs) sink.addBlue(true, z);
 		for (const z of this.analysis.nonBlueTopBottom.bottomZs) sink.addBlue(false, z);
 	}
 
-	public fetch(sink: HierarchySink) {
+	public fetch(sink: HintGenSink) {
 		this.loops++;
 
 		const sidPath = this.getKeyPath();
@@ -101,7 +98,10 @@ export default class HierarchyAnalyzer {
 		const { bot, top, sidPile } = this.getBotTopSid(sidPath);
 		if (!this.stemIsValid(bot) || !this.stemIsValid(top) || !sidPile.length) return;
 
-		const sp = this.analyzePileSpatial(bot, sink, top);
+		const sp = {
+			...this.analyzeBottomStemSpatial(sink, bot),
+			...this.analyzeTopStemSpatial(sink, top)
+		};
 
 		const { sidPileMiddle, repeatPatternMask } = this.getMiddleStems(sidPile, sp, bot, top);
 
@@ -341,38 +341,44 @@ export default class HierarchyAnalyzer {
 		return dependents;
 	}
 
-	private analyzePileSpatial(bot: number, sink: HierarchySink, top: number) {
+	private analyzeBottomStemSpatial(sink: HintGenSink, bot: number) {
 		let botIsBoundary = false,
-			botAtGlyphBottom = false,
-			topIsBoundary = false,
-			topAtGlyphTop = false;
+			botAtGlyphBottom = false;
 		if (!this.stemMask[bot]) {
 			this.stemMask[bot] = MaskState.Hinted;
 			botAtGlyphBottom =
 				atGlyphBottom(this.analysis.stems[bot], this.strategy) &&
 				!isHangingHookShape(this.analysis.stems[bot], this.strategy);
+
 			sink.addBoundaryStem(
 				this.analysis.stems[bot],
 				false,
 				botAtGlyphBottom,
-				atGlyphTop(this.analysis.stems[bot], this.strategy),
-				this.strategy.EmBoxStretch
+				atGlyphTop(this.analysis.stems[bot], this.strategy)
 			);
+
 			botIsBoundary = true;
 		}
+
+		return { botAtGlyphBottom, botIsBoundary };
+	}
+	private analyzeTopStemSpatial(sink: HintGenSink, top: number) {
+		let topIsBoundary = false,
+			topAtGlyphTop = false;
 		if (!this.stemMask[top]) {
 			this.stemMask[top] = MaskState.Hinted;
 			topAtGlyphTop = atGlyphTop(this.analysis.stems[top], this.strategy);
+
 			sink.addBoundaryStem(
 				this.analysis.stems[top],
 				true,
 				atGlyphBottom(this.analysis.stems[top], this.strategy),
-				topAtGlyphTop,
-				this.strategy.EmBoxStretch
+				topAtGlyphTop
 			);
+
 			topIsBoundary = true;
 		}
-		return { botAtGlyphBottom, topAtGlyphTop, botIsBoundary, topIsBoundary };
+		return { topAtGlyphTop, topIsBoundary };
 	}
 
 	private getStemBelow(bot: number, middle: number[], top: number, j: number): Stem | null {
@@ -388,7 +394,7 @@ export default class HierarchyAnalyzer {
 		else return null;
 	}
 
-	private collectIpSaCalls(sink: HierarchySink) {
+	private collectIpSaCalls(sink: HintGenSink) {
 		let a: number[][] = [];
 		for (const ip of this.analysis.interpolations) {
 			a.push([ip.priority, ip.rp1.id, ip.rp2.id, ip.z.id]);
@@ -406,15 +412,14 @@ export default class HierarchyAnalyzer {
 		}
 	}
 
-	public post(sink: HierarchySink) {
+	public post(sink: HintGenSink) {
 		for (let j = 0; j < this.analysis.stems.length; j++) {
 			if (!this.stemMask[j]) {
 				sink.addBoundaryStem(
 					this.analysis.stems[j],
 					!this.analysis.stems[j].hasGlyphStemAbove,
 					atGlyphBottom(this.analysis.stems[j], this.strategy),
-					atGlyphTop(this.analysis.stems[j], this.strategy),
-					this.strategy.EmBoxStretch
+					atGlyphTop(this.analysis.stems[j], this.strategy)
 				);
 			}
 		}

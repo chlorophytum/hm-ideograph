@@ -21,7 +21,19 @@ export const DecideRequiredGap = Lib.Func(function*(e) {
 });
 
 export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: number) {
-	const [N, dist, frBot, frTop, zBot, zTop, vpZMids, vpGapMD, vpInkMD] = e.args(9);
+	const [
+		N,
+		dist,
+		forceRoundBottom,
+		forceRoundTop,
+		frBot,
+		frTop,
+		zBot,
+		zTop,
+		vpZMids,
+		vpGapMD,
+		vpInkMD
+	] = e.args(11);
 
 	const pxReqGap = e.local();
 	const pxReqInk = e.local();
@@ -104,6 +116,8 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 		scalar,
 		bottomSeize,
 		topSeize,
+		forceRoundBottom,
+		forceRoundTop,
 		gapOcc.ptr,
 		inkOcc.ptr,
 		gaps.ptr,

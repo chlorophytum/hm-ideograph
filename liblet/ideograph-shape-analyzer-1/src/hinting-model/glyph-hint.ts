@@ -2,7 +2,6 @@ import {
 	EmptyImpl,
 	Glyph,
 	IArbitratorProxy,
-	IFontEntry,
 	IFontSource,
 	IFontSourceMetadata,
 	IHint,
@@ -14,8 +13,8 @@ import {
 } from "@chlorophytum/arch";
 
 import analyzeGlyph from "../analyze";
-import HierarchyAnalyzer from "../hierarchy";
-import HintGenSink from "../hint-gen/glyph-hints";
+import HierarchyAnalyzer from "../hint-gen";
+import { HintGenSink } from "../hint-gen/glyph-hints";
 import { createHintingStrategy, HintingStrategy } from "../strategy";
 import { combineHash, hashGlyphContours } from "../types/hash";
 
@@ -136,7 +135,7 @@ export class ParallelGlyphHintTask implements IParallelTask<GlyphHintParallelRes
 	public hintGlyphGeometry(geometry: Glyph.Shape, params: HintingStrategy) {
 		const glyph = createGlyph(geometry.eigen); // Care about outline glyphs only
 		const analysis = analyzeGlyph(glyph, params);
-		const sink = new HintGenSink(params.emboxSystemName);
+		const sink = new HintGenSink(params);
 		const ha = new HierarchyAnalyzer(analysis, params);
 		ha.pre(sink);
 		do {
@@ -151,7 +150,7 @@ export async function getGlyphRep<GID>(
 	font: IFontSource<GID>,
 	gid: GID
 ): Promise<null | Glyph.Rep> {
-	const shapes: [(null | Variation.Master), Glyph.Shape][] = [];
+	const shapes: [null | Variation.Master, Glyph.Shape][] = [];
 	const masters: (null | Variation.MasterRep)[] = [null, ...(await font.getGlyphMasters(gid))];
 	for (const m of masters) {
 		const shape = await font.getGeometry(gid, m ? m.peak : null);

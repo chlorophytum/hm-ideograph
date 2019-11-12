@@ -15,40 +15,29 @@ import { UseEmBox } from "./use-em-box";
 export namespace EmBoxStroke {
 	const TAG = "Chlorophytum::EmBox::Stroke";
 	export type Stretch = StretchProps;
+
+	export interface Props {
+		readonly atTop?: boolean;
+		readonly spur?: boolean;
+		readonly zsBot: number;
+		readonly zsTop: number;
+	}
 	export class Hint implements IHint {
-		constructor(
-			private readonly boxName: string,
-			private readonly top: boolean,
-			private readonly spur: boolean,
-			private readonly zSBot: number,
-			private readonly zsTop: number,
-			private readonly stretch: StretchProps
-		) {}
+		constructor(private readonly boxName: string, readonly props: Props) {}
 		public toJSON() {
 			return {
 				type: TAG,
 				boxName: this.boxName,
-				top: this.top,
-				spur: this.spur,
-				zsBot: this.zSBot,
-				zsTop: this.zsTop,
-				stretch: this.stretch
+				...this.props
 			};
 		}
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
-			const ready = UseEmBox.ReadyPropT(this.boxName);
-			if (!bag.get(ready)) throw new Error(`Em box ${this.boxName} is not initialized.`);
+			const ready = bag.get(UseEmBox.ReadyPropT(this.boxName));
+
+			if (!ready) throw new Error(`Em box ${this.boxName} is not initialized.`);
 			const hlttSink = sink.dynamicCast(HlttProgramSink);
 			if (hlttSink) {
-				return new HlttCompiler(
-					hlttSink,
-					this.boxName,
-					this.top,
-					this.spur,
-					this.zSBot,
-					this.zsTop,
-					this.stretch
-				);
+				return new HlttCompiler(hlttSink, this.boxName, this.props, ready);
 			}
 
 			return null;
@@ -60,14 +49,7 @@ export namespace EmBoxStroke {
 		public readonly type = TAG;
 		public readJson(json: any) {
 			if (json && json.type === TAG) {
-				return new Hint(
-					json.boxName,
-					json.top,
-					json.spur,
-					json.zsBot,
-					json.zsTop,
-					json.stretch || null
-				);
+				return new Hint(json.boxName, json);
 			}
 			return null;
 		}
@@ -77,14 +59,12 @@ export namespace EmBoxStroke {
 		constructor(
 			private readonly sink: HlttProgramSink,
 			private readonly boxName: string,
-			private readonly top: boolean,
-			private readonly spur: boolean,
-			private readonly zsBot: number,
-			private readonly zsTop: number,
+			private readonly props: Props,
 			private readonly stretch: StretchProps
 		) {}
 		public doCompile() {
-			const { boxName, top, spur, zsBot, zsTop, stretch } = this;
+			const { boxName, stretch } = this;
+			const { atTop: top, spur, zsBot, zsTop } = this.props;
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
 				const spurTop = $.symbol(Twilights.SpurTop(boxName));

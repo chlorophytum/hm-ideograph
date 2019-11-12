@@ -35,7 +35,7 @@ export const HintMultipleStrokesGiveUp = Lib.Func(function*($) {
 });
 
 const IpClose = Lib.Func(function*($) {
-	const [zBot, zTop, z1, z2] = $.args(4);
+	const [forceRoundBottom, forceRoundTop, zBot, zTop, z1, z2] = $.args(6);
 	yield $.ip(zBot, zTop, z1, z2);
 	const distOrig = $.local();
 	const drTop = $.local();
@@ -44,7 +44,7 @@ const IpClose = Lib.Func(function*($) {
 	yield $.set(drBot, $.abs($.sub($.gc.cur(z1), $.round.gray($.gc.cur(z1)))));
 	yield $.set(drTop, $.abs($.sub($.gc.cur(z2), $.round.gray($.gc.cur(z2)))));
 	yield $.if(
-		$.lt(drTop, drBot),
+		$.or(forceRoundTop, $.and($.not(forceRoundBottom), $.lt(drTop, drBot))),
 		function*() {
 			yield $.scfs(z2, $.round.gray($.gc.cur(z2)));
 			yield $.scfs(z1, $.sub($.round.gray($.gc.cur(z2)), distOrig));
@@ -58,7 +58,7 @@ const IpClose = Lib.Func(function*($) {
 
 // This function is used at very large PPEM -- whether to round is no longer important, just IP
 export const HintMultipleStrokesSimple = Lib.Func(function*($) {
-	const [N, zBot, zTop, vpZMids] = $.args(4);
+	const [N, forceRoundBottom, forceRoundTop, zBot, zTop, vpZMids] = $.args(6);
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);
 	yield $.mdap(zBot);
 	yield $.mdap(zTop);
@@ -68,6 +68,8 @@ export const HintMultipleStrokesSimple = Lib.Func(function*($) {
 	yield $.while($.lt(j, N), function*() {
 		yield $.call(
 			IpClose,
+			forceRoundBottom,
+			forceRoundTop,
 			zBot,
 			zTop,
 			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),

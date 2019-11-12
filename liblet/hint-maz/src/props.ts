@@ -1,8 +1,8 @@
 export interface MultipleAlignZoneMetaPropShared {
 	gapMinDist: number[]; // N+1 args
 	inkMinDist: number[]; // N args
-	bottomFree: boolean; // 1 arg
-	topFree: boolean; // 1 arg
+	bottomBalanceForbidden?: boolean; // 1 arg
+	topBalanceForbidden?: boolean; // 1 arg
 }
 export interface MultipleAlignZoneMeta extends MultipleAlignZoneMetaPropShared {
 	recPath: number[]; // N args

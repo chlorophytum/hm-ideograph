@@ -4,18 +4,26 @@ import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chloro
 import { EmBoxEdge, EmBoxStroke, StretchProps, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
 
-import HierarchySink, { DependentHintType } from "../hierarchy/sink";
+import { HintingStrategy } from "../strategy";
 import { AdjPoint } from "../types/point";
 import Stem from "../types/stem";
 
-export default class HintGenSink extends HierarchySink {
-	constructor(private readonly glyphKind: string) {
-		super();
-	}
+export enum DependentHintType {
+	Symmetry,
+	DiagLowToHigh,
+	DiagHighToLow
+}
+
+export class HintGenSink {
+	constructor(private readonly params: HintingStrategy) {}
+	private blueHints: IHint[] = [];
+	private boundaryStemsBottom: Stem[] = [];
+	private boundaryStemsTop: Stem[] = [];
+	private boundaryHintsFree: IHint[] = [];
 	private subHints: IHint[] = [];
 
 	public addBlue(top: boolean, z: AdjPoint) {
-		this.subHints.push(new EmBoxEdge.Hint(this.glyphKind, top, z.id));
+		this.blueHints.push(new EmBoxEdge.Hint(this.params.emboxSystemName, top, z.id));
 	}
 
 	public addInterpolate(rp1: number, rp2: number, z: number) {
@@ -25,34 +33,19 @@ export default class HintGenSink extends HierarchySink {
 		this.subHints.push(new LinkChain.Hint([rp0, z]));
 	}
 
-	public addBoundaryStem(
-		stem: Stem,
-		locTop: boolean,
-		atBottom: boolean,
-		atTop: boolean,
-		stretch: StretchProps
-	) {
-		if (atBottom || atTop) {
-			this.subHints.push(
-				new EmBoxStroke.Hint(
-					this.glyphKind,
-					atTop,
-					false,
-					stem.lowKey.id,
-					stem.highKey.id,
-					stretch
-				)
-			);
+	public addBoundaryStem(stem: Stem, locTop: boolean, atBottom: boolean, atTop: boolean) {
+		if (atBottom) {
+			this.boundaryStemsBottom.push(stem);
+		} else if (atTop) {
+			this.boundaryStemsTop.push(stem);
 		} else {
-			this.subHints.push(
-				new EmBoxStroke.Hint(
-					this.glyphKind,
-					locTop,
-					true,
-					stem.lowKey.id,
-					stem.highKey.id,
-					stretch
-				)
+			this.boundaryHintsFree.push(
+				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+					atTop: locTop,
+					spur: true,
+					zsBot: stem.lowKey.id,
+					zsTop: stem.highKey.id
+				})
 			);
 		}
 	}
@@ -60,11 +53,9 @@ export default class HintGenSink extends HierarchySink {
 	public addTopSemiBoundaryStem(stem: Stem, below: Stem) {
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.glyphKind,
+				emBoxName: this.params.emboxSystemName,
 				gapMinDist: [1, stem.turnsAbove > 1 ? 2 : 1],
 				inkMinDist: [1],
-				bottomFree: false,
-				topFree: false,
 				mergePriority: [0, 0],
 				allowCollide: [false, false],
 				topPoint: -1,
@@ -76,11 +67,9 @@ export default class HintGenSink extends HierarchySink {
 	public addBottomSemiBoundaryStem(stem: Stem, above: Stem) {
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.glyphKind,
+				emBoxName: this.params.emboxSystemName,
 				gapMinDist: [stem.turnsBelow > 1 ? 2 : 1, 1],
 				inkMinDist: [1],
-				bottomFree: false,
-				topFree: false,
 				mergePriority: [0, 0],
 				allowCollide: [false, false],
 				topPoint: above.lowKey.id,
@@ -130,11 +119,9 @@ export default class HintGenSink extends HierarchySink {
 
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.glyphKind,
+				emBoxName: this.params.emboxSystemName,
 				gapMinDist: gapMD,
 				inkMinDist: inkMD,
-				bottomFree: !botSame,
-				topFree: !topSame,
 				mergePriority: annex,
 				allowCollide,
 				bottomPoint: zBot,
@@ -151,34 +138,30 @@ export default class HintGenSink extends HierarchySink {
 		aboveFrom: null | Stem,
 		to: Stem
 	) {
-		if (type === DependentHintType.DiagHighToLow && belowFrom) {
+		if (type === DependentHintType.DiagHighToLow) {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
-					emBoxName: this.glyphKind,
+					emBoxName: this.params.emboxSystemName,
 					gapMinDist: [1, 3 / 4],
 					inkMinDist: [1],
-					bottomFree: false,
-					topFree: false,
 					mergePriority: [0, 1],
 					allowCollide: [false, true],
-					bottomPoint: belowFrom.highKey.id,
+					bottomPoint: belowFrom ? belowFrom.highKey.id : -1,
 					middleStrokes: [[to.lowKey.id, to.highKey.id]],
 					topPoint: from.highKey.id
 				})
 			);
-		} else if (type === DependentHintType.DiagLowToHigh && aboveFrom) {
+		} else if (type === DependentHintType.DiagLowToHigh) {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
-					emBoxName: this.glyphKind,
+					emBoxName: this.params.emboxSystemName,
 					gapMinDist: [3 / 4, 1],
 					inkMinDist: [1],
-					bottomFree: false,
-					topFree: false,
 					mergePriority: [-1, 0],
 					allowCollide: [true, false],
 					bottomPoint: from.lowKey.id,
 					middleStrokes: [[to.lowKey.id, to.highKey.id]],
-					topPoint: aboveFrom.lowKey.id
+					topPoint: aboveFrom ? aboveFrom.lowKey.id : -1
 				})
 			);
 		} else {
@@ -200,11 +183,77 @@ export default class HintGenSink extends HierarchySink {
 		}
 	}
 
+	private convertBoundaryStemHints() {
+		const hints: IHint[] = [];
+		const bot = this.boundaryStemsBottom.sort((a, b) => a.lowKey.y - b.lowKey.y);
+		const top = this.boundaryStemsTop.sort((a, b) => b.lowKey.y - a.lowKey.y);
+		if (bot.length) {
+			hints.push(
+				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+					atTop: false,
+					spur: false,
+					zsBot: bot[0].lowKey.id,
+					zsTop: bot[0].highKey.id
+				})
+			);
+			for (let k = 1; k < bot.length; k++) {
+				hints.push(
+					new MultipleAlignZone.Hint({
+						emBoxName: this.params.emboxSystemName,
+						gapMinDist: [3 / 4, 1],
+						inkMinDist: [1],
+						bottomBalanceForbidden: true,
+						mergePriority: [-1, 0],
+						allowCollide: [true, false],
+						bottomPoint: bot[0].lowKey.id,
+						middleStrokes: [[bot[k].lowKey.id, bot[k].highKey.id]],
+						topPoint: -1
+					})
+				);
+			}
+		}
+		if (top.length) {
+			hints.push(
+				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+					atTop: true,
+					spur: false,
+					zsBot: top[0].lowKey.id,
+					zsTop: top[0].highKey.id
+				})
+			);
+			for (let k = 1; k < top.length; k++) {
+				hints.push(
+					new MultipleAlignZone.Hint({
+						emBoxName: this.params.emboxSystemName,
+						gapMinDist: [1, 3 / 4],
+						inkMinDist: [1],
+						topBalanceForbidden: true,
+						mergePriority: [0, 1],
+						allowCollide: [false, true],
+						bottomPoint: -1,
+						middleStrokes: [[top[k].lowKey.id, top[k].highKey.id]],
+						topPoint: top[0].highKey.id
+					})
+				);
+			}
+		}
+		return hints;
+	}
+
 	public getHint() {
 		return new Sequence.Hint([
 			WithDirection.Y(
 				new Sequence.Hint([
-					new UseEmBox.Hint(this.glyphKind, new Sequence.Hint(this.subHints))
+					new UseEmBox.Hint(
+						this.params.emboxSystemName,
+						this.params.EmBoxStretch,
+						new Sequence.Hint([
+							...this.blueHints,
+							...this.convertBoundaryStemHints(),
+							...this.boundaryHintsFree,
+							...this.subHints
+						])
+					)
 				])
 			),
 			new Smooth.Hint()

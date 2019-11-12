@@ -1,7 +1,8 @@
 import { Lib } from "../commons";
 
 enum GapOcc {
-	OnePx,
+	OneClear,
+	OneBlur,
 	TwoClear,
 	TwoUp,
 	TwoDown,
@@ -30,7 +31,15 @@ const DecideGapOcc = Lib.Func(function*($) {
 const DecideGapOccBottom = Lib.Func(function*($) {
 	const [gap, bottomSeize] = $.args(2);
 	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5)), function*() {
-		yield $.return(GapOcc.OnePx);
+		yield $.if(
+			$.lt(bottomSeize, $.coerce.toF26D6(1 / 5)),
+			function*() {
+				yield $.return(GapOcc.OneClear);
+			},
+			function*() {
+				yield $.return(GapOcc.OneBlur);
+			}
+		);
 	});
 	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5)), function*() {
 		yield $.if(
@@ -56,7 +65,15 @@ const DecideGapOccBottom = Lib.Func(function*($) {
 const DecideGapOccTop = Lib.Func(function*($) {
 	const [gap, topSeize] = $.args(2);
 	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5)), function*() {
-		yield $.return(GapOcc.OnePx);
+		yield $.if(
+			$.lt(topSeize, $.coerce.toF26D6(1 / 5)),
+			function*() {
+				yield $.return(GapOcc.OneClear);
+			},
+			function*() {
+				yield $.return(GapOcc.OneBlur);
+			}
+		);
 	});
 	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5)), function*() {
 		yield $.if(
@@ -82,7 +99,7 @@ const DecideGapOccTop = Lib.Func(function*($) {
 const DecideGapOccMiddle = Lib.Func(function*($) {
 	const [gap] = $.args(1);
 	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5)), function*() {
-		yield $.return(GapOcc.OnePx);
+		yield $.return(GapOcc.OneClear);
 	});
 	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5)), function*() {
 		yield $.return(GapOcc.TwoClear);
@@ -114,29 +131,23 @@ const InitBalanceMultiStrokeHints = Lib.Func(function*(e) {
 });
 
 const BalanceOneStrokeExtDown = Lib.Func(function*(e) {
-	const [j, vpGapOcc, vpInkOcc, vpGaps, vpInks, vpaInk] = e.args(6);
+	const [j, desired, current, vpGapOcc, vpInkOcc, vpGaps, vpInks] = e.args(7);
 
 	const pGapOcc = e.coerce.fromIndex.variable(vpGapOcc);
 	const pInkOcc = e.coerce.fromIndex.variable(vpInkOcc);
 	const pGaps = e.coerce.fromIndex.variable(vpGaps);
 	const pInks = e.coerce.fromIndex.variable(vpInks);
-	const pAInk = e.coerce.fromIndex.variable(vpaInk);
 
-	const aInk = e.local(),
-		cInk = e.local();
 	const occBelow = e.part(pGapOcc, j),
 		occInk = e.part(pInkOcc, j);
 	const delta = e.local();
-
-	yield e.set(aInk, e.part(pAInk, j));
-	yield e.set(cInk, e.part(pInks, j));
 
 	yield e.if(
 		e.not(
 			e.and(
 				e.or(e.eq(InkOcc.Clear, occInk), e.eq(InkOcc.Up, occInk)),
 				e.or(
-					e.eq(GapOcc.TwoClear, occBelow),
+					e.or(e.eq(GapOcc.OneClear, occBelow), e.eq(GapOcc.TwoClear, occBelow)),
 					e.or(e.eq(GapOcc.MoreClear, occBelow), e.eq(GapOcc.MoreDown, occBelow))
 				)
 			)
@@ -146,7 +157,11 @@ const BalanceOneStrokeExtDown = Lib.Func(function*(e) {
 		}
 	);
 
-	yield e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(aInk, cInk)));
+	yield e.if(
+		e.eq(GapOcc.OneClear, occBelow),
+		() => [e.set(delta, e.min(e.coerce.toF26D6(1 / 4), e.sub(desired, current)))],
+		() => [e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(desired, current)))]
+	);
 	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
 	yield e.set(e.part(pGaps, j), e.sub(e.part(pGaps, j), delta));
 	yield e.if(e.eq(InkOcc.Clear, occInk), function*() {
@@ -154,6 +169,9 @@ const BalanceOneStrokeExtDown = Lib.Func(function*(e) {
 	});
 	yield e.if(e.eq(InkOcc.Up, occInk), function*() {
 		yield e.set(occInk, InkOcc.Both);
+	});
+	yield e.if(e.eq(GapOcc.OneClear, occBelow), function*() {
+		yield e.set(occBelow, GapOcc.OneBlur);
 	});
 	yield e.if(e.eq(GapOcc.TwoClear, occBelow), function*() {
 		yield e.set(occBelow, GapOcc.TwoUp);
@@ -169,29 +187,23 @@ const BalanceOneStrokeExtDown = Lib.Func(function*(e) {
 });
 
 const BalanceOneStrokeExtUp = Lib.Func(function*(e) {
-	const [j, vpGapOcc, vpInkOcc, vpGaps, vpInks, vpaInk] = e.args(6);
+	const [j, desired, current, vpGapOcc, vpInkOcc, vpGaps, vpInks] = e.args(7);
 
 	const pGapOcc = e.coerce.fromIndex.variable(vpGapOcc);
 	const pInkOcc = e.coerce.fromIndex.variable(vpInkOcc);
 	const pGaps = e.coerce.fromIndex.variable(vpGaps);
 	const pInks = e.coerce.fromIndex.variable(vpInks);
-	const pAInk = e.coerce.fromIndex.variable(vpaInk);
 
-	const aInk = e.local(),
-		cInk = e.local();
 	const occInk = e.part(pInkOcc, j),
 		occAbove = e.part(pGapOcc, e.add(1, j));
 	const delta = e.local();
-
-	yield e.set(aInk, e.part(pAInk, j));
-	yield e.set(cInk, e.part(pInks, j));
 
 	yield e.if(
 		e.not(
 			e.and(
 				e.or(e.eq(InkOcc.Clear, occInk), e.eq(InkOcc.Up, occInk)),
 				e.or(
-					e.eq(GapOcc.TwoClear, occAbove),
+					e.or(e.eq(GapOcc.OneClear, occAbove), e.eq(GapOcc.TwoClear, occAbove)),
 					e.or(e.eq(GapOcc.MoreClear, occAbove), e.eq(GapOcc.MoreUp, occAbove))
 				)
 			)
@@ -201,7 +213,11 @@ const BalanceOneStrokeExtUp = Lib.Func(function*(e) {
 		}
 	);
 
-	yield e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(aInk, cInk)));
+	yield e.if(
+		e.eq(GapOcc.OneClear, occAbove),
+		() => [e.set(delta, e.min(e.coerce.toF26D6(1 / 5), e.sub(desired, current)))],
+		() => [e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(desired, current)))]
+	);
 	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
 	yield e.set(e.part(pGaps, e.add(1, j)), e.sub(e.part(pGaps, e.add(1, j)), delta));
 	yield e.if(e.eq(InkOcc.Clear, occInk), function*() {
@@ -209,6 +225,9 @@ const BalanceOneStrokeExtUp = Lib.Func(function*(e) {
 	});
 	yield e.if(e.eq(InkOcc.Up, occInk), function*() {
 		yield e.set(occInk, InkOcc.Both);
+	});
+	yield e.if(e.eq(GapOcc.OneClear, occAbove), function*() {
+		yield e.set(occAbove, GapOcc.OneBlur);
 	});
 	yield e.if(e.eq(GapOcc.TwoClear, occAbove), function*() {
 		yield e.set(occAbove, GapOcc.TwoDown);
@@ -225,7 +244,6 @@ const BalanceOneStrokeExtUp = Lib.Func(function*(e) {
 
 const ShrinkDelta = Lib.Func(function*(e) {
 	const [aInk, cInk] = e.args(2);
-
 	yield e.return(e.neg(e.sub(cInk, e.max(e.coerce.toF26D6(3 / 5), aInk))));
 });
 
@@ -237,6 +255,7 @@ const BalanceShrinkOneStrokeDown = Lib.Func(function*(e) {
 	yield e.set(delta, e.call(ShrinkDelta, aInk, cInk));
 	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
 	yield e.set(e.part(pGaps, j), e.sub(e.part(pGaps, j), delta));
+	yield e.return(1);
 });
 
 const BalanceShrinkOneStrokeUp = Lib.Func(function*(e) {
@@ -247,27 +266,39 @@ const BalanceShrinkOneStrokeUp = Lib.Func(function*(e) {
 	yield e.set(delta, e.call(ShrinkDelta, aInk, cInk));
 	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
 	yield e.set(e.part(pGaps, e.add(1, j)), e.sub(e.part(pGaps, e.add(1, j)), delta));
+	yield e.return(1);
 });
 
 const BalanceOneStroke = Lib.Func(function*(e) {
-	const [j, scalar, vpGapOcc, vpInkOcc, vpGaps, vpInks, vpaGap, vpaInk] = e.args(8);
+	const [
+		j,
+		scalar,
+		fPreserveStrokeWidth,
+		forceRoundBottom,
+		forceRoundTop,
+		vpGapOcc,
+		vpInkOcc,
+		vpGaps,
+		vpInks,
+		vpaGap,
+		vpaInk
+	] = e.args(11);
 	const pGaps = e.coerce.fromIndex.variable(vpGaps);
 	const pInks = e.coerce.fromIndex.variable(vpInks);
 	const pAInk = e.coerce.fromIndex.variable(vpaInk);
 	const pAGap = e.coerce.fromIndex.variable(vpaGap);
 
-	const aInk = e.local();
-	const cGapBelow = e.local(),
-		aGapBelow = e.local(),
+	const aInk = e.local(),
 		cInk = e.local(),
-		cGapAbove = e.local(),
+		aGapBelow = e.local(),
+		cGapBelow = e.local(),
 		aGapAbove = e.local(),
-		lowerIsLarger = e.local();
+		cGapAbove = e.local();
 
-	yield e.set(aInk, e.part(pAInk, j));
+	yield e.set(cInk, e.part(pInks, j));
+	yield e.set(aInk, e.mul(scalar, e.part(pAInk, j)));
 	yield e.set(cGapBelow, e.part(pGaps, j));
 	yield e.set(aGapBelow, e.mul(scalar, e.part(pAGap, j)));
-	yield e.set(cInk, e.part(pInks, j));
 	yield e.set(cGapAbove, e.part(pGaps, e.add(1, j)));
 	yield e.set(aGapAbove, e.mul(scalar, e.part(pAGap, e.add(1, j))));
 
@@ -275,93 +306,162 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		yield e.return();
 	});
 
+	const hasMoreSpaceBelow = e.local(),
+		canExtendDown = e.local(),
+		canExtendUp = e.local(),
+		canShrinkDown = e.local(),
+		canShrinkUp = e.local(),
+		inkDownDesired = e.local(),
+		inkUpDesired = e.local();
+
 	yield e.set(
-		lowerIsLarger,
+		hasMoreSpaceBelow,
 		e.or(
 			e.gt(cGapBelow, cGapAbove),
 			e.and(e.eq(cGapBelow, cGapAbove), e.gteq(aGapBelow, aGapAbove))
 		)
 	);
 
-	// Extend
-	yield e.if(e.lt(cInk, aInk), function*() {
-		yield e.if(
-			lowerIsLarger,
-			function*() {
-				yield e.if(
-					e.not(
-						e.call(
-							BalanceOneStrokeExtDown,
-							j,
-							vpGapOcc,
-							vpInkOcc,
-							vpGaps,
-							vpInks,
-							vpaInk
-						)
-					),
-					function*() {
-						yield e.call(
-							BalanceOneStrokeExtUp,
-							j,
-							vpGapOcc,
-							vpInkOcc,
-							vpGaps,
-							vpInks,
-							vpaInk
-						);
-					}
-				);
-			},
-			function*() {
-				yield e.if(
-					e.not(
-						e.call(BalanceOneStrokeExtUp, j, vpGapOcc, vpInkOcc, vpGaps, vpInks, vpaInk)
-					),
-					function*() {
-						yield e.call(
-							BalanceOneStrokeExtDown,
-							j,
-							vpGapOcc,
-							vpInkOcc,
-							vpGaps,
-							vpInks,
-							vpaInk
-						);
-					}
-				);
-			}
-		);
-	});
+	yield e.if(
+		fPreserveStrokeWidth,
+		function*() {
+			yield e.set(inkDownDesired, aInk);
+			yield e.set(inkUpDesired, aInk);
+		},
+		function*() {
+			yield e.set(
+				inkDownDesired,
+				e.min(
+					e.add(aInk, e.coerce.toF26D6(1 / 3)),
+					e.max(
+						e.sub(aInk, e.coerce.toF26D6(1 / 3)),
+						e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
+					)
+				)
+			);
+			yield e.set(
+				inkUpDesired,
+				e.min(
+					e.add(aInk, e.coerce.toF26D6(1 / 3)),
+					e.max(
+						e.sub(aInk, e.coerce.toF26D6(1 / 3)),
+						e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
+					)
+				)
+			);
+		}
+	);
+	yield e.set(canExtendDown, e.and(e.not(forceRoundBottom), e.lt(cInk, inkDownDesired)));
+	yield e.set(canExtendUp, e.and(e.not(forceRoundTop), e.lt(cInk, inkUpDesired)));
+	yield e.set(
+		canShrinkDown,
+		e.and(
+			e.not(forceRoundBottom),
+			e.and(e.gt(aGapBelow, e.coerce.toF26D6(1 / 8)), e.gt(cInk, inkDownDesired))
+		)
+	);
+	yield e.set(
+		canShrinkUp,
+		e.and(
+			e.not(forceRoundTop),
+			e.and(e.gt(aGapAbove, e.coerce.toF26D6(1 / 8)), e.gt(cInk, inkUpDesired))
+		)
+	);
 
-	// Shrink
-	yield e.if(e.gt(cInk, aInk), function*() {
-		yield e.if(
-			lowerIsLarger,
-			function*() {
-				yield e.if(
-					e.gt(aGapAbove, e.coerce.toF26D6(1 / 8)),
-					function*() {
-						yield e.call(BalanceShrinkOneStrokeUp, j, aInk, cInk, vpInks, vpGaps);
-					},
-					function*() {
-						yield e.call(BalanceShrinkOneStrokeDown, j, aInk, cInk, vpInks, vpGaps);
-					}
-				);
-			},
-			function*() {
-				yield e.if(
-					e.gt(aGapBelow, e.coerce.toF26D6(1 / 8)),
-					function*() {
-						yield e.call(BalanceShrinkOneStrokeDown, j, aInk, cInk, vpInks, vpGaps);
-					},
-					function*() {
-						yield e.call(BalanceShrinkOneStrokeUp, j, aInk, cInk, vpInks, vpGaps);
-					}
-				);
-			}
-		);
-	});
+	const progress = e.local();
+	yield e.set(progress, 0);
+
+	yield e.if(
+		hasMoreSpaceBelow,
+		function*() {
+			yield e.if(e.and(e.not(progress), canExtendDown), () => [
+				e.set(
+					progress,
+					e.call(
+						BalanceOneStrokeExtDown,
+						j,
+						inkDownDesired,
+						cInk,
+						vpGapOcc,
+						vpInkOcc,
+						vpGaps,
+						vpInks
+					)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canExtendUp), () => [
+				e.set(
+					progress,
+					e.call(
+						BalanceOneStrokeExtUp,
+						j,
+						inkUpDesired,
+						cInk,
+						vpGapOcc,
+						vpInkOcc,
+						vpGaps,
+						vpInks
+					)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
+				e.set(
+					progress,
+					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
+				e.set(
+					progress,
+					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
+				)
+			]);
+		},
+		function*() {
+			yield e.if(e.and(e.not(progress), canExtendUp), () => [
+				e.set(
+					progress,
+					e.call(
+						BalanceOneStrokeExtUp,
+						j,
+						inkUpDesired,
+						cInk,
+						vpGapOcc,
+						vpInkOcc,
+						vpGaps,
+						vpInks
+					)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canExtendDown), () => [
+				e.set(
+					progress,
+					e.call(
+						BalanceOneStrokeExtDown,
+						j,
+						inkDownDesired,
+						cInk,
+						vpGapOcc,
+						vpInkOcc,
+						vpGaps,
+						vpInks
+					)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
+				e.set(
+					progress,
+					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
+				)
+			]);
+			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
+				e.set(
+					progress,
+					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
+				)
+			]);
+		}
+	);
 });
 
 export const BalanceStrokes = Lib.Func(function*($) {
@@ -370,6 +470,8 @@ export const BalanceStrokes = Lib.Func(function*($) {
 		scalar,
 		bottomSeize,
 		topSeize,
+		forceRoundBottom,
+		forceRoundTop,
 		vpGapOcc,
 		vpInkOcc,
 		vpGaps,
@@ -377,7 +479,7 @@ export const BalanceStrokes = Lib.Func(function*($) {
 		vpaGap,
 		vpaInk,
 		vpfStrokeBalanced
-	] = $.args(11);
+	] = $.args(13);
 
 	const pfStrokeBalanced = $.coerce.fromIndex.variable(vpfStrokeBalanced);
 	const paInk = $.coerce.fromIndex.variable(vpaInk);
@@ -398,6 +500,9 @@ export const BalanceStrokes = Lib.Func(function*($) {
 			BalanceOneStroke,
 			0,
 			scalar,
+			1,
+			forceRoundBottom,
+			forceRoundTop,
 			vpGapOcc,
 			vpInkOcc,
 			vpGaps,
@@ -411,6 +516,9 @@ export const BalanceStrokes = Lib.Func(function*($) {
 			BalanceOneStroke,
 			$.sub(N, 1),
 			scalar,
+			1,
+			forceRoundBottom,
+			forceRoundTop,
 			vpGapOcc,
 			vpInkOcc,
 			vpGaps,
@@ -447,6 +555,9 @@ export const BalanceStrokes = Lib.Func(function*($) {
 				BalanceOneStroke,
 				processStrokeIndex,
 				scalar,
+				0,
+				forceRoundBottom,
+				forceRoundTop,
 				vpGapOcc,
 				vpInkOcc,
 				vpGaps,

@@ -51,20 +51,8 @@ export const THintTopStrokeFree = ProgramLib.Func(function*($) {
 	yield $.set(yRoundUpTop, $.ceiling(yInterpolated));
 	yield $.set(yRoundDownTop, $.floor(yInterpolated));
 
-	yield $.set(
-		totalMoveRoundUp,
-		$.add(
-			$.abs($.sub(yRoundUpTop, $.gc.orig(zsTop))),
-			$.abs($.sub($.sub(yRoundUpTop, wCur), $.gc.orig(zsBot)))
-		)
-	);
-	yield $.set(
-		totalMoveRoundDown,
-		$.add(
-			$.abs($.sub(yRoundDownTop, $.gc.orig(zsTop))),
-			$.abs($.sub($.sub(yRoundDownTop, wCur), $.gc.orig(zsBot)))
-		)
-	);
+	yield $.set(totalMoveRoundUp, $.abs($.sub(yRoundUpTop, $.gc.orig(zsTop))));
+	yield $.set(totalMoveRoundDown, $.abs($.sub(yRoundDownTop, $.gc.orig(zsTop))));
 	yield $.if(
 		$.lt(totalMoveRoundDown, totalMoveRoundUp),
 		function*() {
