@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-maz",
-	"version": "0.4.3",
+	"version": "0.5.0",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -14,9 +14,9 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.4.0",
 		"@chlorophytum/final-hint-format-hltt": "^0.4.0",
+		"@chlorophytum/hint-embox": "^0.5.0",
+		"@chlorophytum/hint-programs-stoke-adjust": "^0.5.0",
 		"@chlorophytum/hltt": "^0.4.0",
-		"@chlorophytum/hint-embox": "^0.4.3",
-		"@chlorophytum/hint-programs-stoke-adjust": "^0.4.1",
 		"lodash": "^4.17.11",
 		"tslib": "^1.9.3"
 	},
