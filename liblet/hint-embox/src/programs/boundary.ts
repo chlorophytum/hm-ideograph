@@ -22,9 +22,7 @@ const TDistAdjustBot = ProgramLib.Template(function*($, stretch: StretchProps) {
 			$.mul($.coerce.toF26D6((stretch.STRETCH_BOTTOM_X * 64) / 12), $.mppem())
 		)
 	);
-	yield $.return(
-		$.max(0, $.mul(d, $.sub($.coerce.toF26D6(1), $.div($.coerce.toF26D6(1), correctedPpem))))
-	);
+	yield $.return($.max(0, $.sub(d, $.div(d, correctedPpem))));
 });
 
 const TDistAdjustTop = ProgramLib.Template(function*($, stretch: StretchProps) {
@@ -36,9 +34,7 @@ const TDistAdjustTop = ProgramLib.Template(function*($, stretch: StretchProps) {
 			$.mul($.coerce.toF26D6((stretch.STRETCH_TOP_X * 64) / 12), $.mppem())
 		)
 	);
-	yield $.return(
-		$.max(0, $.mul(d, $.sub($.coerce.toF26D6(1), $.div($.coerce.toF26D6(1), correctedPpem))))
-	);
+	yield $.return($.max(0, $.sub(d, $.div(d, correctedPpem))));
 });
 
 const FOffsetMovementHasImprovement = ProgramLib.Func(function*($) {
@@ -62,7 +58,7 @@ function $TooLess($: ProgramDsl, stretch: StretchProps, dCur: Expression, dOrig:
 const TComputeOffsetPixelsForTBImpl = ProgramLib.Template(function*($, stretch: StretchProps) {
 	const [dOrig, dCur, sign] = $.args(3);
 
-	yield $.if($.gt(dOrig, $.coerce.toF26D6(stretch.CUTIN)), function*() {
+	yield $.if($.gteq(dOrig, $.coerce.toF26D6(stretch.CUTIN)), function*() {
 		yield $.if(
 			$.and(
 				$TooMuch($, stretch, dCur, dOrig),
