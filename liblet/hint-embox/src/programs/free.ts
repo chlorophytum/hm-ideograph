@@ -18,8 +18,9 @@ export const THintBottomStrokeFree = ProgramLib.Func(function*($) {
 	const yInterpolated = $.local();
 	yield $.set(
 		yInterpolated,
-		$.round.gray(
-			$.add($.gc.cur(zBot), $.mul(spaceCur, $.div(dBelowOrig, $.add(dBelowOrig, dAboveOrig))))
+		$.add(
+			$.gc.cur(zBot),
+			$.round.white($.mul(spaceCur, $.div(dBelowOrig, $.add(dBelowOrig, dAboveOrig))))
 		)
 	);
 	yield $.scfs(zsBot, yInterpolated);
@@ -40,30 +41,16 @@ export const THintTopStrokeFree = ProgramLib.Func(function*($) {
 	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
 
 	const yInterpolated = $.local();
-	const yRoundUpTop = $.local();
-	const yRoundDownTop = $.local();
-	const totalMoveRoundUp = $.local();
-	const totalMoveRoundDown = $.local();
 	yield $.set(
 		yInterpolated,
-		$.sub($.gc.cur(zTop), $.mul(spaceCur, $.div(dAboveOrig, $.add(dBelowOrig, dAboveOrig))))
+		$.sub(
+			$.gc.cur(zTop),
+			$.round.white($.mul(spaceCur, $.div(dAboveOrig, $.add(dBelowOrig, dAboveOrig))))
+		)
 	);
-	yield $.set(yRoundUpTop, $.ceiling(yInterpolated));
-	yield $.set(yRoundDownTop, $.floor(yInterpolated));
 
-	yield $.set(totalMoveRoundUp, $.abs($.sub(yRoundUpTop, $.gc.orig(zsTop))));
-	yield $.set(totalMoveRoundDown, $.abs($.sub(yRoundDownTop, $.gc.orig(zsTop))));
-	yield $.if(
-		$.lt(totalMoveRoundDown, totalMoveRoundUp),
-		function*() {
-			yield $.scfs(zsTop, yRoundDownTop);
-			yield $.scfs(zsBot, $.sub(yRoundDownTop, wCur));
-		},
-		function*() {
-			yield $.scfs(zsTop, yRoundUpTop);
-			yield $.scfs(zsBot, $.sub(yRoundUpTop, wCur));
-		}
-	);
+	yield $.scfs(zsTop, yInterpolated);
+	yield $.scfs(zsBot, $.sub(yInterpolated, wCur));
 });
 
 export const THintStrokeFreeAuto = ProgramLib.Func(function*($) {

@@ -82,7 +82,7 @@ const TComputeOffsetPixelsForTBImpl = ProgramLib.Template(function*($, stretch: 
 	yield $.return(0);
 });
 const TComputeOffsetPixelsForTB = ProgramLib.Template(function*($, stretch: StretchProps) {
-	const [dOrig, dCur, dOrigArch, dCurArch, sign] = $.args(5);
+	const [dOrig, dCur, sign] = $.args(3);
 
 	const offset = $.local();
 	yield $.set(offset, $.call(TComputeOffsetPixelsForTBImpl(stretch), dOrig, dCur, sign));
@@ -90,27 +90,18 @@ const TComputeOffsetPixelsForTB = ProgramLib.Template(function*($, stretch: Stre
 		yield $.return(offset);
 	});
 
+	/*
 	yield $.set(offset, $.call(TComputeOffsetPixelsForTBImpl(stretch), dOrigArch, dCurArch, sign));
 	yield $.if(offset, function*() {
 		yield $.return(offset);
 	});
+*/
 
 	yield $.return(0);
 });
 
 export const THintBottomStroke = ProgramLib.Template(function*($, stretch: StretchProps) {
-	const [
-		zBot,
-		zTop,
-		zaBot,
-		zaTop,
-		zBotOrig,
-		zTopOrig,
-		zaBotOrig,
-		zaTopOrig,
-		zsBot,
-		zsTop
-	] = $.args(10);
+	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 
 	// Perform a "free" position first -- we'd like to grab the positions
 	yield $.call(THintBottomStrokeFree, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop);
@@ -123,13 +114,12 @@ export const THintBottomStroke = ProgramLib.Template(function*($, stretch: Stret
 			TComputeOffsetPixelsForTB(stretch),
 			$.call(TDistAdjustBot(stretch), $.sub($.gc.orig(zsBot), $.gc.cur(zBotOrig))),
 			$.sub($.gc.cur(zsBot), $.gc.cur(zBot)),
-			$.call(TDistAdjustBot(stretch), $.sub($.gc.orig(zsBot), $.gc.cur(zaBotOrig))),
-			$.sub($.gc.cur(zsBot), $.gc.cur(zaBot)),
+
 			$.coerce.toF26D6(+1)
 		)
 	);
 
-	yield $.if($.lt($.add($.gc.cur(zsBot), dOffset), $.gc.cur(zaBot)), function*() {
+	yield $.if($.lt($.add($.gc.cur(zsBot), dOffset), $.gc.cur(zBot)), function*() {
 		yield $.set(dOffset, $.add(dOffset, $.coerce.toF26D6(+1)));
 	});
 
@@ -138,18 +128,7 @@ export const THintBottomStroke = ProgramLib.Template(function*($, stretch: Stret
 });
 
 export const THintTopStroke = ProgramLib.Template(function*($, stretch: StretchProps) {
-	const [
-		zBot,
-		zTop,
-		zaBot,
-		zaTop,
-		zBotOrig,
-		zTopOrig,
-		zaBotOrig,
-		zaTopOrig,
-		zsBot,
-		zsTop
-	] = $.args(10);
+	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 
 	// Perform a "free" position first -- we'd like to grab the positions
 	yield $.call(THintTopStrokeFree, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop);
@@ -161,12 +140,10 @@ export const THintTopStroke = ProgramLib.Template(function*($, stretch: StretchP
 			TComputeOffsetPixelsForTB(stretch),
 			$.call(TDistAdjustTop(stretch), $.sub($.gc.cur(zTopOrig), $.gc.orig(zsTop))),
 			$.sub($.gc.cur(zTop), $.gc.cur(zsTop)),
-			$.call(TDistAdjustTop(stretch), $.sub($.gc.cur(zaTopOrig), $.gc.orig(zsTop))),
-			$.sub($.gc.cur(zaTop), $.gc.cur(zsTop)),
 			$.coerce.toF26D6(-1)
 		)
 	);
-	yield $.if($.gt($.add($.gc.cur(zsTop), dOffset), $.gc.cur(zaTop)), function*() {
+	yield $.if($.gt($.add($.gc.cur(zsTop), dOffset), $.gc.cur(zTop)), function*() {
 		yield $.set(dOffset, $.add(dOffset, $.coerce.toF26D6(-1)));
 	});
 

@@ -60,10 +60,8 @@ The options include:
   {
   	"Bottom": -0.12,
   	"Top": 0.88,
-  	"StrokeBottom": -0.075,
-  	"StrokeTop": 0.835,
-  	"ArchBottom": -0.085,
-  	"ArchTop": 0.845,
+  	"StrokeBottom": -0.06,
+  	"StrokeTop": 0.82,
   	"SpurBottom": -0.095,
   	"SpurTop": 0.855
   }

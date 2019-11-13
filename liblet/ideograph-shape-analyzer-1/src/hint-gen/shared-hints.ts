@@ -10,8 +10,6 @@ export function createSharedHints(params: HintingStrategy) {
 				name: params.emboxSystemName,
 				strokeBottom: params.UPM * params.EmBox.StrokeBottom,
 				strokeTop: params.UPM * params.EmBox.StrokeTop,
-				archBottom: params.UPM * params.EmBox.ArchBottom,
-				archTop: params.UPM * params.EmBox.ArchTop,
 				spurBottom: params.UPM * params.EmBox.SpurBottom,
 				spurTop: params.UPM * params.EmBox.SpurTop
 			})
