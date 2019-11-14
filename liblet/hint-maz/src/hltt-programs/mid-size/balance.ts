@@ -273,7 +273,6 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 	const [
 		j,
 		scalar,
-		fPreserveStrokeWidth,
 		forceRoundBottom,
 		forceRoundTop,
 		vpGapOcc,
@@ -282,7 +281,7 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		vpInks,
 		vpaGap,
 		vpaInk
-	] = e.args(11);
+	] = e.args(10);
 	const pGaps = e.coerce.fromIndex.variable(vpGaps);
 	const pInks = e.coerce.fromIndex.variable(vpInks);
 	const pAInk = e.coerce.fromIndex.variable(vpaInk);
@@ -322,35 +321,27 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		)
 	);
 
-	yield e.if(
-		fPreserveStrokeWidth,
-		function*() {
-			yield e.set(inkDownDesired, aInk);
-			yield e.set(inkUpDesired, aInk);
-		},
-		function*() {
-			yield e.set(
-				inkDownDesired,
-				e.min(
-					e.add(aInk, e.coerce.toF26D6(1 / 3)),
-					e.max(
-						e.sub(aInk, e.coerce.toF26D6(1 / 3)),
-						e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
-					)
-				)
-			);
-			yield e.set(
-				inkUpDesired,
-				e.min(
-					e.add(aInk, e.coerce.toF26D6(1 / 3)),
-					e.max(
-						e.sub(aInk, e.coerce.toF26D6(1 / 3)),
-						e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
-					)
-				)
-			);
-		}
+	yield e.set(
+		inkDownDesired,
+		e.min(
+			e.add(aInk, e.coerce.toF26D6(1 / 3)),
+			e.max(
+				e.sub(aInk, e.coerce.toF26D6(1 / 3)),
+				e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
+			)
+		)
 	);
+	yield e.set(
+		inkUpDesired,
+		e.min(
+			e.add(aInk, e.coerce.toF26D6(1 / 3)),
+			e.max(
+				e.sub(aInk, e.coerce.toF26D6(1 / 3)),
+				e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
+			)
+		)
+	);
+
 	yield e.set(canExtendDown, e.and(e.not(forceRoundBottom), e.lt(cInk, inkDownDesired)));
 	yield e.set(canExtendUp, e.and(e.not(forceRoundTop), e.lt(cInk, inkUpDesired)));
 	yield e.set(
@@ -500,7 +491,6 @@ export const BalanceStrokes = Lib.Func(function*($) {
 			BalanceOneStroke,
 			0,
 			scalar,
-			1,
 			forceRoundBottom,
 			forceRoundTop,
 			vpGapOcc,
@@ -516,7 +506,6 @@ export const BalanceStrokes = Lib.Func(function*($) {
 			BalanceOneStroke,
 			$.sub(N, 1),
 			scalar,
-			1,
 			forceRoundBottom,
 			forceRoundTop,
 			vpGapOcc,
@@ -555,7 +544,6 @@ export const BalanceStrokes = Lib.Func(function*($) {
 				BalanceOneStroke,
 				processStrokeIndex,
 				scalar,
-				0,
 				forceRoundBottom,
 				forceRoundTop,
 				vpGapOcc,
