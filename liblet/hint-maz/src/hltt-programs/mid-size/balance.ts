@@ -18,6 +18,8 @@ enum InkOcc {
 	Both
 }
 
+const DARKNESS_ADJUST_PIXELS_MAX = 1 / 4;
+
 const DecideGapOcc = Lib.Func(function*($) {
 	const [N, strokeIndex, gap, bottomSeize, topSeize] = $.args(5);
 	yield $.if($.eq(0, strokeIndex), function*() {
@@ -269,6 +271,22 @@ const BalanceShrinkOneStrokeUp = Lib.Func(function*(e) {
 	yield e.return(1);
 });
 
+const ComputeDarknessAdjustedStrokeWidth = Lib.Func(function*($) {
+	const [aInk, adjInk] = $.args(2);
+	yield $.return(
+		$.min(
+			$.add(
+				aInk,
+				$.div(
+					$.coerce.toF26D6(DARKNESS_ADJUST_PIXELS_MAX),
+					$.max($.coerce.toF26D6(1), aInk)
+				)
+			),
+			$.max(aInk, adjInk)
+		)
+	);
+});
+
 const BalanceOneStroke = Lib.Func(function*(e) {
 	const [
 		j,
@@ -295,11 +313,11 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 		cGapAbove = e.local();
 
 	yield e.set(cInk, e.part(pInks, j));
-	yield e.set(aInk, e.mul(scalar, e.part(pAInk, j)));
+	yield e.set(aInk, e.part(pAInk, j));
 	yield e.set(cGapBelow, e.part(pGaps, j));
-	yield e.set(aGapBelow, e.mul(scalar, e.part(pAGap, j)));
+	yield e.set(aGapBelow, e.part(pAGap, j));
 	yield e.set(cGapAbove, e.part(pGaps, e.add(1, j)));
-	yield e.set(aGapAbove, e.mul(scalar, e.part(pAGap, e.add(1, j))));
+	yield e.set(aGapAbove, e.part(pAGap, e.add(1, j)));
 
 	yield e.if(e.lt(aInk, e.coerce.toF26D6(1 / 8)), function*() {
 		yield e.return();
@@ -323,22 +341,18 @@ const BalanceOneStroke = Lib.Func(function*(e) {
 
 	yield e.set(
 		inkDownDesired,
-		e.min(
-			e.add(aInk, e.coerce.toF26D6(1 / 3)),
-			e.max(
-				e.sub(aInk, e.coerce.toF26D6(1 / 3)),
-				e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
-			)
+		e.call(
+			ComputeDarknessAdjustedStrokeWidth,
+			aInk,
+			e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
 		)
 	);
 	yield e.set(
 		inkUpDesired,
-		e.min(
-			e.add(aInk, e.coerce.toF26D6(1 / 3)),
-			e.max(
-				e.sub(aInk, e.coerce.toF26D6(1 / 3)),
-				e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
-			)
+		e.call(
+			ComputeDarknessAdjustedStrokeWidth,
+			aInk,
+			e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
 		)
 	);
 
