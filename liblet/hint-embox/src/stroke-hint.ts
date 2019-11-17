@@ -77,49 +77,35 @@ export namespace EmBoxStroke {
 				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(boxName));
 
 				if (spur) {
-					if (top) {
-						yield $.call(
-							THintStrokeFreeAuto,
-							spurBottom,
-							spurTop,
-							spurBottomOrig,
-							spurTopOrig,
-							zsBot,
-							zsTop
-						);
-					} else {
-						yield $.call(
-							THintStrokeFreeAuto,
-							spurBottom,
-							spurTop,
-							spurBottomOrig,
-							spurTopOrig,
-							zsBot,
-							zsTop
-						);
-					}
+					yield $.call(
+						THintStrokeFreeAuto,
+						spurBottom,
+						spurTop,
+						spurBottomOrig,
+						spurTopOrig,
+						zsBot,
+						zsTop
+					);
+				} else if (top) {
+					yield $.call(
+						THintTopStroke(stretch),
+						strokeBottom,
+						strokeTop,
+						strokeBottomOrig,
+						strokeTopOrig,
+						zsBot,
+						zsTop
+					);
 				} else {
-					if (top) {
-						yield $.call(
-							THintTopStroke(stretch),
-							strokeBottom,
-							strokeTop,
-							strokeBottomOrig,
-							strokeTopOrig,
-							zsBot,
-							zsTop
-						);
-					} else {
-						yield $.call(
-							THintBottomStroke(stretch),
-							strokeBottom,
-							strokeTop,
-							strokeBottomOrig,
-							strokeTopOrig,
-							zsBot,
-							zsTop
-						);
-					}
+					yield $.call(
+						THintBottomStroke(stretch),
+						strokeBottom,
+						strokeTop,
+						strokeBottomOrig,
+						strokeTopOrig,
+						zsBot,
+						zsTop
+					);
 				}
 			});
 		}
