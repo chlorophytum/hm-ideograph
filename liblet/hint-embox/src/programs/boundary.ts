@@ -13,7 +13,7 @@ export interface StretchProps {
 }
 
 const ComputeYAvgEmboxShift = ProgramLib.Func(function*($) {
-	const [zBot, zTop, zBotOrig, zTopOrig] = $.args(6);
+	const [zBot, zTop, zBotOrig, zTopOrig] = $.args(4);
 	yield $.return(
 		$.mul(
 			$.add(
