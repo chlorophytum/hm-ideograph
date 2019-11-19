@@ -14,12 +14,15 @@ import { UseEmBox } from "./use-em-box";
 
 export namespace EmBoxStroke {
 	const TAG = "Chlorophytum::EmBox::Stroke";
+	const DistinguishDist = 3 / 5;
 
 	export interface Props {
 		readonly atTop?: boolean;
 		readonly spur?: boolean;
 		readonly zsBot: number;
 		readonly zsTop: number;
+		readonly leavePixelsBelow: number;
+		readonly leavePixelsAbove: number;
 	}
 	export class Hint implements IHint {
 		constructor(private readonly boxName: string, readonly props: Props) {}
@@ -61,8 +64,7 @@ export namespace EmBoxStroke {
 			private readonly props: Props
 		) {}
 		public doCompile() {
-			const { boxName } = this;
-			const { atTop: top, spur, zsBot, zsTop } = this.props;
+			const { boxName, props } = this;
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
 				const spurTop = $.symbol(Twilights.SpurTop(boxName));
@@ -74,25 +76,27 @@ export namespace EmBoxStroke {
 				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(boxName));
 				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(boxName));
 
-				if (spur) {
+				if (props.spur) {
 					yield $.call(
 						THintStrokeFreeAuto,
+						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsBelow)),
+						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsAbove)),
 						spurBottom,
 						spurTop,
 						spurBottomOrig,
 						spurTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
-				} else if (top) {
+				} else if (props.atTop) {
 					yield $.call(
 						THintTopStroke,
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
 				} else {
 					yield $.call(
@@ -101,8 +105,8 @@ export namespace EmBoxStroke {
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
 				}
 			});

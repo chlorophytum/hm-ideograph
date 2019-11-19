@@ -1,18 +1,20 @@
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
+import { HintAnalysis } from "../hint-analyze/type";
 import Radical from "../types/radical";
 import Stem from "../types/stem";
 
-export class Interpolation {
+export class Interpolation implements HintAnalysis.InterpolationOrLink {
 	constructor(
-		public rp1: AdjPoint,
-		public rp2: AdjPoint,
-		public z: AdjPoint,
+		public ref1: AdjPoint,
+		public ref2: AdjPoint,
+		public subject: AdjPoint,
 		public priority: number
 	) {}
 }
-export class ShortAbsorption {
-	constructor(public rp0: AdjPoint, public z: AdjPoint, public priority: number) {}
+export class ShortAbsorption implements HintAnalysis.InterpolationOrLink {
+	public ref2 = null;
+	constructor(public ref1: AdjPoint, public subject: AdjPoint, public priority: number) {}
 }
 
 export class BlueZone {
@@ -28,7 +30,7 @@ export class ColMats {
 	public spatialProximity: number[][] = [];
 }
 
-export class GlyphAnalysis {
+export class ShapeAnalysisResult {
 	public radicals: Radical[] = [];
 	public stems: Stem[] = [];
 	public stemOverlaps: number[][] = [];

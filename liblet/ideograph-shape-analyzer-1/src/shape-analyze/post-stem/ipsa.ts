@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import Stem from "../../types/stem";
-import { BlueZone, GlyphAnalysis, Interpolation, ShortAbsorption } from "../analysis";
+import { BlueZone, Interpolation, ShapeAnalysisResult, ShortAbsorption } from "../analysis";
 
 function byPointY(p: Geometry.Point, q: Geometry.Point) {
 	return p.y - q.y;
@@ -245,7 +245,7 @@ function linkRadicalSoleStemPoints(
 function linkSoleStemPoints(
 	shortAbsorptions: ShortAbsorption[],
 	strategy: HintingStrategy,
-	analysis: GlyphAnalysis,
+	analysis: ShapeAnalysisResult,
 	priority: number
 ) {
 	for (let j = 0; j < analysis.radicals.length; j++) {
@@ -405,7 +405,7 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 
 export default function AnalyzeIpSa(
 	glyph: CGlyph,
-	analysis: GlyphAnalysis,
+	analysis: ShapeAnalysisResult,
 	strategy: HintingStrategy
 ) {
 	let interpolations: (Interpolation | null)[] = [];
@@ -489,7 +489,7 @@ export default function AnalyzeIpSa(
 		);
 	}
 	interpolations = interpolations.sort(function(u, v) {
-		return u && v ? u.z.x - v.z.x : 0;
+		return u && v ? u.subject.x - v.subject.x : 0;
 	});
 	// cleanup
 	return cleanupInterpolations(glyph, strategy, interpolations, shortAbsorptions);
@@ -508,13 +508,15 @@ function cleanupInterpolations(
 			const ipK = interpolations[k];
 			if (
 				ipK &&
-				ipJ.rp1 === ipK.rp1 &&
-				ipJ.rp2 === ipK.rp2 &&
-				ipJ.z === ipK.z &&
+				ipJ.ref1 === ipK.ref1 &&
+				ipJ.ref2 === ipK.ref2 &&
+				ipJ.subject === ipK.subject &&
 				ipJ.priority !== 9 &&
-				Math.abs(ipJ.z.y - ipJ.z.y) <= strategy.Y_FUZZ * strategy.UPM
+				Math.abs(ipJ.subject.y - ipJ.subject.y) <= strategy.Y_FUZZ * strategy.UPM
 			) {
-				shortAbsorptions.push(new ShortAbsorption(ipJ.z, ipK.z, ipJ.priority - 1));
+				shortAbsorptions.push(
+					new ShortAbsorption(ipJ.subject, ipK.subject, ipJ.priority - 1)
+				);
 				interpolations[k] = null;
 			}
 		}

@@ -3,7 +3,7 @@ import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import { stemOverlapLength, stemOverlapRatio } from "../../si-common/overlap";
 import { HintingStrategy } from "../../strategy";
 import Stem from "../../types/stem";
-import { GlyphAnalysis } from "../analysis";
+import { ShapeAnalysisResult } from "../analysis";
 
 import { computeACSMatrices, computePQMatrices } from "./annex-matrix";
 import { analyzeDirectOverlaps } from "./direct-overlap";
@@ -39,9 +39,9 @@ function updateProximity(stems: Stem[], dov: boolean[][], P: number[][], F: numb
 export default function analyzeStems(
 	glyph: CGlyph,
 	strategy: HintingStrategy,
-	analysis: GlyphAnalysis
+	sa: ShapeAnalysisResult
 ) {
-	const radicals = analysis.radicals;
+	const radicals = sa.radicals;
 	const stems = findStems(radicals, strategy);
 
 	// There are two overlapping matrices are being used: one "minimal" and one "canonical".
@@ -89,14 +89,14 @@ export default function analyzeStems(
 
 	analyzeStemKeyPoints(stems);
 
-	analysis.radicals = radicals;
-	analysis.stems = stems;
-	analysis.stemOverlaps = stemOverlaps;
-	analysis.stemOverlapLengths = stemOverlapLengths;
-	analysis.directOverlaps = directOverlaps;
-	analysis.collisionMatrices.annexation = collisionMatrices1.annexation;
-	analysis.collisionMatrices.darkness = collisionMatrices1.darkness;
-	analysis.collisionMatrices.flips = collisionMatrices1.flips;
-	analysis.collisionMatrices.proximity = P;
-	analysis.collisionMatrices.spatialProximity = Q;
+	sa.radicals = radicals;
+	sa.stems = stems;
+	sa.stemOverlaps = stemOverlaps;
+	sa.stemOverlapLengths = stemOverlapLengths;
+	sa.directOverlaps = directOverlaps;
+	sa.collisionMatrices.annexation = collisionMatrices1.annexation;
+	sa.collisionMatrices.darkness = collisionMatrices1.darkness;
+	sa.collisionMatrices.flips = collisionMatrices1.flips;
+	sa.collisionMatrices.proximity = P;
+	sa.collisionMatrices.spatialProximity = Q;
 }

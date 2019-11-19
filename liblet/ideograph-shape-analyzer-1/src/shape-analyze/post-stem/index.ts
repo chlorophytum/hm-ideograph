@@ -1,7 +1,7 @@
 import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
-import { GlyphAnalysis } from "../analysis";
+import { ShapeAnalysisResult } from "../analysis";
 
 import analyzeBlueZonePoints from "./blue-zone-points";
 import AnalyzeIpSa from "./ipsa";
@@ -10,7 +10,7 @@ import analyzeSymmetry from "./symmetry";
 export default function analyzePostStemHints(
 	glyph: CGlyph,
 	strategy: HintingStrategy,
-	analysis: GlyphAnalysis
+	analysis: ShapeAnalysisResult
 ) {
 	const bz = analyzeBlueZonePoints(glyph, analysis.stems, strategy);
 	analysis.blueZone.bottomZs = bz.bottomBluePoints;

@@ -1,23 +1,16 @@
 import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chlorophytum/hint-common";
 import { EmBoxEdge, EmBoxShared, EmBoxStroke, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
-import { GlyphAnalysis, HintingStrategy } from "@chlorophytum/ideograph-shape-analyzer-1";
+import { HintAnalysis, HintingStrategy } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { CGlyph, IHintGen } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { GlyphHintGenBackEnd } from "./glyph-back-end";
-import GlyphHintGenFrontEnd from "./glyph-front-end";
 import { generateSharedHints } from "./shared-hints";
 
-export const IdeographHintGenerator1: IHintGen<HintingStrategy, CGlyph, GlyphAnalysis> = {
+export const IdeographHintGenerator1: IHintGen<HintingStrategy, CGlyph, HintAnalysis.Result> = {
 	generateGlyphHints(params, glyph, analysis) {
 		const sink = new GlyphHintGenBackEnd(params);
-		const ha = new GlyphHintGenFrontEnd(analysis, params);
-		ha.pre(sink);
-		do {
-			ha.fetch(sink);
-		} while (ha.lastPathWeight && ha.loops < 256);
-		ha.post(sink);
-		return sink.getHint();
+		return sink.process(analysis);
 	},
 	generateSharedHints,
 	factoriesOfUsedHints: [
