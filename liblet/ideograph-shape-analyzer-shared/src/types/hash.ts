@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 
-import CGlyph from "./glyph";
+import { CGlyph } from "./glyph";
 function simpleHash(text: string) {
 	const hash = crypto.createHash("sha1");
 	hash.update(text);

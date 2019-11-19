@@ -7,14 +7,13 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import { StretchProps, THintBottomStroke, THintTopStroke } from "./programs/boundary";
+import { THintBottomStroke, THintTopStroke } from "./programs/boundary";
 import { THintStrokeFreeAuto } from "./programs/free";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 
 export namespace EmBoxStroke {
 	const TAG = "Chlorophytum::EmBox::Stroke";
-	export type Stretch = StretchProps;
 
 	export interface Props {
 		readonly atTop?: boolean;
@@ -37,7 +36,7 @@ export namespace EmBoxStroke {
 			if (!ready) throw new Error(`Em box ${this.boxName} is not initialized.`);
 			const hlttSink = sink.dynamicCast(HlttProgramSink);
 			if (hlttSink) {
-				return new HlttCompiler(hlttSink, this.boxName, this.props, ready);
+				return new HlttCompiler(hlttSink, this.boxName, this.props);
 			}
 
 			return null;
@@ -59,11 +58,10 @@ export namespace EmBoxStroke {
 		constructor(
 			private readonly sink: HlttProgramSink,
 			private readonly boxName: string,
-			private readonly props: Props,
-			private readonly stretch: StretchProps
+			private readonly props: Props
 		) {}
 		public doCompile() {
-			const { boxName, stretch } = this;
+			const { boxName } = this;
 			const { atTop: top, spur, zsBot, zsTop } = this.props;
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
@@ -88,7 +86,7 @@ export namespace EmBoxStroke {
 					);
 				} else if (top) {
 					yield $.call(
-						THintTopStroke(stretch),
+						THintTopStroke,
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,
@@ -98,7 +96,7 @@ export namespace EmBoxStroke {
 					);
 				} else {
 					yield $.call(
-						THintBottomStroke(stretch),
+						THintBottomStroke,
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,

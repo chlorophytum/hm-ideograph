@@ -1,4 +1,5 @@
-import { AdjPoint } from "../types/point";
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import Radical from "../types/radical";
 import Stem from "../types/stem";
 

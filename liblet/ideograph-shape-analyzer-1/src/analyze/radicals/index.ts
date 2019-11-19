@@ -1,7 +1,8 @@
 "use strict";
 
+import { Contour } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { transitiveReduce } from "../../si-common/overlap";
-import Contour from "../../types/contour";
 import Radical from "../../types/radical";
 
 function inclusionToRadicals(

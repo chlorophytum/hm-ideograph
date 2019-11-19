@@ -1,9 +1,9 @@
 import { Support } from "@chlorophytum/arch";
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { overlapInfo, overlapRatio } from "../../si-common/overlap";
 import { expandZ, leftmostZ_SS, rightmostZ_SS, slopeOf } from "../../si-common/seg";
 import { HintingStrategy } from "../../strategy";
-import { AdjPoint } from "../../types/point";
 import Radical from "../../types/radical";
 import { Seg, SegSpan } from "../../types/seg";
 import Stem from "../../types/stem";

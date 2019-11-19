@@ -1,12 +1,10 @@
 import { IHint } from "@chlorophytum/arch";
 import { mix } from "@chlorophytum/arch/lib/support";
 import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chlorophytum/hint-common";
-import { EmBoxEdge, EmBoxStroke, StretchProps, UseEmBox } from "@chlorophytum/hint-embox";
+import { EmBoxEdge, EmBoxStroke, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
-
-import { HintingStrategy } from "../strategy";
-import { AdjPoint } from "../types/point";
-import Stem from "../types/stem";
+import { HintingStrategy, Stem } from "@chlorophytum/ideograph-shape-analyzer-1";
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 export enum DependentHintType {
 	Symmetry,
@@ -14,7 +12,7 @@ export enum DependentHintType {
 	DiagHighToLow
 }
 
-export class HintGenSink {
+export class GlyphHintGenBackEnd {
 	constructor(private readonly params: HintingStrategy) {}
 	private blueHints: IHint[] = [];
 	private boundaryStemsBottom: Stem[] = [];
@@ -246,7 +244,6 @@ export class HintGenSink {
 				new Sequence.Hint([
 					new UseEmBox.Hint(
 						this.params.emboxSystemName,
-						this.params.EmBoxStretch,
 						new Sequence.Hint([
 							...this.blueHints,
 							...this.convertBoundaryStemHints(),

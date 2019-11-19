@@ -15,7 +15,7 @@ To use this hint model you need to introduce it as a hint pass in the configurat
 	......,
 	"hintPasses": [
 		{
-			"plugin": "@chlorophytum/ideograph-shape-analyzer-1",
+			"plugin": "@chlorophytum/hm-ideograph",
 			"options": { ...... }
 		}
 	]
@@ -67,20 +67,6 @@ The options include:
   }
   ```
 
-- `EmBoxStretch`: Decides how to stretch strokes close to the top and bottom of the Em-box for better visual consistency. Defaults to
-
-  ```json
-  {
-  	"PIXEL_RATIO_TO_MOVE": 1.7,
-  	"PIXEL_SHIFT_TO_MOVE": 0.7,
-  	"STRETCH_BOTTOM_A": -0.5,
-  	"STRETCH_BOTTOM_X": 1.25,
-  	"STRETCH_TOP_A": -0.5,
-  	"STRETCH_TOP_X": 2.5,
-  	"CUTIN": 0
-  }
-  ```
-  
 - Stem identification options:
 
   - `CANONICAL_STEM_WIDTH`: Canonical width of stems in `em`. Defaults to `0.067`.

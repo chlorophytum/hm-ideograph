@@ -1,11 +1,10 @@
 import { mix } from "@chlorophytum/arch/lib/support";
+import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
-import CGlyph from "../../types/glyph";
 import Stem from "../../types/stem";
 
 const SIZE = 256;
-const MIN_RUN_LENGTH = 16;
 
 export class Bitmap {
 	public scale: number;

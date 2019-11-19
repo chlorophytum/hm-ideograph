@@ -1,12 +1,15 @@
+import {
+	atGlyphBottom,
+	atGlyphTop,
+	GlyphAnalysis,
+	HintingStrategy,
+	isHangingHookShape,
+	Stem,
+	stemsAreSimilar
+} from "@chlorophytum/ideograph-shape-analyzer-1";
 import * as _ from "lodash";
 
-import { GlyphAnalysis } from "../analyze/analysis";
-import { stemsAreSimilar } from "../analyze/stems/rel";
-import { atGlyphBottom, atGlyphTop, isHangingHookShape } from "../si-common/stem-spatial";
-import { HintingStrategy } from "../strategy";
-import Stem from "../types/stem";
-
-import { DependentHintType, HintGenSink } from "./glyph-hints";
+import { DependentHintType, GlyphHintGenBackEnd } from "./glyph-back-end";
 
 interface LpRec {
 	weight: number;
@@ -66,10 +69,8 @@ interface StemPileSpatial {
 	topIsBoundary: boolean;
 }
 
-export default class HierarchyAnalyzer {
+export default class GlyphHintGenFrontEnd {
 	private stemMask: number[];
-	private bottomMostStems: Stem[] = [];
-	private topMostStems: Stem[] = [];
 	public lastPathWeight = 0;
 	public loops = 0;
 
@@ -80,14 +81,14 @@ export default class HierarchyAnalyzer {
 		}
 	}
 
-	public pre(sink: HintGenSink) {
+	public pre(sink: GlyphHintGenBackEnd) {
 		for (const z of this.analysis.blueZone.topZs) sink.addBlue(true, z);
 		for (const z of this.analysis.blueZone.bottomZs) sink.addBlue(false, z);
 		for (const z of this.analysis.nonBlueTopBottom.topZs) sink.addBlue(true, z);
 		for (const z of this.analysis.nonBlueTopBottom.bottomZs) sink.addBlue(false, z);
 	}
 
-	public fetch(sink: HintGenSink) {
+	public fetch(sink: GlyphHintGenBackEnd) {
 		this.loops++;
 
 		const sidPath = this.getKeyPath();
@@ -341,7 +342,7 @@ export default class HierarchyAnalyzer {
 		return dependents;
 	}
 
-	private analyzeBottomStemSpatial(sink: HintGenSink, bot: number) {
+	private analyzeBottomStemSpatial(sink: GlyphHintGenBackEnd, bot: number) {
 		let botIsBoundary = false,
 			botAtGlyphBottom = false;
 		if (!this.stemMask[bot]) {
@@ -362,7 +363,7 @@ export default class HierarchyAnalyzer {
 
 		return { botAtGlyphBottom, botIsBoundary };
 	}
-	private analyzeTopStemSpatial(sink: HintGenSink, top: number) {
+	private analyzeTopStemSpatial(sink: GlyphHintGenBackEnd, top: number) {
 		let topIsBoundary = false,
 			topAtGlyphTop = false;
 		if (!this.stemMask[top]) {
@@ -394,7 +395,7 @@ export default class HierarchyAnalyzer {
 		else return null;
 	}
 
-	private collectIpSaCalls(sink: HintGenSink) {
+	private collectIpSaCalls(sink: GlyphHintGenBackEnd) {
 		let a: number[][] = [];
 		for (const ip of this.analysis.interpolations) {
 			a.push([ip.priority, ip.rp1.id, ip.rp2.id, ip.z.id]);
@@ -412,7 +413,7 @@ export default class HierarchyAnalyzer {
 		}
 	}
 
-	public post(sink: HintGenSink) {
+	public post(sink: GlyphHintGenBackEnd) {
 		for (let j = 0; j < this.analysis.stems.length; j++) {
 			if (!this.stemMask[j]) {
 				sink.addBoundaryStem(

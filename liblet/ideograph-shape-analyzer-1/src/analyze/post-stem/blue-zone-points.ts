@@ -1,9 +1,7 @@
 import { Geometry } from "@chlorophytum/arch";
+import { AdjPoint, CGlyph, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
-import Contour from "../../types/contour";
-import CGlyph from "../../types/glyph";
-import { AdjPoint, CPoint } from "../../types/point";
 import Stem from "../../types/stem";
 
 function nearTop(z1: Geometry.Point, z2: Geometry.Point, d: number) {

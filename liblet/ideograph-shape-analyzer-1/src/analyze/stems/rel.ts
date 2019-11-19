@@ -1,9 +1,7 @@
 import { Geometry } from "@chlorophytum/arch";
-import { cursorTo } from "readline";
+import { AdjPoint, CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
-import CGlyph from "../../types/glyph";
-import { AdjPoint } from "../../types/point";
 import Radical from "../../types/radical";
 import Stem, { StemSharedBoolKeys, StemSharedNumberKeys } from "../../types/stem";
 

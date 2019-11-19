@@ -1,10 +1,8 @@
 import { Geometry } from "@chlorophytum/arch";
+import { AdjPoint, CGlyph, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import * as _ from "lodash";
 
 import { HintingStrategy } from "../../strategy";
-import Contour from "../../types/contour";
-import CGlyph from "../../types/glyph";
-import { AdjPoint, CPoint } from "../../types/point";
 import Radical from "../../types/radical";
 import Stem from "../../types/stem";
 import { BlueZone, GlyphAnalysis, Interpolation, ShortAbsorption } from "../analysis";
@@ -411,7 +409,7 @@ export default function AnalyzeIpSa(
 	strategy: HintingStrategy
 ) {
 	let interpolations: (Interpolation | null)[] = [];
-	let shortAbsorptions: (ShortAbsorption)[] = [];
+	let shortAbsorptions: ShortAbsorption[] = [];
 
 	const targets: IpSaTarget = { interpolations, shortAbsorptions };
 

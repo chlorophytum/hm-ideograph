@@ -1,7 +1,7 @@
 import { Geometry, Glyph } from "@chlorophytum/arch";
 
-import Contour from "../types/contour";
-import CGlyph from "../types/glyph";
+import { Contour } from "../types/contour";
+import { CGlyph } from "../types/glyph";
 import { CPoint } from "../types/point";
 
 function rotatePoints<A extends Geometry.Point>(c: A[]) {

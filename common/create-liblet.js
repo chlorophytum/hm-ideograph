@@ -30,7 +30,7 @@ test("Dummy test :: ${libName}", t => {
 `
 );
 fs.writeFileSync(
-	path.join(LIBLET_DIR, libName, "src", ".npmignore"),
+	path.join(LIBLET_DIR, libName, ".npmignore"),
 	`src/
 lib/**/*.map
 tsconfig.json

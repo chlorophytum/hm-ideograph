@@ -1,6 +1,5 @@
 import { IFontEntry, ITask, WellKnownGlyphRelation } from "@chlorophytum/arch";
-
-import { HintingStrategy } from "../strategy";
+import { IdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 const DefaultLookupKinds = [`gsub_single`, `gsub_multiple`, `gsub_alternate`];
 
@@ -11,7 +10,7 @@ export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
 	private acceptableFeatureTags: ReadonlySet<string>;
 	private acceptableUnicode: ReadonlySet<number>;
 
-	constructor(private readonly font: IFontEntry<GID>, params: HintingStrategy) {
+	constructor(private readonly font: IFontEntry<GID>, params: IdeographHintingParams) {
 		this.acceptAllGlyphs = !!params.acceptAllGlyphs;
 
 		this.acceptableLookupKinds = new Set(DefaultLookupKinds);

@@ -1,8 +1,9 @@
+import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { HintingStrategy } from "../../strategy";
-import CGlyph from "../../types/glyph";
 import { GlyphAnalysis } from "../analysis";
 
-import analyzeBlueZonePoints from "./bluezone-points";
+import analyzeBlueZonePoints from "./blue-zone-points";
 import AnalyzeIpSa from "./ipsa";
 import analyzeSymmetry from "./symmetry";
 

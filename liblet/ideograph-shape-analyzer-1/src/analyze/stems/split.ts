@@ -1,8 +1,8 @@
 import { Geometry } from "@chlorophytum/arch";
+import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { leftmostZ_SS, rightmostZ_SS } from "../../si-common/seg";
 import { HintingStrategy } from "../../strategy";
-import { AdjPoint, CPoint } from "../../types/point";
 import { PostHint } from "../../types/post-hint";
 import { Seg } from "../../types/seg";
 import Stem from "../../types/stem";

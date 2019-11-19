@@ -1,6 +1,6 @@
 import { Geometry } from "@chlorophytum/arch";
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-import { AdjPoint } from "../types/point";
 import Stem from "../types/stem";
 
 import { slopeOf } from "./seg";

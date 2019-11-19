@@ -4,6 +4,9 @@
 		{"path": "./hint-embox"},
 		{"path": "./hint-maz"},
 		{"path": "./hint-programs-stoke-adjust"},
-		{"path": "./ideograph-shape-analyzer-1"}
+		{"path": "./hm-ideograph"},
+		{"path": "./ideograph-hint-generator-1"},
+		{"path": "./ideograph-shape-analyzer-1"},
+		{"path": "./ideograph-shape-analyzer-shared"}
 	]
 }

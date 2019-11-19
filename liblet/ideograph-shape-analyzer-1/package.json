@@ -13,9 +13,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@chlorophytum/arch": "^0.4.0",
-		"@chlorophytum/hint-common": "^0.4.0",
-		"@chlorophytum/hint-embox": "^0.5.4",
-		"@chlorophytum/hint-maz": "^0.5.4",
+		"@chlorophytum/ideograph-shape-analyzer-shared": "^0.5.4",
 		"lodash": "^4.17.11",
 		"tslib": "^1.9.3"
 	},

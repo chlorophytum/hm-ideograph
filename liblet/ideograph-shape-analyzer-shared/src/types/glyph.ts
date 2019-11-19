@@ -1,10 +1,10 @@
 import { Geometry } from "@chlorophytum/arch";
 
-import Contour, { inPoly } from "./contour";
+import { Contour, inPoly } from "./contour";
 import { CPoint } from "./point";
 import { createStat, Stat } from "./stat";
 
-export default class CGlyph {
+export class CGlyph {
 	constructor(public contours: Contour[] = []) {}
 	public nPoints = 0;
 	public indexedPoints: CPoint[] = [];

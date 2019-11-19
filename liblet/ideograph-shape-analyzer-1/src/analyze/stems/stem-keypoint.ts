@@ -1,5 +1,6 @@
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { correctYWForStem } from "../../si-common/hlkey";
-import { AdjPoint } from "../../types/point";
 import Stem from "../../types/stem";
 
 export function analyzeStemKeyPoints(stems: Stem[]) {

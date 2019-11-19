@@ -9,24 +9,17 @@ import {
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import { TypeRep } from "typable";
 
-import { StretchProps } from "./programs/boundary";
-
 export namespace UseEmBox {
 	export const ReadyPropT = (name: string) =>
-		new TypeRep<StretchProps>("Chlorophytum::EmBox::Init::Ready::" + name);
+		new TypeRep<boolean>("Chlorophytum::EmBox::Init::Ready::" + name);
 
 	const TAG = "Chlorophytum::EmBox::Init";
 	export class Hint implements IHint {
-		constructor(
-			private readonly name: string,
-			private readonly stretch: StretchProps,
-			private readonly inner: IHint
-		) {}
+		constructor(private readonly name: string, private readonly inner: IHint) {}
 		public toJSON() {
 			return {
 				type: TAG,
 				name: this.name,
-				stretch: this.stretch,
 				inner: this.inner.toJSON()
 			};
 		}
@@ -34,7 +27,7 @@ export namespace UseEmBox {
 		private createInnerBag(bag: PropertyBag) {
 			const ready = ReadyPropT(this.name);
 			const bag1 = bag.extend();
-			bag1.set(ready, this.stretch);
+			bag1.set(ready, true);
 			return bag1;
 		}
 		public createCompiler(bag: PropertyBag, sink: IFinalHintProgramSink): IHintCompiler | null {
@@ -54,7 +47,7 @@ export namespace UseEmBox {
 		public readJson(json: any, general: IHintFactory) {
 			if (json && json.type === TAG && json.inner) {
 				const inner = general.readJson(json.inner, general);
-				if (inner) return new Hint(json.name, json.stretch, inner);
+				if (inner) return new Hint(json.name, inner);
 			}
 			return null;
 		}

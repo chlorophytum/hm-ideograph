@@ -3,7 +3,7 @@ import { Geometry } from "@chlorophytum/arch";
 import { CPoint } from "./point";
 import { createStat } from "./stat";
 
-export default class Contour {
+export class Contour {
 	public points: CPoint[] = [];
 	public ccw = false;
 	public stats = createStat();

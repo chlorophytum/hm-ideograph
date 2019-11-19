@@ -1,8 +1,7 @@
 import { Geometry } from "@chlorophytum/arch";
+import { Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
-import Contour from "../../types/contour";
-import { CPoint } from "../../types/point";
 import Radical from "../../types/radical";
 import { SegSpan } from "../../types/seg";
 

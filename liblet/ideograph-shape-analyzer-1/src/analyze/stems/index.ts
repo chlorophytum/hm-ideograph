@@ -1,6 +1,7 @@
+import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { stemOverlapLength, stemOverlapRatio } from "../../si-common/overlap";
 import { HintingStrategy } from "../../strategy";
-import CGlyph from "../../types/glyph";
 import Stem from "../../types/stem";
 import { GlyphAnalysis } from "../analysis";
 

@@ -11,20 +11,18 @@ import {
 	ITask,
 	Variation
 } from "@chlorophytum/arch";
+import {
+	IdeographHintingParams,
+	IHintGen,
+	IShapeAnalyzer
+} from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-import analyzeGlyph from "../analyze";
-import HierarchyAnalyzer from "../hint-gen";
-import { HintGenSink } from "../hint-gen/glyph-hints";
-import { createHintingStrategy, HintingStrategy } from "../strategy";
-import { combineHash, hashGlyphContours } from "../types/hash";
-
-import { createGlyph } from "./create-glyph";
-import { ModelVersionPrefix } from "./version-prefix";
-
-export class GlyphHintTask<GID> implements ITask<void> {
+export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implements ITask<void> {
 	constructor(
 		private readonly font: IFontSource<GID>,
-		private readonly params: HintingStrategy,
+		private readonly analyzer: IShapeAnalyzer<S, G, A>,
+		private readonly codeGen: IHintGen<S, G, A>,
+		private readonly params: S,
 		private readonly ee: IHintingModelExecEnv,
 		private readonly gid: GID
 	) {}
@@ -32,12 +30,8 @@ export class GlyphHintTask<GID> implements ITask<void> {
 	private async getGlyphCacheKey(gid: GID) {
 		const geometry = await this.font.getGeometry(gid, null);
 		if (!geometry) return null;
-		const glyph = createGlyph(geometry.eigen); // Care about outline glyphs only
-		return combineHash(
-			ModelVersionPrefix,
-			JSON.stringify(this.params),
-			hashGlyphContours(glyph)
-		);
+		const glyph = this.analyzer.createGlyph(geometry.eigen); // Care about outline glyphs only
+		return this.analyzer.getGlyphHash(glyph, this.params);
 	}
 
 	public async execute(arb: IArbitratorProxy) {
@@ -57,7 +51,13 @@ export class GlyphHintTask<GID> implements ITask<void> {
 			if (runPct) {
 				hints = await runPct;
 			} else {
-				const pt = new ParallelGlyphHintTask(this.font.metadata, this.params, glyphRep);
+				const pt = new ParallelGlyphHintTask(
+					this.font.metadata,
+					this.analyzer,
+					this.codeGen,
+					this.params,
+					glyphRep
+				);
 				hints = await pt.executeImpl();
 			}
 			if (!hints) return;
@@ -76,26 +76,26 @@ export class GlyphHintTask<GID> implements ITask<void> {
 }
 
 export const ParallelTaskType = "Chlorophytum::IdeographHintingModel1::ParallelTask";
-export type GlyphHintParallelArgRep = {
+export type GlyphHintParallelArgRep<S> = {
 	readonly fmd: IFontSourceMetadata;
-	readonly params: HintingStrategy;
+	readonly params: S;
 	readonly glyphRep: Glyph.Rep;
 };
 export type GlyphHintParallelResultRep = {
 	readonly hints: any;
 };
 
-export class ParallelGlyphHintCoTask<GID>
+export class ParallelGlyphHintCoTask<GID, S>
 	implements
 		IParallelCoTask<
 			null | undefined | IHint,
-			GlyphHintParallelArgRep,
+			GlyphHintParallelArgRep<S>,
 			GlyphHintParallelResultRep
 		> {
 	constructor(
 		private readonly font: IFontSource<GID>,
 		private readonly ee: IHintingModelExecEnv,
-		private readonly params: HintingStrategy,
+		private readonly params: S,
 
 		private readonly glyphRep: Glyph.Rep
 	) {}
@@ -109,16 +109,19 @@ export class ParallelGlyphHintCoTask<GID>
 	}
 }
 
-export class ParallelGlyphHintTask implements IParallelTask<GlyphHintParallelResultRep> {
+export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
+	implements IParallelTask<GlyphHintParallelResultRep> {
 	public readonly type = ParallelTaskType;
 	constructor(
 		fmd: IFontSourceMetadata,
-		ptParams: Partial<HintingStrategy>,
+		private readonly analyzer: IShapeAnalyzer<S, G, A>,
+		private readonly codeGen: IHintGen<S, G, A>,
+		ptParams: Partial<S>,
 		private readonly glyphRep: Glyph.Rep
 	) {
-		this.params = createHintingStrategy(fmd.upm, ptParams);
+		this.params = this.analyzer.createHintingStrategy(fmd.upm, ptParams);
 	}
-	private readonly params: HintingStrategy;
+	private readonly params: S;
 
 	public async execute() {
 		const hints = await this.executeImpl();
@@ -132,17 +135,10 @@ export class ParallelGlyphHintTask implements IParallelTask<GlyphHintParallelRes
 		return this.hintGlyphGeometry(geometry, this.params);
 	}
 
-	public hintGlyphGeometry(geometry: Glyph.Shape, params: HintingStrategy) {
-		const glyph = createGlyph(geometry.eigen); // Care about outline glyphs only
-		const analysis = analyzeGlyph(glyph, params);
-		const sink = new HintGenSink(params);
-		const ha = new HierarchyAnalyzer(analysis, params);
-		ha.pre(sink);
-		do {
-			ha.fetch(sink);
-		} while (ha.lastPathWeight && ha.loops < 256);
-		ha.post(sink);
-		return sink.getHint();
+	public hintGlyphGeometry(geometry: Glyph.Shape, params: S) {
+		const glyph = this.analyzer.createGlyph(geometry.eigen); // Care about outline glyphs only
+		const analysis = this.analyzer.analyzeGlyph(params, glyph);
+		return this.codeGen.generateGlyphHints(params, glyph, analysis);
 	}
 }
 
