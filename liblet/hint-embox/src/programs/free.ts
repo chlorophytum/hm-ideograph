@@ -3,7 +3,7 @@ import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
 import { ProgramLib } from "./twilight";
 
 export const THintStrokeFreeAuto = ProgramLib.Func(function*($) {
-	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
+	const [mdBot, mdTop, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(8);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();
 	const wOrig = $.local();
@@ -39,4 +39,13 @@ export const THintStrokeFreeAuto = ProgramLib.Func(function*($) {
 			yield $.scfs(zsBot, $.sub(rTop, wCur));
 		}
 	);
+	// Leave space for distinguishing
+	yield $.if($.lt($.gc.cur(zsTop), $.add($.gc.cur(zBot), mdBot)), function*() {
+		yield $.scfs(zsBot, $.add($.gc.cur(zsBot), $.coerce.toF26D6(1)));
+		yield $.scfs(zsTop, $.add($.gc.cur(zsTop), $.coerce.toF26D6(1)));
+	});
+	yield $.if($.gt($.gc.cur(zsBot), $.sub($.gc.cur(zTop), mdTop)), function*() {
+		yield $.scfs(zsBot, $.sub($.gc.cur(zsBot), $.coerce.toF26D6(1)));
+		yield $.scfs(zsTop, $.sub($.gc.cur(zsTop), $.coerce.toF26D6(1)));
+	});
 });

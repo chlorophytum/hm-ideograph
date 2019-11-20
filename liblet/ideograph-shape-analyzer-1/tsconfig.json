@@ -1,6 +1,6 @@
 {
 	"extends": "../tsconfig.settings.json",
-	"references": [{"path": "../hint-embox"}, {"path": "../hint-maz"}],
+	"references": [{"path": "../ideograph-shape-analyzer-shared"}],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "lib",

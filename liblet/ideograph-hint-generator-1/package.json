@@ -1,0 +1,34 @@
+{
+	"name": "@chlorophytum/ideograph-hint-generator-1",
+	"version": "0.5.4",
+	"description": "",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"scripts": {
+		"clean": "rimraf lib .build-cache",
+		"build": "tsc --build",
+		"test": "ava --verbose"
+	},
+	"author": "Renzhi Li (aka. Belleve Invis)",
+	"license": "MIT",
+	"dependencies": {
+		"@chlorophytum/arch": "^0.4.0",
+		"@chlorophytum/hint-common": "^0.4.0",
+		"@chlorophytum/hint-embox": "^0.5.4",
+		"@chlorophytum/hint-maz": "^0.5.4",
+		"@chlorophytum/ideograph-shape-analyzer-shared": "^0.5.4",
+		"@chlorophytum/ideograph-shape-analyzer-1": "^0.5.4",
+		"tslib": "^1.9.3"
+	},
+	"devDependencies": {
+		"ava": "^1.4.1"
+	},
+	"ava": {
+		"files": [
+			"lib/**/*.test.js"
+		]
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

@@ -1,6 +1,6 @@
 import { Geometry } from "@chlorophytum/arch";
+import { CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-import { CPoint } from "../types/point";
 import Radical from "../types/radical";
 import { Seg, SegSpan } from "../types/seg";
 

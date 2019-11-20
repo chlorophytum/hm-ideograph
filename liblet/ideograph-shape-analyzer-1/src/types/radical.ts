@@ -1,7 +1,6 @@
 import { Geometry, Support } from "@chlorophytum/arch";
+import { AdjPoint, Contour } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-import Contour from "./contour";
-import { AdjPoint } from "./point";
 import { SegSpan } from "./seg";
 import Stem from "./stem";
 

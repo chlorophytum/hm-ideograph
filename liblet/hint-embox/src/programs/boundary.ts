@@ -2,16 +2,6 @@ import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
 
 import { ProgramLib } from "./twilight";
 
-export interface StretchProps {
-	readonly PIXEL_RATIO_TO_MOVE: number;
-	readonly PIXEL_SHIFT_TO_MOVE: number;
-	readonly STRETCH_BOTTOM_A: number;
-	readonly STRETCH_BOTTOM_X: number;
-	readonly STRETCH_TOP_A: number;
-	readonly STRETCH_TOP_X: number;
-	readonly CUTIN: number;
-}
-
 const ComputeYAvgEmboxShift = ProgramLib.Func(function*($) {
 	const [zBot, zTop, zBotOrig, zTopOrig] = $.args(4);
 	yield $.return(
@@ -25,7 +15,7 @@ const ComputeYAvgEmboxShift = ProgramLib.Func(function*($) {
 	);
 });
 
-export const THintBottomStroke = ProgramLib.Template(function*($, stretch: StretchProps) {
+export const THintBottomStroke = ProgramLib.Func(function*($) {
 	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();
@@ -50,7 +40,7 @@ export const THintBottomStroke = ProgramLib.Template(function*($, stretch: Stret
 	yield $.scfs(zsTop, $.add(yInterpolated, wCur));
 });
 
-export const THintTopStroke = ProgramLib.Template(function*($, stretch: StretchProps) {
+export const THintTopStroke = ProgramLib.Func(function*($) {
 	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();

@@ -7,20 +7,22 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
-import { StretchProps, THintBottomStroke, THintTopStroke } from "./programs/boundary";
+import { THintBottomStroke, THintTopStroke } from "./programs/boundary";
 import { THintStrokeFreeAuto } from "./programs/free";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 
 export namespace EmBoxStroke {
 	const TAG = "Chlorophytum::EmBox::Stroke";
-	export type Stretch = StretchProps;
+	const DistinguishDist = 3 / 5;
 
 	export interface Props {
 		readonly atTop?: boolean;
 		readonly spur?: boolean;
 		readonly zsBot: number;
 		readonly zsTop: number;
+		readonly leavePixelsBelow: number;
+		readonly leavePixelsAbove: number;
 	}
 	export class Hint implements IHint {
 		constructor(private readonly boxName: string, readonly props: Props) {}
@@ -37,7 +39,7 @@ export namespace EmBoxStroke {
 			if (!ready) throw new Error(`Em box ${this.boxName} is not initialized.`);
 			const hlttSink = sink.dynamicCast(HlttProgramSink);
 			if (hlttSink) {
-				return new HlttCompiler(hlttSink, this.boxName, this.props, ready);
+				return new HlttCompiler(hlttSink, this.boxName, this.props);
 			}
 
 			return null;
@@ -59,12 +61,10 @@ export namespace EmBoxStroke {
 		constructor(
 			private readonly sink: HlttProgramSink,
 			private readonly boxName: string,
-			private readonly props: Props,
-			private readonly stretch: StretchProps
+			private readonly props: Props
 		) {}
 		public doCompile() {
-			const { boxName, stretch } = this;
-			const { atTop: top, spur, zsBot, zsTop } = this.props;
+			const { boxName, props } = this;
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
 				const spurTop = $.symbol(Twilights.SpurTop(boxName));
@@ -76,35 +76,37 @@ export namespace EmBoxStroke {
 				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(boxName));
 				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(boxName));
 
-				if (spur) {
+				if (props.spur) {
 					yield $.call(
 						THintStrokeFreeAuto,
+						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsBelow)),
+						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsAbove)),
 						spurBottom,
 						spurTop,
 						spurBottomOrig,
 						spurTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
-				} else if (top) {
+				} else if (props.atTop) {
 					yield $.call(
-						THintTopStroke(stretch),
+						THintTopStroke,
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
 				} else {
 					yield $.call(
-						THintBottomStroke(stretch),
+						THintBottomStroke,
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						zsBot,
-						zsTop
+						props.zsBot,
+						props.zsTop
 					);
 				}
 			});

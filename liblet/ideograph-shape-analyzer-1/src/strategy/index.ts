@@ -1,16 +1,6 @@
-import { StretchProps } from "@chlorophytum/hint-embox";
+import { DefaultIdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 const DEADLY = 1e12;
-
-const DefaultStretch: StretchProps = {
-	PIXEL_RATIO_TO_MOVE: 1.7,
-	PIXEL_SHIFT_TO_MOVE: 0.7,
-	STRETCH_BOTTOM_A: -0.5,
-	STRETCH_BOTTOM_X: 1.25,
-	STRETCH_TOP_A: -0.5,
-	STRETCH_TOP_X: 2.5,
-	CUTIN: 0
-};
 
 export type EmBoxProps = {
 	Bottom: number;
@@ -30,47 +20,14 @@ export const DefaultEmBoxProps: EmBoxProps = {
 	SpurTop: (380 + 475) / 1000
 };
 
-const DefaultUnicodeRanges: [number, number][] = [
-	[0x2e80, 0x2fff], // Radicals
-	[0x31c0, 0x31e3], // Strokes
-	[0x3400, 0x4dbf], // ExtA
-	[0x4e00, 0x9fff], // URO
-	[0xf900, 0xfa6f], // Compatibility
-	[0x20000, 0x2ffff], // SIP
-	[0xac00, 0xd7af] // Hangul
-];
-const DefaultScriptTags = [`hani`, `hang`];
-const DefaultFeatureTags = [
-	`locl`,
-	`smpl`,
-	`trad`,
-	`tnam`,
-	`jp78`,
-	`jp83`,
-	`jp90`,
-	`jp04`,
-	`hojo`,
-	`nlck`,
-	`expt`
-];
-for (let cv = 0; cv <= 99; cv++) {
-	let cvTag: string = "" + cv;
-	while (cvTag.length < 2) cvTag = "0" + cvTag;
-	DefaultFeatureTags.push(`cv` + cvTag);
-	DefaultFeatureTags.push(`ss` + cvTag);
-}
-
 const DefaultStrategy = {
 	// Coverage
 	emboxSystemName: "Ideographs",
-	acceptAllGlyphs: false,
-	unicodeRanges: DefaultUnicodeRanges,
-	trackScripts: DefaultScriptTags,
-	trackFeatures: DefaultFeatureTags,
+
+	...DefaultIdeographHintingParams,
 
 	// Em-box
 	EmBox: DefaultEmBoxProps,
-	EmBoxStretch: DefaultStretch,
 
 	// Stem identification
 	CANONICAL_STEM_WIDTH: 67 / 1000,

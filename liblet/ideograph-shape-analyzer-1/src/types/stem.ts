@@ -1,4 +1,5 @@
-import { AdjPoint, CPoint } from "./point";
+import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { PostHint } from "./post-hint";
 import { Seg } from "./seg";
 
