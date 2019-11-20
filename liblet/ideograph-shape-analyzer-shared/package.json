@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/ideograph-shape-analyzer-shared",
-	"version": "0.5.4",
+	"version": "0.6.0",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -12,9 +12,9 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"tslib": "^1.9.3",
 		"@chlorophytum/arch": "^0.4.0",
-		"lodash": "^4.17.11"
+		"lodash": "^4.17.11",
+		"tslib": "^1.9.3"
 	},
 	"devDependencies": {
 		"ava": "^1.4.1"
