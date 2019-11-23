@@ -2,13 +2,15 @@ import {
 	IFontSource,
 	IHintingModel,
 	IHintingModelExecEnv,
-	IHintingModelPlugin
+	IHintingModelPlugin,
+	IHintingModelPreEnv
 } from "@chlorophytum/arch";
 import { IdeographHintGenerator1 } from "@chlorophytum/ideograph-hint-generator-1";
 import { IdeographShapeAnalyzer1 } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { IdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { IdeographHintingTask } from "../model";
+import { DummyTask } from "../model/dummy";
 import {
 	GlyphHintParallelArgRep,
 	ParallelGlyphHintTask,
@@ -32,10 +34,14 @@ export class IdeographHintingModel1<GID> implements IHintingModel {
 			ee
 		);
 	}
+	public getPreTask(ee: IHintingModelPreEnv) {
+		return new DummyTask();
+	}
 }
 
 class CIdeographHintingModelFactory1 implements IHintingModelPlugin {
 	public readonly type = "Chlorophytum::IdeographHintingModel1";
+	public readonly requiredPreHintRounds = 0; // No pre-analysis is needed
 	public adopt<GID>(font: IFontSource<GID>, parameters: any) {
 		return new IdeographHintingModel1<GID>(font, parameters);
 	}
