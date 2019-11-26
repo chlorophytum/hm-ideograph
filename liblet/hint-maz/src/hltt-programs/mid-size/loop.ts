@@ -1,6 +1,6 @@
 import { Lib } from "../commons";
 
-export const MaxAverageDivisorIncreaseStep = 1;
+export const MaxAverageDivisorIncreaseStep = 2;
 
 export const HighestAverageLoop = Lib.Func(function*($) {
 	const [N, vpA, vpC, vpDiv, vpAlloc, scalar, rest] = $.args(7);
