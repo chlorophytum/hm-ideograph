@@ -64,13 +64,15 @@ export namespace MultipleAlignZone {
 				(c, j) => c * (props.allowCollide[j] ? 1 : 0)
 			);
 			const recPathCollide = getRecPath(props.mergePriority, collidePriority, N);
-
+			const sink = this.sink;
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(EmBox.Twilights.SpurBottom(props.emBoxName));
 				const spurTop = $.symbol(EmBox.Twilights.SpurTop(props.emBoxName));
 
-				const bottomPoint = props.bottomPoint < 0 ? spurBottom : props.bottomPoint;
-				const topPoint = props.topPoint < 0 ? spurTop : props.topPoint;
+				const bottomPoint = !props.bottomPoint
+					? spurBottom
+					: sink.resolveGlyphPoint(props.bottomPoint);
+				const topPoint = !props.topPoint ? spurTop : sink.resolveGlyphPoint(props.topPoint);
 
 				yield $.call(
 					THintMultipleStrokesExplicit(N),
@@ -82,7 +84,7 @@ export namespace MultipleAlignZone {
 					props.topBalanceForbidden ? 1 : 0,
 					bottomPoint,
 					topPoint,
-					..._.flatten(props.middleStrokes)
+					..._.flatten(props.middleStrokes).map(z => sink.resolveGlyphPoint(z))
 				);
 			});
 		}

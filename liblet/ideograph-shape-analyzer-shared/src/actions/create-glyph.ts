@@ -24,27 +24,18 @@ export function createGlyph(input: Glyph.Geom) {
 		const c = input[j];
 		const currentContour = new Contour();
 		for (let k = 0; k < c.length; k++) {
-			const pt = new CPoint(c[k].x, c[k].y, c[k].on, ptIndex);
+			const pt = new CPoint(c[k].x, c[k].y, c[k].on, c[k].references);
 			currentContour.points.push(pt);
 			indexedPoints[ptIndex] = pt;
 			ptIndex++;
 		}
 		if (currentContour.points.length < 1) continue;
 		currentContour.points = rotatePoints(currentContour.points);
-		currentContour.points.push(
-			new CPoint(
-				currentContour.points[0].x,
-				currentContour.points[0].y,
-				currentContour.points[0].on,
-				currentContour.points[0].id
-			)
-		);
+		currentContour.points.push(currentContour.points[0]);
 		contours.push(currentContour);
 	}
 	const glyph = new CGlyph(contours);
-	glyph.unifyZ();
 	glyph.stat();
 	glyph.nPoints = ptIndex - 1;
-	glyph.indexedPoints = indexedPoints;
 	return glyph;
 }

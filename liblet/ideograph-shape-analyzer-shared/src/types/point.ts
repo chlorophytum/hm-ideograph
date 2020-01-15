@@ -35,10 +35,10 @@ export interface IpKeys {
 
 export class CPoint implements AdjPoint {
 	constructor(
-		public x: number,
-		public y: number,
-		public on: boolean = true,
-		public id: number = -1
+		public readonly x: number,
+		public readonly y: number,
+		public readonly on: boolean = true,
+		public readonly references: null | Geometry.PointReference[] = null
 	) {}
 	public xExtrema: boolean = false;
 	public xStrongExtrema: boolean = false;

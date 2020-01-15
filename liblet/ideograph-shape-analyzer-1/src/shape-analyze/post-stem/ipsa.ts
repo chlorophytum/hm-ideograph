@@ -35,11 +35,7 @@ function shortAbsorptionPointByKeys(
 	for (let m = 0; m < keys.length; m++) {
 		let key = keys[m];
 		const dist = Math.hypot(pt.y - key.y, pt.x - key.x);
-		if (
-			key.yStrongExtrema &&
-			dist <= strategy.ABSORPTION_LIMIT * strategy.UPM &&
-			key.id !== pt.id
-		) {
+		if (key.yStrongExtrema && dist <= strategy.ABSORPTION_LIMIT * strategy.UPM && key !== pt) {
 			if (dist < minDist) {
 				minDist = dist;
 				minKey = key;
@@ -158,7 +154,7 @@ function interpolateByKeys(
 			if (upperK.y > lowerK.y + fuzz) {
 				pt.ipKeys = { upperK0, lowerK0, upperK, lowerK, ipPri: priority };
 				targets.interpolations.push(new Interpolation(upperK, lowerK, pt, priority));
-			} else if (upperK.id !== pt.id) {
+			} else if (upperK !== pt) {
 				targets.shortAbsorptions.push(new ShortAbsorption(upperK, pt, priority));
 			}
 		}
@@ -188,7 +184,7 @@ function linkRadicalSoleStemPoints(
 			const keyPoints = highPoints.concat(lowPoints);
 			for (let j = 0; j < keyPoints.length; j++) {
 				let zKey = keyPoints[j];
-				if (zKey.id === z.id || !(zKey.id >= 0) || zKey.dontTouch) continue;
+				if (zKey === z || !zKey.references || zKey.dontTouch) continue;
 				if (CPoint.adjacent(zKey, z) || CPoint.adjacentZ(zKey, z)) {
 					reject = true;
 					continue;
@@ -336,8 +332,8 @@ type IpSaRecord = {
 
 function isIpSaPointExtrema(z: AdjPoint, pMin: AdjPoint, pMax: AdjPoint) {
 	return (
-		z.id !== pMin.id &&
-		z.id !== pMax.id &&
+		z !== pMin &&
+		z !== pMax &&
 		!z.touched &&
 		!z.dontTouch &&
 		(z.yExtrema || (z.xStrongExtrema && z.turn))
@@ -376,7 +372,7 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 					}
 					extrema[m].touched = true;
 					extrema[m].dontTouch = true;
-				} else if (extrema[m].id !== pMin.id) {
+				} else if (extrema[m] !== pMin) {
 					middlePoints.push(extrema[m]);
 				}
 			}

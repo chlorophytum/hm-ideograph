@@ -1,13 +1,11 @@
 import { Geometry } from "@chlorophytum/arch";
 
 import { Contour, inPoly } from "./contour";
-import { CPoint } from "./point";
 import { createStat, Stat } from "./stat";
 
 export class CGlyph {
 	constructor(public contours: Contour[] = []) {}
 	public nPoints = 0;
-	public indexedPoints: CPoint[] = [];
 
 	public stats: Stat = createStat();
 
@@ -23,16 +21,6 @@ export class CGlyph {
 		return nCCW !== nCW;
 	}
 
-	public unifyZ() {
-		for (let j = 0; j < this.contours.length; j++) {
-			let pts = this.contours[j].points;
-			for (let k = 0; k < pts.length; k++) {
-				if (this.indexedPoints[pts[k].id]) {
-					pts[k] = this.indexedPoints[pts[k].id];
-				}
-			}
-		}
-	}
 	public stat() {
 		for (let c of this.contours) {
 			c.stat();

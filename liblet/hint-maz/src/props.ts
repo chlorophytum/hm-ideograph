@@ -1,3 +1,5 @@
+import { Geometry } from "@chlorophytum/arch";
+
 export interface MultipleAlignZoneMetaPropShared {
 	gapMinDist: number[]; // N+1 args
 	inkMinDist: number[]; // N args
@@ -11,9 +13,9 @@ export interface MultipleAlignZoneMeta extends MultipleAlignZoneMetaPropShared {
 
 export interface MultipleAlignZoneProps extends MultipleAlignZoneMetaPropShared {
 	emBoxName: string;
-	bottomPoint: number; // 1 arg
-	topPoint: number; // 1 arg
-	middleStrokes: [number, number][]; // 2N args
+	bottomPoint: null | Geometry.PointReference; // 1 arg
+	topPoint: null | Geometry.PointReference; // 1 arg
+	middleStrokes: [Geometry.PointReference, Geometry.PointReference][]; // 2N args
 	mergePriority: number[]; // N+1 items. Not an argument!
 	allowCollide: boolean[]; // N+1 items. Not an argument!
 }

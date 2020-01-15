@@ -1,5 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
-import { Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+import { AdjPoint, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
@@ -37,14 +37,12 @@ function tryPushSegment(
 	s: SegSpan,
 	ss: SegSpan[],
 	approSlopeA: SlopeOperator,
-	coupled: boolean[],
+	coupled: Set<AdjPoint>,
 	strategy: HintingStrategy
 ) {
 	while (s.length > 1) {
 		if (approSlopeA(s[0], s[s.length - 1], strategy)) {
-			for (let z of s) {
-				coupled[z.id] = true;
-			}
+			for (let z of s) coupled.add(z);
 			ss.push(s);
 			return;
 		} else {
@@ -63,7 +61,7 @@ function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: Hint
 		lastPoint = z;
 		segment = [lastPoint];
 	}
-	let coupled: boolean[] = [];
+	let coupled: Set<AdjPoint> = new Set();
 	let z0 = contour.points[0];
 	let lastPoint = z0;
 	let segment = [lastPoint];
@@ -72,10 +70,10 @@ function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: Hint
 		let tores = false;
 		for (let k = 1; k < contour.points.length - 1; k++) {
 			const z = contour.points[k];
-			if (tores || z.id === undefined || coupled[lastPoint.id]) {
+			if (tores || !z.references || coupled.has(lastPoint)) {
 				restart(z);
 				tores = false;
-			} else if (!coupled[z.id] && as1t(z, lastPoint, strategy)) {
+			} else if (!coupled.has(z) && as1t(z, lastPoint, strategy)) {
 				segment.push(z);
 				if (segment.length > 2 && !as1(z, lastPoint, strategy)) {
 					tryPushSegment(segment, segments, as2, coupled, strategy);
@@ -90,7 +88,7 @@ function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: Hint
 				tores = false;
 			}
 		}
-		if (!coupled[z0.id] && as1(z0, lastPoint, strategy)) {
+		if (!coupled.has(z0) && as1(z0, lastPoint, strategy)) {
 			if (segments[0] && segments[0][0] === z0) {
 				const firstSeg = [...segment, ...segments[0]];
 				segment.shift();

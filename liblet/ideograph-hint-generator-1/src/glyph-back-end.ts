@@ -4,6 +4,12 @@ import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chloro
 import { EmBoxEdge, EmBoxStroke, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
 import { HintAnalysis, HintingStrategy, Stem } from "@chlorophytum/ideograph-shape-analyzer-1";
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared/src";
+
+function ref(z: AdjPoint) {
+	if (!z.references) throw new Error("Unable to reference point.");
+	return z.references[0];
+}
 
 export class GlyphHintGenBackEnd {
 	constructor(private readonly params: HintingStrategy) {}
@@ -53,15 +59,15 @@ export class GlyphHintGenBackEnd {
 
 	private addBlue(blue: HintAnalysis.BluePoint) {
 		this.blueHints.push(
-			new EmBoxEdge.Hint(this.params.emboxSystemName, blue.top, blue.point.id)
+			new EmBoxEdge.Hint(this.params.emboxSystemName, blue.top, ref(blue.point))
 		);
 	}
 
 	private addInterpolateOrLink(fn: HintAnalysis.InterpolationOrLink) {
 		if (fn.ref2) {
-			this.subHints.push(new Interpolate.Hint(fn.ref1.id, fn.ref2.id, [fn.subject.id]));
+			this.subHints.push(new Interpolate.Hint(ref(fn.ref1), ref(fn.ref2), [ref(fn.subject)]));
 		} else {
-			this.subHints.push(new LinkChain.Hint([fn.ref1.id, fn.subject.id]));
+			this.subHints.push(new LinkChain.Hint([ref(fn.ref1), ref(fn.subject)]));
 		}
 	}
 
@@ -75,8 +81,8 @@ export class GlyphHintGenBackEnd {
 				new EmBoxStroke.Hint(this.params.emboxSystemName, {
 					atTop: boundary.locTop,
 					spur: true,
-					zsBot: boundary.stem.lowKey.id,
-					zsTop: boundary.stem.highKey.id,
+					zsBot: ref(boundary.stem.lowKey),
+					zsTop: ref(boundary.stem.highKey),
 					leavePixelsAbove: 1, // Ignore on purpose for diagonal dots, etc.
 					leavePixelsBelow: Math.max(1, Math.min(2, boundary.flipsBelow))
 				})
@@ -92,9 +98,9 @@ export class GlyphHintGenBackEnd {
 				inkMinDist: [1],
 				mergePriority: [0, 0],
 				allowCollide: [false, false],
-				topPoint: -1,
-				middleStrokes: [[boundary.stem.lowKey.id, boundary.stem.highKey.id]],
-				bottomPoint: boundary.below.highKey.id
+				topPoint: null,
+				middleStrokes: [[ref(boundary.stem.lowKey), ref(boundary.stem.highKey)]],
+				bottomPoint: ref(boundary.below.highKey)
 			})
 		);
 	}
@@ -106,9 +112,9 @@ export class GlyphHintGenBackEnd {
 				inkMinDist: [1],
 				mergePriority: [0, 0],
 				allowCollide: [false, false],
-				topPoint: boundary.above.lowKey.id,
-				middleStrokes: [[boundary.stem.lowKey.id, boundary.stem.highKey.id]],
-				bottomPoint: -1
+				topPoint: ref(boundary.above.lowKey),
+				middleStrokes: [[ref(boundary.stem.lowKey), ref(boundary.stem.highKey)]],
+				bottomPoint: null
 			})
 		);
 	}
@@ -125,8 +131,8 @@ export class GlyphHintGenBackEnd {
 
 		const botSame = pile.bot === pile.middle[0];
 		const topSame = pile.top === pile.middle[pile.middle.length - 1];
-		const zBot = !pile.bot ? -1 : botSame ? pile.bot.lowKey.id : pile.bot.highKey.id;
-		const zTop = !pile.top ? -1 : topSame ? pile.top.highKey.id : pile.top.lowKey.id;
+		const zBot = !pile.bot ? null : botSame ? ref(pile.bot.lowKey) : ref(pile.bot.highKey);
+		const zTop = !pile.top ? null : topSame ? ref(pile.top.highKey) : ref(pile.top.lowKey);
 		let inkMD: number[] = Array(pile.middle.length).fill(1);
 		let gapMD: number[] = pile.minDist.map(t => (t ? 2 : 1));
 
@@ -152,7 +158,7 @@ export class GlyphHintGenBackEnd {
 				allowCollide,
 				bottomPoint: zBot,
 				topPoint: zTop,
-				middleStrokes: pile.middle.map(s => [s.lowKey.id, s.highKey.id])
+				middleStrokes: pile.middle.map(s => [ref(s.lowKey), ref(s.highKey)])
 			})
 		);
 	}
@@ -166,9 +172,9 @@ export class GlyphHintGenBackEnd {
 					inkMinDist: [1],
 					mergePriority: [0, 1],
 					allowCollide: [false, true],
-					bottomPoint: dependent.belowFrom ? dependent.belowFrom.highKey.id : -1,
-					middleStrokes: [[dependent.to.lowKey.id, dependent.to.highKey.id]],
-					topPoint: dependent.from.highKey.id
+					bottomPoint: dependent.belowFrom ? ref(dependent.belowFrom.highKey) : null,
+					middleStrokes: [[ref(dependent.to.lowKey), ref(dependent.to.highKey)]],
+					topPoint: ref(dependent.from.highKey)
 				})
 			);
 		} else if (dependent.type === HintAnalysis.DependentHintType.DiagLowToHigh) {
@@ -179,17 +185,17 @@ export class GlyphHintGenBackEnd {
 					inkMinDist: [1],
 					mergePriority: [-1, 0],
 					allowCollide: [true, false],
-					bottomPoint: dependent.from.lowKey.id,
-					middleStrokes: [[dependent.to.lowKey.id, dependent.to.highKey.id]],
-					topPoint: dependent.aboveFrom ? dependent.aboveFrom.lowKey.id : -1
+					bottomPoint: ref(dependent.from.lowKey),
+					middleStrokes: [[ref(dependent.to.lowKey), ref(dependent.to.highKey)]],
+					topPoint: dependent.aboveFrom ? ref(dependent.aboveFrom.lowKey) : null
 				})
 			);
 		} else {
 			this.subHints.push(
-				new LinkChain.Hint([dependent.from.lowKey.id, dependent.to.lowKey.id])
+				new LinkChain.Hint([ref(dependent.from.lowKey), ref(dependent.to.lowKey)])
 			);
 			this.subHints.push(
-				new LinkChain.Hint([dependent.from.highKey.id, dependent.to.highKey.id])
+				new LinkChain.Hint([ref(dependent.from.highKey), ref(dependent.to.highKey)])
 			);
 		}
 	}
@@ -197,12 +203,12 @@ export class GlyphHintGenBackEnd {
 	private addStemEdgeAlign(stem: Stem) {
 		if (stem.highAlign.length) {
 			this.subHints.push(
-				new LinkChain.Hint([stem.highKey.id, ...stem.highAlign.map(z => z.id)])
+				new LinkChain.Hint([ref(stem.highKey), ...stem.highAlign.map(z => ref(z))])
 			);
 		}
 		if (stem.lowAlign.length) {
 			this.subHints.push(
-				new LinkChain.Hint([stem.lowKey.id, ...stem.lowAlign.map(z => z.id)])
+				new LinkChain.Hint([ref(stem.lowKey), ...stem.lowAlign.map(z => ref(z))])
 			);
 		}
 	}
@@ -216,8 +222,8 @@ export class GlyphHintGenBackEnd {
 				new EmBoxStroke.Hint(this.params.emboxSystemName, {
 					atTop: false,
 					spur: false,
-					zsBot: bot[0].lowKey.id,
-					zsTop: bot[0].highKey.id,
+					zsBot: ref(bot[0].lowKey),
+					zsTop: ref(bot[0].highKey),
 					leavePixelsAbove: 0,
 					leavePixelsBelow: 0
 				})
@@ -231,9 +237,9 @@ export class GlyphHintGenBackEnd {
 						bottomBalanceForbidden: true,
 						mergePriority: [-1, 0],
 						allowCollide: [true, false],
-						bottomPoint: bot[0].lowKey.id,
-						middleStrokes: [[bot[k].lowKey.id, bot[k].highKey.id]],
-						topPoint: -1
+						bottomPoint: ref(bot[0].lowKey),
+						middleStrokes: [[ref(bot[k].lowKey), ref(bot[k].highKey)]],
+						topPoint: null
 					})
 				);
 			}
@@ -243,8 +249,8 @@ export class GlyphHintGenBackEnd {
 				new EmBoxStroke.Hint(this.params.emboxSystemName, {
 					atTop: true,
 					spur: false,
-					zsBot: top[0].lowKey.id,
-					zsTop: top[0].highKey.id,
+					zsBot: ref(top[0].lowKey),
+					zsTop: ref(top[0].highKey),
 					leavePixelsAbove: 0,
 					leavePixelsBelow: 0
 				})
@@ -258,9 +264,9 @@ export class GlyphHintGenBackEnd {
 						topBalanceForbidden: true,
 						mergePriority: [0, 1],
 						allowCollide: [false, true],
-						bottomPoint: -1,
-						middleStrokes: [[top[k].lowKey.id, top[k].highKey.id]],
-						topPoint: top[0].highKey.id
+						bottomPoint: null,
+						middleStrokes: [[ref(top[k].lowKey), ref(top[k].highKey)]],
+						topPoint: ref(top[0].highKey)
 					})
 				);
 			}

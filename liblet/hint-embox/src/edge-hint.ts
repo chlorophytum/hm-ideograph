@@ -1,4 +1,5 @@
 import {
+	Geometry,
 	IFinalHintProgramSink,
 	IHint,
 	IHintCompiler,
@@ -17,7 +18,7 @@ export namespace EmBoxEdge {
 		constructor(
 			private readonly boxName: string,
 			private readonly top: boolean,
-			private readonly zEdge: number
+			private readonly zEdge: Geometry.PointReference
 		) {}
 		public toJSON() {
 			return {
@@ -52,24 +53,25 @@ export namespace EmBoxEdge {
 			private readonly sink: HlttProgramSink,
 			private readonly boxName: string,
 			private readonly top: boolean,
-			private readonly zEdge: number
+			private readonly zEdge: Geometry.PointReference
 		) {}
 		public doCompile() {
 			const { boxName, top, zEdge } = this;
+			const zidEdge = this.sink.resolveGlyphPoint(zEdge);
 			this.sink.addSegment(function*($) {
 				if (top) {
 					yield $.call(
 						THintTopEdge,
 						$.symbol(Twilights.SpurTop(boxName)),
 						$.symbol(Twilights.SpurTopOrig(boxName)),
-						zEdge
+						zidEdge
 					);
 				} else {
 					yield $.call(
 						THintBottomEdge,
 						$.symbol(Twilights.SpurBottom(boxName)),
 						$.symbol(Twilights.SpurBottomOrig(boxName)),
-						zEdge
+						zidEdge
 					);
 				}
 			});

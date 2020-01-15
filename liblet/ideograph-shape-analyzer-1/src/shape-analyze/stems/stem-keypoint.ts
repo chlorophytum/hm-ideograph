@@ -21,7 +21,7 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 					continue;
 				}
 				stem.high[j][k].linkedKey = highKey;
-				if (!(stem.high[j][k].id >= 0)) {
+				if (!stem.high[j][k].references) {
 					continue;
 				}
 				if (k === 0) {
@@ -40,7 +40,7 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 					continue;
 				}
 				stem.low[j][k].linkedKey = lowKey;
-				if (!(stem.low[j][k].id >= 0)) {
+				if (!stem.low[j][k].references) {
 					continue;
 				}
 				if (k === stem.low[j].length - 1) {

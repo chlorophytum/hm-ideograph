@@ -32,7 +32,7 @@ export function findHighLowKeys(s: Stem) {
 		for (let k = 0; k < s.high[j].length; k++) {
 			if (
 				!highKey ||
-				(s.high[j][k].id >= 0 &&
+				(s.high[j][k].references &&
 					keyPointPriority(s.high[j][k], highKey, s.atLeft, s.atRight))
 			) {
 				highKey = s.high[j][k];
@@ -43,7 +43,8 @@ export function findHighLowKeys(s: Stem) {
 		for (let k = 0; k < s.low[j].length; k++) {
 			if (
 				!lowKey ||
-				(s.low[j][k].id >= 0 && keyPointPriority(s.low[j][k], lowKey, s.atLeft, s.atRight))
+				(s.low[j][k].references &&
+					keyPointPriority(s.low[j][k], lowKey, s.atLeft, s.atRight))
 			) {
 				lowKey = s.low[j][k];
 			}

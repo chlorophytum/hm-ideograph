@@ -1,4 +1,5 @@
 import {
+	Geometry,
 	IFinalHintProgramSink,
 	IHint,
 	IHintCompiler,
@@ -19,8 +20,8 @@ export namespace EmBoxStroke {
 	export interface Props {
 		readonly atTop?: boolean;
 		readonly spur?: boolean;
-		readonly zsBot: number;
-		readonly zsTop: number;
+		readonly zsBot: Geometry.PointReference;
+		readonly zsTop: Geometry.PointReference;
 		readonly leavePixelsBelow: number;
 		readonly leavePixelsAbove: number;
 	}
@@ -65,6 +66,8 @@ export namespace EmBoxStroke {
 		) {}
 		public doCompile() {
 			const { boxName, props } = this;
+			const zsBot = this.sink.resolveGlyphPoint(this.props.zsBot);
+			const zsTop = this.sink.resolveGlyphPoint(this.props.zsTop);
 			this.sink.addSegment(function*($) {
 				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
 				const spurTop = $.symbol(Twilights.SpurTop(boxName));
@@ -85,8 +88,8 @@ export namespace EmBoxStroke {
 						spurTop,
 						spurBottomOrig,
 						spurTopOrig,
-						props.zsBot,
-						props.zsTop
+						zsBot,
+						zsTop
 					);
 				} else if (props.atTop) {
 					yield $.call(
@@ -95,8 +98,8 @@ export namespace EmBoxStroke {
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						props.zsBot,
-						props.zsTop
+						zsBot,
+						zsTop
 					);
 				} else {
 					yield $.call(
@@ -105,8 +108,8 @@ export namespace EmBoxStroke {
 						strokeTop,
 						strokeBottomOrig,
 						strokeTopOrig,
-						props.zsBot,
-						props.zsTop
+						zsBot,
+						zsTop
 					);
 				}
 			});

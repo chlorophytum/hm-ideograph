@@ -93,15 +93,15 @@ export function splitDiagonalStem(
 		const ipLow: PostHint[] = [];
 		for (let sg of s.high) {
 			for (let z of [sg[0], sg[sg.length - 1]]) {
-				if (!(z.id >= 0)) continue;
-				if (z.id === hl.id || z.id === hr.id) continue;
+				if (!z.references) continue;
+				if (z === hl || z === hr) continue;
 				ipHigh.push([hl, hr, z]);
 			}
 		}
 		for (let sg of s.low) {
 			for (let z of [sg[0], sg[sg.length - 1]]) {
-				if (!(z.id >= 0)) continue;
-				if (z.id === ll.id || z.id === lr.id) continue;
+				if (!z.references) continue;
+				if (z === ll || z === lr) continue;
 				ipLow.push([ll, lr, z]);
 			}
 		}

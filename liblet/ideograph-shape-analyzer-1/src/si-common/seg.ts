@@ -57,8 +57,8 @@ export function expandZ(
 	dx: number,
 	dy: number,
 	maxTicks: number
-) {
-	let z1 = { x: z.x + dx, y: z.y + dy, on: true, id: -1 },
+): Geometry.GlyphPoint {
+	let z1 = { x: z.x + dx, y: z.y + dy, on: true, references: [] },
 		steps = 0;
 	while (radical.includesEdge(z1, 0, 2) && steps < maxTicks) {
 		z1.x += dx;
@@ -75,8 +75,8 @@ export function expandZ0(
 	dx: number,
 	dy: number,
 	maxTicks: number
-) {
-	let z1 = { x: z.x + dx, y: z.y + dy, on: true, id: -1 },
+): Geometry.GlyphPoint {
+	let z1 = { x: z.x + dx, y: z.y + dy, on: true, references: [] },
 		steps = 0;
 	while (radical.includes(z1) && steps < maxTicks) {
 		z1.x += dx;
