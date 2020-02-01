@@ -15,12 +15,15 @@ export default function analyzeSymmetry(
 		for (let k = 0; k < j; k++) {
 			const yTopDiff = Math.abs(stems[j].y - stems[k].y);
 			const yBotDiff = Math.abs(stems[j].y - stems[j].width - stems[k].y + stems[k].width);
+			const xMinDiff = Math.abs(stems[j].xMinEx - stems[k].xMinEx);
+			const xMaxDiff = Math.abs(stems[j].xMaxEx - stems[k].xMaxEx);
 			const lengthDiff = Math.abs(
 				stems[j].xMaxExP - stems[j].xMinExP - (stems[k].xMaxExP - stems[k].xMinExP)
 			);
 
 			const topologicalSimilar =
-				!directOverlaps[j][k] && !stems[j].diagHigh && !stems[k].diagHigh;
+				!directOverlaps[j][k] || (xMinDiff < limitX && xMaxDiff < limitX);
+			const notDiagonal = !stems[j].diagHigh && !stems[k].diagHigh;
 			const positionalSimilar =
 				yTopDiff < limitY &&
 				yBotDiff < limitY &&
@@ -33,7 +36,11 @@ export default function analyzeSymmetry(
 				(atGlyphTop(stems[j], strategy) === atGlyphTop(stems[k], strategy) ||
 					atGlyphBottom(stems[j], strategy) === atGlyphBottom(stems[k], strategy));
 
-			sym[j][k] = topologicalSimilar && positionalSimilar && spatialRelationshipSimilar;
+			sym[j][k] =
+				topologicalSimilar &&
+				notDiagonal &&
+				positionalSimilar &&
+				spatialRelationshipSimilar;
 		}
 	}
 	return sym;
