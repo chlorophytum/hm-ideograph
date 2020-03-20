@@ -11,6 +11,7 @@ import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
 
 import { MergeCalculator } from "./calc-annex";
+import { DisjointSet } from "./disjoint-set";
 import { HintAnalysis } from "./type";
 
 interface LpRec {
@@ -19,20 +20,24 @@ interface LpRec {
 }
 function LP(
 	g: boolean[][],
+	ds: DisjointSet,
 	w1: number[][],
 	w2: number[][],
 	j: number,
 	cache: (LpRec | null)[]
 ): LpRec {
 	if (cache[j]) return cache[j]!;
-	let c: LpRec = {
-		weight: 0,
-		next: -1
-	};
+	let c: LpRec = { weight: 0, next: -1 };
 	for (let k = j; k-- > 0; ) {
 		if (!g[j][k]) continue;
-		const ck = LP(g, w1, w2, k, cache);
-		const newWeight = ck.weight + w1[j][k];
+
+		let deltaWeight = 0;
+		const linkedStems = [...ds.sameSet(k)];
+		for (const s of linkedStems) deltaWeight += w1[j][s];
+		deltaWeight *= linkedStems.length;
+
+		const ck = LP(g, ds, w1, w2, k, cache);
+		const newWeight = ck.weight + deltaWeight;
 		if (newWeight > c.weight) {
 			c.weight = newWeight;
 			c.next = k;
@@ -73,10 +78,12 @@ interface StemPileSpatial {
 
 class HintAnalyzer {
 	private stemMask: number[];
+	private dependentSet: DisjointSet;
 	public lastPathWeight = 0;
 	public loops = 0;
 	constructor(private sa: ShapeAnalysisResult, private readonly strategy: HintingStrategy) {
 		this.stemMask = [];
+		this.dependentSet = new DisjointSet(sa.stems.length);
 		for (let j = 0; j < sa.stems.length; j++) {
 			this.stemMask[j] = MaskState.Available;
 		}
@@ -110,8 +117,9 @@ class HintAnalyzer {
 
 		const sidPath = this.getKeyPath();
 		if (!sidPath.length) return;
-
 		const dependents = this.getDependents(sidPath);
+
+		this.removeSidPathLinks(dependents, sidPath);
 
 		const { bot, top, sidPile } = this.getBotTopSid(sidPath);
 		if (!this.stemIsValid(bot) || !this.stemIsValid(top) || !sidPile.length) return;
@@ -162,9 +170,21 @@ class HintAnalyzer {
 				to: this.sa.stems[dependent.toStem]
 			});
 		}
-
 		hr.fetchResults.push(fr);
 		for (const j of sidPath) this.stemMask[j] = MaskState.Hinted;
+	}
+
+	private removeSidPathLinks(dependents: DependentHint[], sidPath: number[]) {
+		for (const dependent of dependents) {
+			this.dependentSet.union(dependent.toStem, dependent.fromStem);
+		}
+		for (let m = 1; m < sidPath.length; m++) {
+			for (const p of this.dependentSet.sameSet(sidPath[m - 1])) {
+				for (const q of this.dependentSet.sameSet(sidPath[m])) {
+					this.sa.directOverlaps[p][q] = this.sa.directOverlaps[q][p] = false;
+				}
+			}
+		}
 	}
 
 	private getBotTopSid(sidPath: number[]) {
@@ -206,31 +226,50 @@ class HintAnalyzer {
 	}
 
 	private getKeyPath() {
-		this.lastPathWeight = 0;
-		let pathStart = -1;
+		const lpCache = this.computeLpCache();
+		const path = this.fetchKeyPath(lpCache);
+		this.amendKeyPath(path);
+		return _.uniq(path);
+	}
+
+	private computeLpCache() {
 		let lpCache: (LpRec | null)[] = [];
 		for (let j = 0; j < this.sa.stems.length; j++) {
 			LP(
 				this.sa.directOverlaps,
+				this.dependentSet,
 				this.sa.stemOverlapLengths,
 				this.sa.collisionMatrices.flips,
 				j,
 				lpCache
 			);
 		}
+		return lpCache;
+	}
+
+	private fetchKeyPath(lpCache: (LpRec | null)[]) {
+		let pathStart = -1;
+		this.lastPathWeight = 0;
 		for (let j = 0; j < this.sa.stems.length; j++) {
+			if (this.stemMask[j]) continue;
 			if (lpCache[j]!.weight > this.lastPathWeight) {
 				this.lastPathWeight = lpCache[j]!.weight;
 				pathStart = j;
 			}
 		}
+
 		let path: number[] = [];
 		while (pathStart >= 0) {
 			path.push(pathStart);
 			const next = lpCache[pathStart]!.next;
-			if (pathStart >= 0 && next >= 0) this.sa.directOverlaps[pathStart][next] = false;
-			pathStart = next;
+			if (!this.stemMask[next]) pathStart = next;
+			else break;
 		}
+
+		return path;
+	}
+
+	private amendKeyPath(path: number[]) {
 		for (let m = 0; m < path.length; m++) {
 			const sm = this.sa.stems[path[m]];
 			if (!sm || !sm.rid) continue;
@@ -245,7 +284,6 @@ class HintAnalyzer {
 				if (opposite >= 0 && !this.stemMask[opposite]) path[m] = opposite;
 			}
 		}
-		return _.uniq(path);
 	}
 
 	private getMiddleStems(sidPile: number[], sp: StemPileSpatial, bot: number, top: number) {
