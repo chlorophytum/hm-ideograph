@@ -251,7 +251,6 @@ class HintAnalyzer {
 		let pathStart = -1;
 		this.lastPathWeight = 0;
 		for (let j = 0; j < this.sa.stems.length; j++) {
-			if (this.stemMask[j]) continue;
 			if (lpCache[j]!.weight > this.lastPathWeight) {
 				this.lastPathWeight = lpCache[j]!.weight;
 				pathStart = j;
@@ -262,8 +261,8 @@ class HintAnalyzer {
 		while (pathStart >= 0) {
 			path.push(pathStart);
 			const next = lpCache[pathStart]!.next;
-			if (!this.stemMask[next]) pathStart = next;
-			else break;
+			pathStart = next;
+			if (this.stemMask[next]) break;
 		}
 
 		return path;
