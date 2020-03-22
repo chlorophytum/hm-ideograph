@@ -260,9 +260,9 @@ class HintAnalyzer {
 		let path: number[] = [];
 		while (pathStart >= 0) {
 			path.push(pathStart);
+			if (this.stemMask[pathStart]) break;
 			const next = lpCache[pathStart]!.next;
 			pathStart = next;
-			if (this.stemMask[next]) break;
 		}
 
 		return path;
