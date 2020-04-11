@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hm-ideograph",
-	"version": "0.8.4",
+	"version": "0.8.5",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -16,8 +16,8 @@
 		"@chlorophytum/hint-common": "^0.6.0",
 		"@chlorophytum/hint-embox": "^0.8.0",
 		"@chlorophytum/hint-maz": "^0.8.0",
-		"@chlorophytum/ideograph-hint-generator-1": "^0.8.4",
-		"@chlorophytum/ideograph-shape-analyzer-1": "^0.8.4",
+		"@chlorophytum/ideograph-hint-generator-1": "^0.8.5",
+		"@chlorophytum/ideograph-shape-analyzer-1": "^0.8.5",
 		"@chlorophytum/ideograph-shape-analyzer-shared": "^0.8.0",
 		"tslib": "^1.9.3"
 	},
