@@ -59,16 +59,6 @@ interface DependentHint {
 	toStem: number;
 }
 
-interface MergeDecideGap {
-	index: number;
-	sidAbove: number;
-	sidBelow: number;
-	multiplier: number;
-	repeatGapMultiplier: number;
-	order: number;
-	merged: boolean;
-}
-
 interface StemPileSpatial {
 	botAtGlyphBottom: boolean;
 	topAtGlyphTop: boolean;
@@ -106,6 +96,11 @@ class HintAnalyzer {
 	}
 
 	public fetch(hr: HintAnalysis.Result) {
+		this.loops++;
+		this.fetchImpl(hr, this.getKeyPath());
+	}
+
+	private fetchImpl(hr: HintAnalysis.Result, sidPath: number[]) {
 		const fr: HintAnalysis.FetchResults = {
 			boundary: [],
 			pile: null,
@@ -113,9 +108,6 @@ class HintAnalyzer {
 			semiTop: null,
 			dependent: []
 		};
-		this.loops++;
-
-		const sidPath = this.getKeyPath();
 		if (!sidPath.length) return;
 		const dependents = this.getDependents(sidPath);
 
@@ -264,6 +256,13 @@ class HintAnalyzer {
 			const next = lpCache[pathStart]!.next;
 			pathStart = next;
 		}
+
+		// console.log(
+		// 	path.map(sid => [
+		// 		this.sa.stems[sid].highKey.references![0].id,
+		// 		this.sa.stems[sid].lowKey.references![0].id
+		// 	])
+		// );
 
 		return path;
 	}
@@ -466,20 +465,44 @@ class HintAnalyzer {
 		return a;
 	}
 
+	private processFloatingStem(hr: HintAnalysis.Result, sid: number) {
+		let sidBelow = sid - 1,
+			foundStemBelow = false;
+		let sidAbove = sid + 1,
+			foundStemAbove = false;
+		while (sidBelow >= 0) {
+			if (this.sa.directOverlaps[sid][sidBelow] && this.stemMask[sidBelow]) {
+				foundStemBelow = true;
+				break;
+			}
+			sidBelow--;
+		}
+		while (sidAbove < this.sa.stems.length) {
+			if (this.sa.directOverlaps[sidAbove][sid] && this.stemMask[sidAbove]) {
+				foundStemAbove = true;
+				break;
+			}
+			sidAbove++;
+		}
+		if (foundStemBelow && foundStemAbove) this.fetchImpl(hr, [sidBelow, sid, sidAbove]);
+	}
+
 	public post(hr: HintAnalysis.Result) {
 		for (let j = 0; j < this.sa.stems.length; j++) {
-			if (!this.stemMask[j]) {
-				const stem = this.sa.stems[j];
-
-				hr.floatingStems.push({
-					stem: stem,
-					locTop: !stem.hasGlyphStemAbove,
-					atBottom: atGlyphBottom(stem, this.strategy),
-					atTop: atGlyphTop(stem, this.strategy),
-					flipsBelow: stem.turnsBelow,
-					flipsAbove: stem.turnsAbove
-				});
-			}
+			if (this.stemMask[j]) continue;
+			this.processFloatingStem(hr, j);
+		}
+		for (let j = 0; j < this.sa.stems.length; j++) {
+			if (this.stemMask[j]) continue;
+			const stem = this.sa.stems[j];
+			hr.floatingStems.push({
+				stem: stem,
+				locTop: !stem.hasGlyphStemAbove,
+				atBottom: atGlyphBottom(stem, this.strategy),
+				atTop: atGlyphTop(stem, this.strategy),
+				flipsBelow: stem.turnsBelow,
+				flipsAbove: stem.turnsAbove
+			});
 		}
 		hr.interpolationsAndLinks = this.collectIpSaCalls();
 	}
