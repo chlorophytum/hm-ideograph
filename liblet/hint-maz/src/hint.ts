@@ -9,11 +9,12 @@ import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import * as EmBox from "@chlorophytum/hint-embox";
 import * as _ from "lodash";
 
+import { PREFIX } from "./constants";
 import { THintMultipleStrokesExplicit } from "./hltt-programs";
 import { getRecPath, MultipleAlignZoneProps } from "./props";
 
 export namespace MultipleAlignZone {
-	const TAG = "Chlorophytum::MultipleAlignZone::MultipleAlignZone";
+	const TAG = `${PREFIX}::MultipleAlignZone`;
 	export class Hint implements IHint {
 		private readonly N: number;
 		constructor(private readonly props: MultipleAlignZoneProps) {

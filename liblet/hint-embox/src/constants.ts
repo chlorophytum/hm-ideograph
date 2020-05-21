@@ -1,1 +1,1 @@
-export const PREFIX = "Chlorophytum::EmBox::Shared::TwilightPoint::";
+export const PREFIX = "@chlorophytum/hint-embox";

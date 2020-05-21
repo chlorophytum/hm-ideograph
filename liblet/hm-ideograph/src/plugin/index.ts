@@ -3,26 +3,24 @@ import {
 	IHintingModel,
 	IHintingModelExecEnv,
 	IHintingModelPlugin,
-	IHintingModelPreEnv
+	IHintingModelPreEnv,
+	IHintingPass
 } from "@chlorophytum/arch";
 import { IdeographHintGenerator1 } from "@chlorophytum/ideograph-hint-generator-1";
 import { IdeographShapeAnalyzer1 } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { IdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { IdeographHintingTask } from "../model";
+import { HintModelPrefix, ParallelTaskType } from "../model/constants";
 import { DummyTask } from "../model/dummy";
-import {
-	GlyphHintParallelArgRep,
-	ParallelGlyphHintTask,
-	ParallelTaskType
-} from "../model/glyph-hint";
+import { GlyphHintParallelArgRep, ParallelGlyphHintTask } from "../model/glyph-hint";
 
 export class IdeographHintingModel1<GID> implements IHintingModel {
 	constructor(
 		private readonly font: IFontSource<GID>,
 		private readonly ptParams: Partial<IdeographHintingParams>
 	) {}
-	public readonly type = "Chlorophytum::IdeographHintingModel1";
+	public readonly type = HintModelPrefix;
 	public readonly allowParallel = false;
 
 	public getHintingTask(ee: IHintingModelExecEnv) {
@@ -39,11 +37,11 @@ export class IdeographHintingModel1<GID> implements IHintingModel {
 	}
 }
 
-class CIdeographHintingModelFactory1 implements IHintingModelPlugin {
-	public readonly type = "Chlorophytum::IdeographHintingModel1";
-	public readonly requiredPreHintRounds = 0; // No pre-analysis is needed
-	public adopt<GID>(font: IFontSource<GID>, parameters: any) {
-		return new IdeographHintingModel1<GID>(font, parameters);
+export class CIdeographHintingPass1 implements IHintingPass {
+	constructor(private readonly parameters: Partial<IdeographHintingParams>) {}
+	public readonly requirePreHintRounds = 0; // No pre-analysis is needed
+	public adopt<GID>(font: IFontSource<GID>) {
+		return new IdeographHintingModel1<GID>(font, this.parameters);
 	}
 	public readonly factoriesOfUsedHints = IdeographHintGenerator1.factoriesOfUsedHints;
 	public createParallelTask(type: string, _rep: any) {
@@ -61,6 +59,12 @@ class CIdeographHintingModelFactory1 implements IHintingModelPlugin {
 	}
 }
 
-const IdeographHintingModelFactory1: IHintingModelPlugin = new CIdeographHintingModelFactory1();
+export class CIdeographHintingPlugin1 implements IHintingModelPlugin {
+	public async load(parameters: any) {
+		return new CIdeographHintingPass1(parameters);
+	}
+}
+
+const IdeographHintingModelFactory1: IHintingModelPlugin = new CIdeographHintingPlugin1();
 
 export default IdeographHintingModelFactory1;

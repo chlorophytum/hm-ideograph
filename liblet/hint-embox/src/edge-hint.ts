@@ -8,12 +8,13 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
+import { PREFIX } from "./constants";
 import { THintBottomEdge, THintTopEdge } from "./programs/edge";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 
 export namespace EmBoxEdge {
-	const TAG = "Chlorophytum::EmBox::Edge";
+	const TAG = `${PREFIX}::Hints::Edge`;
 	export class Hint implements IHint {
 		constructor(
 			private readonly boxName: string,

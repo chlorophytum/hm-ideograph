@@ -1,6 +1,6 @@
 import { TtLibrary } from "@chlorophytum/hltt";
 
-const Lib = new TtLibrary(`Chlorophytum::HlttProgramsStrokeAdjustLibrary`);
+const Lib = new TtLibrary(`@chlorophytum/hint-programs-stroke-adjust`);
 
 export const AdjustStrokeDistT = Lib.Template(function*($, rate: number) {
 	const [d] = $.args(1);

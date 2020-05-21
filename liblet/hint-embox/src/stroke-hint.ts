@@ -8,13 +8,14 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
+import { PREFIX } from "./constants";
 import { THintBottomStroke, THintTopStroke } from "./programs/boundary";
 import { THintStrokeFreeAuto } from "./programs/free";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 
 export namespace EmBoxStroke {
-	const TAG = "Chlorophytum::EmBox::Stroke";
+	const TAG = `${PREFIX}::Hints::Stroke`;
 	const DistinguishDist = 3 / 5;
 
 	export interface Props {

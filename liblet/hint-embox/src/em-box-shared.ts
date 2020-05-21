@@ -7,6 +7,7 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
+import { PREFIX } from "./constants";
 import { TInitEmBoxTwilightPoints } from "./programs/init";
 import { ControlValues, Twilights } from "./programs/twilight";
 
@@ -18,7 +19,7 @@ export namespace EmBoxShared {
 		spurBottom: number;
 		spurTop: number;
 	}
-	const TAG = "Chlorophytum::EmBox::Shared";
+	const TAG = `${PREFIX}::Hints::Shared`;
 	export class Hint implements IHint {
 		constructor(private readonly props: EmBoxProps) {}
 		public toJSON() {

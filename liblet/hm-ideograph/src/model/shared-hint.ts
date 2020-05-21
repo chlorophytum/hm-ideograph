@@ -1,7 +1,9 @@
 import { IHintingModelExecEnv, ITask } from "@chlorophytum/arch";
-import { IHintGen } from "@chlorophytum/ideograph-shape-analyzer-shared";
+import { IdeographHintingParams, IHintGen } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-export class SharedHintTask<S, G, A> implements ITask<void> {
+import { HintModelPrefix } from "./constants";
+
+export class SharedHintTask<S extends IdeographHintingParams, G, A> implements ITask<void> {
 	constructor(
 		private readonly codeGen: IHintGen<S, G, A>,
 		private readonly params: S,
@@ -9,8 +11,8 @@ export class SharedHintTask<S, G, A> implements ITask<void> {
 	) {}
 
 	public async execute() {
-		await this.ee.modelLocalHintStore.setSharedHints(
-			this.ee.passUniqueID,
+		await this.ee.hintStore.setSharedHints(
+			`${HintModelPrefix}::SharedHint{${this.params.groupName || ""}}`,
 			this.codeGen.generateSharedHints(this.params)
 		);
 	}

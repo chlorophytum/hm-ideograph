@@ -1,4 +1,5 @@
 export interface IdeographHintingParams {
+	readonly groupName?: string;
 	readonly unicodeRanges: ReadonlyArray<[number, number]>;
 	readonly trackScripts: ReadonlyArray<string>;
 	readonly trackFeatures: ReadonlyArray<string>;

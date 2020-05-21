@@ -9,11 +9,13 @@ import {
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import { TypeRep } from "typable";
 
+import { PREFIX } from "./constants";
+
 export namespace UseEmBox {
 	export const ReadyPropT = (name: string) =>
-		new TypeRep<boolean>("Chlorophytum::EmBox::Init::Ready::" + name);
+		new TypeRep<boolean>(`${PREFIX}::Init::Ready::` + name);
 
-	const TAG = "Chlorophytum::EmBox::Init";
+	const TAG = `${PREFIX}::Hints::UseEmBox`;
 	export class Hint implements IHint {
 		constructor(private readonly name: string, private readonly inner: IHint) {}
 		public toJSON() {

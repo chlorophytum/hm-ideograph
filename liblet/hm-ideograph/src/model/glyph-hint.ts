@@ -17,6 +17,8 @@ import {
 	IShapeAnalyzer
 } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
+import { ParallelTaskType } from "./constants";
+
 export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implements ITask<void> {
 	constructor(
 		private readonly font: IFontSource<GID>,
@@ -40,7 +42,7 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 		const ck = await this.getGlyphCacheKey(this.gid);
 		const cached = !ck ? null : this.ee.cacheManager.getCache(ck);
 		if (cached) {
-			await this.ee.modelLocalHintStore.setGlyphHints(gn, cached);
+			await this.ee.hintStore.setGlyphHints(gn, cached);
 		} else {
 			const glyphRep = await getGlyphRep(this.font, this.gid);
 			if (!glyphRep) return;
@@ -62,7 +64,7 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 			}
 			if (!hints) return;
 			if (ck) this.ee.cacheManager.setCache(ck, hints);
-			await this.ee.modelLocalHintStore.setGlyphHints(gn, hints);
+			await this.ee.hintStore.setGlyphHints(gn, hints);
 		}
 	}
 
@@ -75,7 +77,6 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 	}
 }
 
-export const ParallelTaskType = "Chlorophytum::IdeographHintingModel1::ParallelTask";
 export type GlyphHintParallelArgRep<S> = {
 	readonly fmd: IFontSourceMetadata;
 	readonly params: S;

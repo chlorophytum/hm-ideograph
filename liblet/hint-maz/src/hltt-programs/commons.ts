@@ -1,8 +1,9 @@
 import { OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
-import { TtLibrary } from "@chlorophytum/hltt";
-import { Expression, ProgramDsl, Variable } from "@chlorophytum/hltt";
+import { Expression, ProgramDsl, TtLibrary, Variable } from "@chlorophytum/hltt";
 
-export const Lib = new TtLibrary(`Chlorophytum::MultipleAlignZone::HlttPrograms`);
+import { PREFIX } from "../constants";
+
+export const Lib = new TtLibrary(`${PREFIX}::TtLib::HlttPrograms`);
 
 export const ConsideredDark = 3 / 4;
 
