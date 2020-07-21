@@ -63,7 +63,8 @@ The options include:
   	"StrokeBottom": -0.06,
   	"StrokeTop": 0.82,
   	"SpurBottom": -0.095,
-  	"SpurTop": 0.855
+	"SpurTop": 0.855,
+	"SmallSizeExpansionRate": 1
   }
   ```
 

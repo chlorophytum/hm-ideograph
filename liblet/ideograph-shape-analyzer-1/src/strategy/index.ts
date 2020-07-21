@@ -9,6 +9,7 @@ export type EmBoxProps = {
 	StrokeTop: number;
 	SpurBottom: number;
 	SpurTop: number;
+	SmallSizeExpansionRate: number;
 };
 
 export const DefaultEmBoxProps: EmBoxProps = {
@@ -17,7 +18,8 @@ export const DefaultEmBoxProps: EmBoxProps = {
 	StrokeBottom: (380 - 440) / 1000,
 	StrokeTop: (380 + 440) / 1000,
 	SpurBottom: (380 - 475) / 1000,
-	SpurTop: (380 + 475) / 1000
+	SpurTop: (380 + 475) / 1000,
+	SmallSizeExpansionRate: 1
 };
 
 const DefaultStrategy = {

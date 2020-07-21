@@ -10,7 +10,8 @@ export function generateSharedHints(params: HintingStrategy) {
 				strokeBottom: params.UPM * params.EmBox.StrokeBottom,
 				strokeTop: params.UPM * params.EmBox.StrokeTop,
 				spurBottom: params.UPM * params.EmBox.SpurBottom,
-				spurTop: params.UPM * params.EmBox.SpurTop
+				spurTop: params.UPM * params.EmBox.SpurTop,
+				smallSizeExpansionRate: params.EmBox.SmallSizeExpansionRate || 0
 			})
 		)
 	]);

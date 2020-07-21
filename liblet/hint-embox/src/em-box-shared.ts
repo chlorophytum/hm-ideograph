@@ -18,6 +18,7 @@ export namespace EmBoxShared {
 		strokeTop: number;
 		spurBottom: number;
 		spurTop: number;
+		smallSizeExpansionRate: number;
 	}
 	const TAG = `${PREFIX}::Hints::Shared`;
 	export class Hint implements IHint {
@@ -82,7 +83,7 @@ export namespace EmBoxShared {
 				yield $.miap($.symbol(spurTopOrig), $.symbol(cvSpurTop).ptr);
 
 				yield $.call(
-					TInitEmBoxTwilightPoints,
+					TInitEmBoxTwilightPoints(props.smallSizeExpansionRate),
 					$.symbol(strokeBottom),
 					$.symbol(strokeTop),
 					$.symbol(spurBottom),
