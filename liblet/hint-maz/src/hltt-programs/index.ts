@@ -21,12 +21,10 @@ const AmendMinGapDist = Lib.Func(function*($) {
 	const j = $.local();
 	const gapDist = $.local();
 	const gapMinDistOld = $.local();
-	const gapDistCut = $.local();
 
 	yield $.set(j, 0);
 	yield $.set(gapDist, 0);
 	yield $.set(gapMinDistOld, 0);
-	yield $.set(gapDistCut, 0);
 
 	yield $.while($.lteq(j, N), function*() {
 		yield $.if(
@@ -58,23 +56,10 @@ const AmendMinGapDist = Lib.Func(function*($) {
 		);
 
 		yield $.set(gapMinDistOld, $.part(pGapMD, j));
-		yield $.if(
-			$.gt(gapDist, $.max($.coerce.toF26D6(1 / 2), gapMinDistOld)),
-			function*() {
-				yield $.set(
-					gapDistCut,
-					$.max($.coerce.toF26D6(1), $.div($.ceiling(gapMinDistOld), $.coerce.toF26D6(2)))
-				);
-			},
-			function*() {
-				yield $.set(gapDistCut, $.floor(gapMinDistOld));
-			}
-		);
-
 		yield $.set(
 			$.part(pGapMD, j),
 			$.max(
-				gapDistCut,
+				$.floor(gapMinDistOld),
 				$.mul(
 					$.min($.coerce.toF26D6(1), $.floor(gapMinDistOld)),
 					$.max(
