@@ -12,10 +12,10 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"@chlorophytum/arch": "^0.8.0",
-		"@chlorophytum/final-hint-format-hltt": "^0.8.0",
+		"@chlorophytum/arch": "^0.10.0",
+		"@chlorophytum/final-hint-format-hltt": "^0.10.0",
 		"@chlorophytum/hint-programs-stoke-adjust": "^0.9.1",
-		"@chlorophytum/hltt": "^0.8.0",
+		"@chlorophytum/hltt": "^0.10.0",
 		"tslib": "^1.9.3",
 		"typable": "^1.0.0"
 	},

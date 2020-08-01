@@ -12,7 +12,7 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"@chlorophytum/arch": "^0.8.0",
+		"@chlorophytum/arch": "^0.10.0",
 		"lodash": "^4.17.11",
 		"tslib": "^1.9.3"
 	},

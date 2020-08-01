@@ -13,43 +13,43 @@ function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
 function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
 	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
 }
-const AmendMinGapDist = Lib.Func(function*(e) {
-	const [N, zBot, zTop, vpZMids, vpGapMD] = e.args(5);
-	const pZMids = e.coerce.fromIndex.variable(vpZMids);
-	const pGapMD = e.coerce.fromIndex.variable(vpGapMD);
+const AmendMinGapDist = Lib.Func(function*($) {
+	const [N, zBot, zTop, vpZMids, vpGapMD] = $.args(5);
+	const pZMids = $.coerce.fromIndex.variable(vpZMids);
+	const pGapMD = $.coerce.fromIndex.variable(vpGapMD);
 
-	const j = e.local();
-	const gapDist = e.local();
-	const gapMinDistOld = e.local();
-	const gapDistCut = e.local();
+	const j = $.local();
+	const gapDist = $.local();
+	const gapMinDistOld = $.local();
+	const gapDistCut = $.local();
 
-	yield e.set(j, 0);
-	yield e.set(gapDist, 0);
-	yield e.set(gapMinDistOld, 0);
-	yield e.set(gapDistCut, 0);
+	yield $.set(j, 0);
+	yield $.set(gapDist, 0);
+	yield $.set(gapMinDistOld, 0);
+	yield $.set(gapDistCut, 0);
 
-	yield e.while(e.lteq(j, N), function*() {
-		yield e.if(
-			e.eq(j, 0),
+	yield $.while($.lteq(j, N), function*() {
+		yield $.if(
+			$.eq(j, 0),
 			function*() {
-				yield e.set(gapDist, e.call(OctDistOrig, zBot, midBot(e, pZMids, j)));
+				yield $.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j)));
 			},
 			function*() {
-				yield e.if(
-					e.eq(j, N),
+				yield $.if(
+					$.eq(j, N),
 					function*() {
-						yield e.set(
+						yield $.set(
 							gapDist,
-							e.call(OctDistOrig, midTop(e, pZMids, e.sub(j, 1)), zTop)
+							$.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)
 						);
 					},
 					function*() {
-						yield e.set(
+						yield $.set(
 							gapDist,
-							e.call(
+							$.call(
 								OctDistOrig,
-								midTop(e, pZMids, e.sub(j, 1)),
-								midBot(e, pZMids, j)
+								midTop($, pZMids, $.sub(j, 1)),
+								midBot($, pZMids, j)
 							)
 						);
 					}
@@ -57,29 +57,32 @@ const AmendMinGapDist = Lib.Func(function*(e) {
 			}
 		);
 
-		yield e.set(gapMinDistOld, e.part(pGapMD, j));
-		yield e.if(
-			e.gt(gapDist, e.max(e.coerce.toF26D6(1 / 2), gapMinDistOld)),
+		yield $.set(gapMinDistOld, $.part(pGapMD, j));
+		yield $.if(
+			$.gt(gapDist, $.max($.coerce.toF26D6(1 / 2), gapMinDistOld)),
 			function*() {
-				yield e.set(gapDistCut, e.max(e.coerce.toF26D6(1), e.ceiling(gapMinDistOld)));
+				yield $.set(
+					gapDistCut,
+					$.max($.coerce.toF26D6(1), $.div($.ceiling(gapMinDistOld), $.coerce.toF26D6(2)))
+				);
 			},
 			function*() {
-				yield e.set(gapDistCut, e.floor(gapMinDistOld));
+				yield $.set(gapDistCut, $.floor(gapMinDistOld));
 			}
 		);
 
-		yield e.set(
-			e.part(pGapMD, j),
-			e.max(
+		yield $.set(
+			$.part(pGapMD, j),
+			$.max(
 				gapDistCut,
-				e.mul(
-					e.min(e.coerce.toF26D6(1), e.floor(gapMinDistOld)),
-					e.max(
+				$.mul(
+					$.min($.coerce.toF26D6(1), $.floor(gapMinDistOld)),
+					$.max(
 						0,
-						e.round.white(
-							e.sub(
+						$.round.white(
+							$.sub(
 								gapDist,
-								e.add(e.coerce.toF26D6(1), e.mul(e.coerce.toF26D6(2), e.mppem()))
+								$.add($.coerce.toF26D6(1), $.mul($.coerce.toF26D6(2), $.mppem()))
 							)
 						)
 					)
@@ -87,7 +90,7 @@ const AmendMinGapDist = Lib.Func(function*(e) {
 			)
 		);
 
-		yield e.set(j, e.add(1, j));
+		yield $.set(j, $.add(1, j));
 	});
 });
 

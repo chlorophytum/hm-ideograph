@@ -2,14 +2,13 @@ import {
 	IFontSource,
 	IHintingModel,
 	IHintingModelExecEnv,
-	IHintingModelPlugin,
 	IHintingModelPreEnv,
-	IHintingPass
+	IHintingPass,
+	Plugins
 } from "@chlorophytum/arch";
 import { IdeographHintGenerator1 } from "@chlorophytum/ideograph-hint-generator-1";
 import { IdeographShapeAnalyzer1 } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { IdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
 import { IdeographHintingTask } from "../model";
 import { HintModelPrefix, ParallelTaskType } from "../model/constants";
 import { DummyTask } from "../model/dummy";
@@ -59,12 +58,12 @@ export class CIdeographHintingPass1 implements IHintingPass {
 	}
 }
 
-export class CIdeographHintingPlugin1 implements IHintingModelPlugin {
-	public async load(parameters: any) {
+export class CIdeographHintingPlugin1 implements Plugins.IHintingModelPlugin {
+	public async load(loader: Plugins.IAsyncModuleLoader, parameters: any) {
 		return new CIdeographHintingPass1(parameters);
 	}
 }
 
-const IdeographHintingModelFactory1: IHintingModelPlugin = new CIdeographHintingPlugin1();
+const IdeographHintingModelFactory1: Plugins.IHintingModelPlugin = new CIdeographHintingPlugin1();
 
 export default IdeographHintingModelFactory1;

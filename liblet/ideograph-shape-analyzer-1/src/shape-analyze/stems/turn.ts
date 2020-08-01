@@ -1,6 +1,5 @@
-import { mix } from "@chlorophytum/arch/lib/support";
+import { Support } from "@chlorophytum/arch";
 import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
 import { HintingStrategy } from "../../strategy";
 import Stem from "../../types/stem";
 
@@ -183,11 +182,11 @@ export function analyzeSquash(g: CGlyph, strategy: HintingStrategy, stems: Stem[
 			let a = 0;
 			for (let v = 0; v <= NV; v++) {
 				let s = 0;
-				const y = mix(yBot, yTop, v / NV);
-				const xLeft = mix(xj1, xk1, v / NV);
-				const xRight = mix(xj2, xk2, v / NV);
+				const y = Support.mix(yBot, yTop, v / NV);
+				const xLeft = Support.mix(xj1, xk1, v / NV);
+				const xRight = Support.mix(xj2, xk2, v / NV);
 				for (let u = 0; u <= NU; u++) {
-					const x = mix(xLeft, xRight, u / NU);
+					const x = Support.mix(xLeft, xRight, u / NU);
 					if (bitmap.accessRaw(x, y)) s += 1;
 				}
 				a += (s / NV) * Math.abs(xRight - xLeft);

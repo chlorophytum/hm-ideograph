@@ -455,8 +455,6 @@ export function analyzeEntireContourAboveBelow(glyph: CGlyph, stems: Stem[]) {
 }
 
 export function stemsAreSimilar(strategy: HintingStrategy, a: Stem, b: Stem) {
-	// console.log(a.xMinBot, a.xMaxBot, a.xMinTop, a.xMaxTop);
-	// console.log(b.xMinBot, b.xMaxBot, b.xMinTop, b.xMaxTop);
 	return (
 		((b.belongRadical === a.belongRadical &&
 			b.hasSameRadicalStemBelow &&

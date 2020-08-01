@@ -1,5 +1,4 @@
 import {
-	EmptyImpl,
 	Glyph,
 	IArbitratorProxy,
 	IFontSource,
@@ -11,12 +10,12 @@ import {
 	ITask,
 	Variation
 } from "@chlorophytum/arch";
+import { Empty } from "@chlorophytum/hint-common";
 import {
 	IdeographHintingParams,
 	IHintGen,
 	IShapeAnalyzer
 } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
 import { ParallelTaskType } from "./constants";
 
 export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implements ITask<void> {
@@ -132,7 +131,7 @@ export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
 	public async executeImpl() {
 		const shapeMap = new Map(this.glyphRep.shapes);
 		const geometry = shapeMap.get(null);
-		if (!geometry) return new EmptyImpl.Empty.Hint();
+		if (!geometry) return new Empty.Hint();
 		return this.hintGlyphGeometry(geometry, this.params);
 	}
 

@@ -1,5 +1,4 @@
-import { IHint } from "@chlorophytum/arch";
-import { mix } from "@chlorophytum/arch/lib/support";
+import { IHint, Support } from "@chlorophytum/arch";
 import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chlorophytum/hint-common";
 import { EmBoxEdge, EmBoxStroke, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
@@ -122,7 +121,8 @@ export class GlyphHintGenBackEnd {
 	private tbCollidable(top: null | Stem, s: Stem) {
 		if (!top || top === s) return false;
 		return (
-			s.xMin > mix(top.xMin, top.xMax, 1 / 10) && s.xMax < mix(top.xMin, top.xMax, 1 - 1 / 10)
+			s.xMin > Support.mix(top.xMin, top.xMax, 1 / 10) &&
+			s.xMax < Support.mix(top.xMin, top.xMax, 1 - 1 / 10)
 		);
 	}
 

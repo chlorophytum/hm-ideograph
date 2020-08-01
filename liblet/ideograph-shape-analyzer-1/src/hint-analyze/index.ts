@@ -257,13 +257,6 @@ class HintAnalyzer {
 			pathStart = next;
 		}
 
-		// console.log(
-		// 	path.map(sid => [
-		// 		this.sa.stems[sid].highKey.references![0].id,
-		// 		this.sa.stems[sid].lowKey.references![0].id
-		// 	])
-		// );
-
 		return path;
 	}
 

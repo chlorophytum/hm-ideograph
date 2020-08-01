@@ -1,3 +1,4 @@
+import { Support } from "@chlorophytum/arch";
 import { ShapeAnalysisResult } from "../shape-analyze/analysis";
 import { HintingStrategy } from "../strategy";
 
@@ -25,12 +26,20 @@ export class MergeCalculator {
 	) {
 		const sj = this.sa.stems[j];
 		const sk = this.sa.stems[k];
+
+		const fTooFar =
+			4 * (sj.lowKey.y - sk.highKey.y) >=
+			this.strategy.UPM * (this.strategy.EmBox.SpurTop - this.strategy.EmBox.SpurBottom);
+
+		const sjXMiddle = Support.mix(sj.xMin, sj.xMax, 0.5);
+		const skXMiddle = Support.mix(sk.xMin, sk.xMax, 0.5);
+		const fLowerAtSide = sk.xMax < sjXMiddle || sk.xMin > sjXMiddle;
+		const fUpperAtSide = sj.xMax < skXMiddle || sj.xMin > skXMiddle;
+		const fUpperShorter = sj.xMax - sj.xMin < sk.xMax - sk.xMin;
+		const fMergeDown = fUpperAtSide === fLowerAtSide ? fUpperShorter : fUpperAtSide;
 		const multiplier =
-			j === k || m[j][k] >= this.strategy.DEADLY_MERGE
-				? 0
-				: sj.xMin >= sk.xMin && sj.xMax <= sk.xMax
-				? -1
-				: 1;
+			j === k || fTooFar || m[j][k] >= this.strategy.DEADLY_MERGE ? 0 : fMergeDown ? -1 : 1;
+
 		gaps.push({
 			index,
 			sidAbove: j,
