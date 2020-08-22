@@ -18,7 +18,7 @@
 		"@chlorophytum/hint-programs-stoke-adjust": "^0.10.1",
 		"@chlorophytum/hltt": "^0.10.0",
 		"lodash": "^4.17.11",
-		"tslib": "^1.9.3"
+		"tslib": "^2.0.1"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.134",

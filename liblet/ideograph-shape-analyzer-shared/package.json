@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.10.0",
 		"lodash": "^4.17.11",
-		"tslib": "^1.9.3"
+		"tslib": "^2.0.1"
 	},
 	"devDependencies": {
 		"ava": "^1.4.1"
