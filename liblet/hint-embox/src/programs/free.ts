@@ -2,7 +2,7 @@ import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
 
 import { ProgramLib } from "./twilight";
 
-export const THintStrokeFreeAuto = ProgramLib.Func(function*($) {
+export const THintStrokeFreeAuto = ProgramLib.Func(function* ($) {
 	const [mdBot, mdTop, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(8);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();
@@ -28,23 +28,21 @@ export const THintStrokeFreeAuto = ProgramLib.Func(function*($) {
 	);
 	yield $.set(rTop, $.round.white(urTop));
 	yield $.set(rBot, $.round.white(urBot));
-	yield $.if(
-		$.gt($.abs($.sub(rTop, urTop)), $.abs($.sub(rBot, urBot))),
-		function*() {
+	yield $.if($.gt($.abs($.sub(rTop, urTop)), $.abs($.sub(rBot, urBot))))
+		.then(function* () {
 			yield $.scfs(zsBot, rBot);
 			yield $.scfs(zsTop, $.add(rBot, wCur));
-		},
-		function*() {
+		})
+		.else(function* () {
 			yield $.scfs(zsTop, rTop);
 			yield $.scfs(zsBot, $.sub(rTop, wCur));
-		}
-	);
+		});
 	// Leave space for distinguishing
-	yield $.if($.lt($.gc.cur(zsTop), $.add($.gc.cur(zBot), mdBot)), function*() {
+	yield $.if($.lt($.gc.cur(zsTop), $.add($.gc.cur(zBot), mdBot))).then(function* () {
 		yield $.scfs(zsBot, $.add($.gc.cur(zsBot), $.coerce.toF26D6(1)));
 		yield $.scfs(zsTop, $.add($.gc.cur(zsTop), $.coerce.toF26D6(1)));
 	});
-	yield $.if($.gt($.gc.cur(zsBot), $.sub($.gc.cur(zTop), mdTop)), function*() {
+	yield $.if($.gt($.gc.cur(zsBot), $.sub($.gc.cur(zTop), mdTop))).then(function* () {
 		yield $.scfs(zsBot, $.sub($.gc.cur(zsBot), $.coerce.toF26D6(1)));
 		yield $.scfs(zsTop, $.sub($.gc.cur(zsTop), $.coerce.toF26D6(1)));
 	});

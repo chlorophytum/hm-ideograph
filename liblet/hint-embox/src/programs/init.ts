@@ -1,6 +1,6 @@
 import { ProgramLib } from "./twilight";
 
-const BiRound = ProgramLib.Template(function*($, rate: number) {
+const BiRound = ProgramLib.Template(function* ($, rate: number) {
 	const [a, b, aOrig, bOrig] = $.args(4);
 
 	const widthExpander = $.local();
@@ -42,25 +42,23 @@ const BiRound = ProgramLib.Template(function*($, rate: number) {
 		)
 	);
 
-	yield $.if(
-		$.lt(roundTopTotalMove, roundBottomTotalMove),
-		function*() {
+	yield $.if($.lt(roundTopTotalMove, roundBottomTotalMove))
+		.then(function* () {
 			yield $.scfs(b, roundYTop);
 			yield $.scfs(a, $.sub(roundYTop, roundedDist));
-		},
-		function*() {
+		})
+		.else(function* () {
 			yield $.scfs(a, roundYBottom);
 			yield $.scfs(b, $.add(roundYBottom, roundedDist));
-		}
-	);
+		});
 });
 
-const ULink = ProgramLib.Func(function*($) {
+const ULink = ProgramLib.Func(function* ($) {
 	const [a, b, aOrig, bOrig] = $.args(4);
 	yield $.scfs(b, $.add($.gc.cur(a), $.sub($.gc.cur(bOrig), $.gc.cur(aOrig))));
 });
 
-export const TInitEmBoxTwilightPoints = ProgramLib.Template(function*($, rate: number) {
+export const TInitEmBoxTwilightPoints = ProgramLib.Template(function* ($, rate: number) {
 	const [
 		strokeBottom,
 		strokeTop,
@@ -69,7 +67,7 @@ export const TInitEmBoxTwilightPoints = ProgramLib.Template(function*($, rate: n
 		strokeBottomOrig,
 		strokeTopOrig,
 		spurBottomOrig,
-		spurTopOrig
+		spurTopOrig,
 	] = $.args(8);
 
 	yield $.mdap(strokeBottom);

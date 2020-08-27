@@ -13,7 +13,7 @@ function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
 function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
 	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
 }
-const AmendMinGapDist = Lib.Func(function*($) {
+const AmendMinGapDist = Lib.Func(function* ($) {
 	const [N, zBot, zTop, vpZMids, vpGapMD] = $.args(5);
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);
 	const pGapMD = $.coerce.fromIndex.variable(vpGapMD);
@@ -26,34 +26,23 @@ const AmendMinGapDist = Lib.Func(function*($) {
 	yield $.set(gapDist, 0);
 	yield $.set(gapMinDistOld, 0);
 
-	yield $.while($.lteq(j, N), function*() {
-		yield $.if(
-			$.eq(j, 0),
-			function*() {
-				yield $.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j)));
-			},
-			function*() {
-				yield $.if(
-					$.eq(j, N),
-					function*() {
-						yield $.set(
-							gapDist,
-							$.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)
-						);
-					},
-					function*() {
-						yield $.set(
+	yield $.while($.lteq(j, N), function* () {
+		yield $.if($.eq(j, 0))
+			.then($.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j))))
+			.else(
+				$.if($.eq(j, N))
+					.then($.set(gapDist, $.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)))
+					.else(
+						$.set(
 							gapDist,
 							$.call(
 								OctDistOrig,
 								midTop($, pZMids, $.sub(j, 1)),
 								midBot($, pZMids, j)
 							)
-						);
-					}
-				);
-			}
-		);
+						)
+					)
+			);
 
 		yield $.set(gapMinDistOld, $.part(pGapMD, j));
 		yield $.set(
@@ -75,7 +64,7 @@ const AmendMinGapDist = Lib.Func(function*($) {
 			)
 		);
 
-		yield $.set(j, $.add(1, j));
+		yield $.addSet(j, 1);
 	});
 });
 
@@ -83,7 +72,7 @@ function MultipleAlignZoneArgQuantity(N: number) {
 	return N + 1 + N + N + N + 1 + 1 + 1 + 1 + 2 * N;
 }
 
-export const THintMultipleStrokesExplicit = Lib.Template(function*($, N: number) {
+export const THintMultipleStrokesExplicit = Lib.Template(function* ($, N: number) {
 	const argQty = [N + 1, N, N, N, 1, 1, 1, 1, 2 * N];
 	const args = $.args(MultipleAlignZoneArgQuantity(N));
 	const [
@@ -95,7 +84,7 @@ export const THintMultipleStrokesExplicit = Lib.Template(function*($, N: number)
 		[iTopFree],
 		[zBot],
 		[zTop],
-		zMids
+		zMids,
 	] = splitNArgs(args, argQty);
 
 	const oGapMD = $.local(N + 1);

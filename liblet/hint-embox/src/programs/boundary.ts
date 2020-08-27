@@ -2,7 +2,7 @@ import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
 
 import { ProgramLib } from "./twilight";
 
-const ComputeYAvgEmboxShift = ProgramLib.Func(function*($) {
+const ComputeYAvgEmboxShift = ProgramLib.Func(function* ($) {
 	const [zBot, zTop, zBotOrig, zTopOrig] = $.args(4);
 	yield $.return(
 		$.mul(
@@ -15,7 +15,7 @@ const ComputeYAvgEmboxShift = ProgramLib.Func(function*($) {
 	);
 });
 
-export const THintBottomStroke = ProgramLib.Func(function*($) {
+export const THintBottomStroke = ProgramLib.Func(function* ($) {
 	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();
@@ -40,7 +40,7 @@ export const THintBottomStroke = ProgramLib.Func(function*($) {
 	yield $.scfs(zsTop, $.add(yInterpolated, wCur));
 });
 
-export const THintTopStroke = ProgramLib.Func(function*($) {
+export const THintTopStroke = ProgramLib.Func(function* ($) {
 	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
 	const dBelowOrig = $.local();
 	const dAboveOrig = $.local();
@@ -73,11 +73,8 @@ export const THintTopStroke = ProgramLib.Func(function*($) {
 					$.coerce.toF26D6(1)
 				)
 			)
-		),
-		function*() {
-			yield $.set(yInterpolated, $.sub(yInterpolated, $.coerce.toF26D6(1)));
-		}
-	);
+		)
+	).then($.set(yInterpolated, $.sub(yInterpolated, $.coerce.toF26D6(1))));
 
 	yield $.scfs(zsTop, yInterpolated);
 	yield $.scfs(zsBot, $.sub(yInterpolated, wCur));

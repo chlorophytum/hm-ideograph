@@ -2,7 +2,7 @@ import { Lib } from "../commons";
 
 export const MaxAverageDivisorIncreaseStep = 2;
 
-export const HighestAverageLoop = Lib.Func(function*($) {
+export const HighestAverageLoop = Lib.Func(function* ($) {
 	const [N, vpA, vpC, vpDiv, vpAlloc, scalar, rest] = $.args(7);
 	const pA = $.coerce.fromIndex.variable(vpA);
 	const pC = $.coerce.fromIndex.variable(vpC);
@@ -16,11 +16,11 @@ export const HighestAverageLoop = Lib.Func(function*($) {
 	const jLoop = $.local();
 	const dOpt = $.local();
 	yield $.set(restInk, rest);
-	yield $.while($.gt(restInk, 0), function*() {
+	yield $.while($.gt(restInk, 0), function* () {
 		yield $.set(jOpt, -1);
 		yield $.set(dOpt, -255);
 		yield $.set(jLoop, 0);
-		yield $.while($.lt(jLoop, N), function*() {
+		yield $.while($.lt(jLoop, N), function* () {
 			yield $.if(
 				$.and(
 					$.lt(
@@ -32,15 +32,15 @@ export const HighestAverageLoop = Lib.Func(function*($) {
 						$.and($.not($.odd(jLoop)), $.gteq($.part(pC, jLoop), dOpt))
 					)
 				),
-				function*() {
+				function* () {
 					yield $.set(jOpt, jLoop);
 					yield $.set(dOpt, $.part(pC, jLoop));
 				}
 			);
-			yield $.set(jLoop, $.add(jLoop, 1));
+			yield $.addSet(jLoop, 1);
 		});
 
-		yield $.if($.gteq(jOpt, 0), function*() {
+		yield $.if($.gteq(jOpt, 0), function* () {
 			yield $.set($.part(pAlloc, jOpt), $.add($.part(pAlloc, jOpt), $.min(restInk, ONE)));
 			yield $.set(
 				$.part(pDiv, jOpt),
@@ -48,6 +48,6 @@ export const HighestAverageLoop = Lib.Func(function*($) {
 			);
 			yield $.set($.part(pC, jOpt), $.div($.part(pA, jOpt), $.part(pDiv, jOpt)));
 		});
-		yield $.set(restInk, $.sub(restInk, ONE));
+		yield $.subSet(restInk, ONE);
 	});
 });

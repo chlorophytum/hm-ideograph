@@ -2,7 +2,7 @@ import { TtLibrary } from "@chlorophytum/hltt";
 
 const Lib = new TtLibrary(`@chlorophytum/hint-programs-stroke-adjust`);
 
-export const AdjustStrokeDistT = Lib.Template(function*($, rate: number) {
+export const AdjustStrokeDistT = Lib.Template(function* ($, rate: number) {
 	const [d] = $.args(1);
 	const One = $.coerce.toF26D6(1);
 	yield $.return(
@@ -16,32 +16,20 @@ export const AdjustStrokeDistT = Lib.Template(function*($, rate: number) {
 	);
 });
 
-export const VisFloorT = Lib.Template(function*($, ConsideredDark: number) {
+export const VisFloorT = Lib.Template(function* ($, ConsideredDark: number) {
 	const [x, fillRate] = $.args(2);
-	yield $.if(
-		$.gteq($.sub(x, $.floor(x)), $.coerce.toF26D6(ConsideredDark)),
-		function*() {
-			yield $.return($.floor($.add($.coerce.toF26D6(1), $.floor(x))));
-		},
-		function*() {
-			yield $.return($.floor($.floor(x)));
-		}
-	);
+	yield $.if($.gteq($.sub(x, $.floor(x)), $.coerce.toF26D6(ConsideredDark)))
+		.then($.return($.floor($.add($.coerce.toF26D6(1), $.floor(x)))))
+		.else($.return($.floor($.floor(x))));
 });
-export const VisCeilT = Lib.Template(function*($, ConsideredDark: number) {
+export const VisCeilT = Lib.Template(function* ($, ConsideredDark: number) {
 	const [x, fillRate] = $.args(2);
-	yield $.if(
-		$.gteq($.sub($.ceiling(x), x), $.coerce.toF26D6(ConsideredDark)),
-		function*() {
-			yield $.return($.ceiling($.sub($.ceiling(x), $.coerce.toF26D6(1))));
-		},
-		function*() {
-			yield $.return($.ceiling($.ceiling(x)));
-		}
-	);
+	yield $.if($.gteq($.sub($.ceiling(x), x), $.coerce.toF26D6(ConsideredDark)))
+		.then($.return($.ceiling($.sub($.ceiling(x), $.coerce.toF26D6(1)))))
+		.else($.return($.ceiling($.ceiling(x))));
 });
 
-export const VisDistT = Lib.Template(function*(e, ConsideredDark: number) {
+export const VisDistT = Lib.Template(function* (e, ConsideredDark: number) {
 	const [zBot, zTop, frBot, frTop] = e.args(4);
 	yield e.return(
 		e.sub(
@@ -51,7 +39,7 @@ export const VisDistT = Lib.Template(function*(e, ConsideredDark: number) {
 	);
 });
 
-export const OctDistOrig = Lib.Func(function*(e) {
+export const OctDistOrig = Lib.Func(function* (e) {
 	const [zBot, zTop] = e.args(2);
 	yield e.return(e.sub(e.gc.orig(zTop), e.gc.orig(zBot)));
 });

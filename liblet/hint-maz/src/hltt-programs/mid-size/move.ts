@@ -9,7 +9,7 @@ function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
 	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
 }
 
-const PlaceStrokeDist2 = Lib.Func(function*($) {
+const PlaceStrokeDist2 = Lib.Func(function* ($) {
 	const [vpY, zBot, zTop, gap, ink] = $.args(5);
 	const pY = $.coerce.fromIndex.variable(vpY);
 	yield $.set(pY, $.add(pY, gap));
@@ -19,7 +19,7 @@ const PlaceStrokeDist2 = Lib.Func(function*($) {
 	yield $.scfs(zTop, pY);
 });
 
-export const MovePointsForMiddleHint = Lib.Func(function*($) {
+export const MovePointsForMiddleHint = Lib.Func(function* ($) {
 	const [N, zBot, zTop, y0, vpGaps, vpInks, vpZMids] = $.args(7);
 	const pGaps = $.coerce.fromIndex.variable(vpGaps);
 	const pInks = $.coerce.fromIndex.variable(vpInks);
@@ -34,7 +34,7 @@ export const MovePointsForMiddleHint = Lib.Func(function*($) {
 	yield $.set(y, y0);
 	yield $.set(yBot, $.gc.cur(zBot));
 	yield $.set(yTop, $.gc.cur(zTop));
-	yield $.while($.lt(j, N), function*() {
+	yield $.while($.lt(j, N), function* () {
 		yield $.call(
 			PlaceStrokeDist2,
 			y.ptr,
@@ -43,7 +43,7 @@ export const MovePointsForMiddleHint = Lib.Func(function*($) {
 			$.part(pGaps, j),
 			$.part(pInks, j)
 		);
-		yield $.set(j, $.add(1, j));
+		yield $.addSet(j, 1);
 	});
 	yield $.scfs(zBot, yBot);
 	yield $.scfs(zTop, yTop);

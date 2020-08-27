@@ -12,7 +12,7 @@ function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
 	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
 }
 
-export const InitMSDGapEntries = Lib.Func(function*($) {
+export const InitMSDGapEntries = Lib.Func(function* ($) {
 	const [N, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, zBot, zTop, vpZMids, vpGapMD] = $.args(10);
 
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);
@@ -22,34 +22,23 @@ export const InitMSDGapEntries = Lib.Func(function*($) {
 	const gapDist = $.local();
 	yield $.set(j, 0);
 	yield $.set(gapDist, 0);
-	yield $.while($.lteq(j, N), function*() {
-		yield $.if(
-			$.eq(j, 0),
-			function*() {
-				yield $.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j)));
-			},
-			function*() {
-				yield $.if(
-					$.eq(j, N),
-					function*() {
-						yield $.set(
-							gapDist,
-							$.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)
-						);
-					},
-					function*() {
-						yield $.set(
+	yield $.while($.lteq(j, N), function* () {
+		yield $.if($.eq(j, 0))
+			.then($.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j))))
+			.else(
+				$.if($.eq(j, N))
+					.then($.set(gapDist, $.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)))
+					.else(
+						$.set(
 							gapDist,
 							$.call(
 								OctDistOrig,
 								midTop($, pZMids, $.sub(j, 1)),
 								midBot($, pZMids, j)
 							)
-						);
-					}
-				);
-			}
-		);
+						)
+					)
+			);
 		yield $.call(
 			InitMSDistEntry,
 			$.mul($.coerce.toF26D6(2), j),
@@ -61,11 +50,11 @@ export const InitMSDGapEntries = Lib.Func(function*($) {
 			gapDist,
 			$.part(pGapMD, j)
 		);
-		yield $.set(j, $.add(1, j));
+		yield $.addSet(j, 1);
 	});
 });
 
-export const InitMSDInkEntries = Lib.Func(function*($) {
+export const InitMSDInkEntries = Lib.Func(function* ($) {
 	const [N, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, vpZMids, vpStrokeMD] = $.args(8);
 
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);
@@ -73,7 +62,7 @@ export const InitMSDInkEntries = Lib.Func(function*($) {
 
 	const j = $.local();
 	yield $.set(j, 0);
-	yield $.while($.lt(j, N), function*() {
+	yield $.while($.lt(j, N), function* () {
 		yield $.call(
 			InitMSDistEntry,
 			$.add(1, $.mul($.coerce.toF26D6(2), j)),
@@ -88,11 +77,11 @@ export const InitMSDInkEntries = Lib.Func(function*($) {
 			),
 			$.part(pStrokeMD, j)
 		);
-		yield $.set(j, $.add(1, j));
+		yield $.addSet(j, 1);
 	});
 });
 
-const InitMSDistEntry = Lib.Func(function*($) {
+const InitMSDistEntry = Lib.Func(function* ($) {
 	const [j, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, origDist, pixelsAllocated] = $.args(8);
 	const pTotalDist = $.coerce.fromIndex.variable(vpTotalDist);
 	const pA = $.coerce.fromIndex.variable(vpA);

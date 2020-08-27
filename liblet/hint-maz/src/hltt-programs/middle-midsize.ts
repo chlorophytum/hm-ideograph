@@ -6,21 +6,21 @@ import { InitMSDGapEntries, InitMSDInkEntries } from "./mid-size/init";
 import { HighestAverageLoop } from "./mid-size/loop";
 import { MovePointsForMiddleHint } from "./mid-size/move";
 
-export const DecideRequiredGap = Lib.Func(function*(e) {
+export const DecideRequiredGap = Lib.Func(function* (e) {
 	const [N, vpGapMD] = e.args(2);
 	const pGapMD = e.coerce.fromIndex.variable(vpGapMD);
 	const j = e.local();
 	const s = e.local();
 	yield e.set(j, 0);
 	yield e.set(s, 0);
-	yield e.while(e.lt(j, N), function*() {
+	yield e.while(e.lt(j, N), function* () {
 		yield e.set(s, e.add(s, e.part(pGapMD, j)));
 		yield e.set(j, e.add(j, 1));
 	});
 	yield e.return(s);
 });
 
-export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: number) {
+export const THintMultipleStrokesMidSize = Lib.Template(function* (e, NMax: number) {
 	const [
 		N,
 		dist,
@@ -32,7 +32,7 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 		zTop,
 		vpZMids,
 		vpGapMD,
-		vpInkMD
+		vpInkMD,
 	] = e.args(11);
 
 	const pxReqGap = e.local();
@@ -130,17 +130,17 @@ export const THintMultipleStrokesMidSize = Lib.Template(function*(e, NMax: numbe
 	yield e.call(MovePointsForMiddleHint, N, zBot, zTop, visPosBottom, gaps.ptr, inks.ptr, vpZMids);
 });
 
-const splitGapInkArrayData = Lib.Func(function*($) {
+const splitGapInkArrayData = Lib.Func(function* ($) {
 	const [N, vp, vpGap, vpInk] = $.args(4);
 	const p = $.coerce.fromIndex.variable(vp);
 	const pGap = $.coerce.fromIndex.variable(vpGap);
 	const pInk = $.coerce.fromIndex.variable(vpInk);
 	const j = $.local();
 	yield $.set(j, 0);
-	yield $.while($.lt(j, N), function*() {
+	yield $.while($.lt(j, N), function* () {
 		yield $.set($.part(pGap, j), $.part(p, $.mul($.coerce.toF26D6(2), j)));
 		yield $.set($.part(pInk, j), $.part(p, $.add(1, $.mul($.coerce.toF26D6(2), j))));
-		yield $.set(j, $.add(1, j));
+		yield $.addSet(j, 1);
 	});
 	yield $.set($.part(pGap, N), $.part(p, $.mul($.coerce.toF26D6(2), N)));
 });
