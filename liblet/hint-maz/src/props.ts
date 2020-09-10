@@ -18,6 +18,7 @@ export interface MultipleAlignZoneProps extends MultipleAlignZoneMetaPropShared 
 	middleStrokes: [Geometry.PointReference, Geometry.PointReference][]; // 2N args
 	mergePriority: number[]; // N+1 items. Not an argument!
 	allowCollide: boolean[]; // N+1 items. Not an argument!
+	giveUpMode?: null | undefined | number; // Mode for "give up" case
 }
 
 function drop<A>(a: A[], index: number) {

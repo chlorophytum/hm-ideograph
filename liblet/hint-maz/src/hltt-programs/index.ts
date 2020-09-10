@@ -69,11 +69,11 @@ const AmendMinGapDist = Lib.Func(function* ($) {
 });
 
 function MultipleAlignZoneArgQuantity(N: number) {
-	return N + 1 + N + N + N + 1 + 1 + 1 + 1 + 2 * N;
+	return N + 1 + N + N + N + 1 + 1 + 1 + 1 + 2 * N + 1;
 }
 
 export const THintMultipleStrokesExplicit = Lib.Template(function* ($, N: number) {
-	const argQty = [N + 1, N, N, N, 1, 1, 1, 1, 2 * N];
+	const argQty = [N + 1, N, N, N, 1, 1, 1, 1, 2 * N, 1];
 	const args = $.args(MultipleAlignZoneArgQuantity(N));
 	const [
 		ixGapMinDist,
@@ -85,6 +85,7 @@ export const THintMultipleStrokesExplicit = Lib.Template(function* ($, N: number
 		[zBot],
 		[zTop],
 		zMids,
+		[giveUpMode]
 	] = splitNArgs(args, argQty);
 
 	const oGapMD = $.local(N + 1);
@@ -117,6 +118,7 @@ export const THintMultipleStrokesExplicit = Lib.Template(function* ($, N: number
 		aGapMD.ptr,
 		aInkMD.ptr,
 		aRecPath.ptr,
-		aRecPathCollide.ptr
+		aRecPathCollide.ptr,
+		giveUpMode
 	);
 });

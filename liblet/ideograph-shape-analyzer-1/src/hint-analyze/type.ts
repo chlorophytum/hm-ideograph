@@ -56,7 +56,8 @@ export namespace HintAnalysis {
 
 	// Fetch result
 	export interface FetchResults {
-		boundary: BoundaryStem[];
+		boundaryBottom: null | BoundaryStem;
+		boundaryTop: null | BoundaryStem;
 		pile: null | StemPile;
 		semiBottom: null | BottomSemiBoundaryStem;
 		semiTop: null | TopSemiBoundaryStem;

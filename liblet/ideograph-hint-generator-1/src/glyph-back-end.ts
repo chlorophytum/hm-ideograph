@@ -26,7 +26,8 @@ export class GlyphHintGenBackEnd {
 	private pass1(ar: HintAnalysis.Result) {
 		for (const blue of ar.blues) this.addBlue(blue);
 		for (const fr of ar.fetchResults) {
-			for (const bound of fr.boundary) this.addBoundaryStem(bound);
+			if (fr.boundaryBottom) this.addBoundaryStem(fr.boundaryBottom);
+			if (fr.boundaryTop) this.addBoundaryStem(fr.boundaryTop);
 			if (fr.pile) this.addStemPileHint(fr.pile);
 			if (fr.semiBottom) this.addBottomSemiBoundaryStem(fr.semiBottom);
 			if (fr.semiTop) this.addTopSemiBoundaryStem(fr.semiTop);
@@ -167,6 +168,7 @@ export class GlyphHintGenBackEnd {
 		if (dependent.type === HintAnalysis.DependentHintType.DiagHighToLow) {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
+					giveUpMode: +1, // high to low
 					emBoxName: this.params.emboxSystemName,
 					gapMinDist: [1, 3 / 4],
 					inkMinDist: [1],
@@ -180,6 +182,7 @@ export class GlyphHintGenBackEnd {
 		} else if (dependent.type === HintAnalysis.DependentHintType.DiagLowToHigh) {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
+					giveUpMode: -1, // low to high
 					emBoxName: this.params.emboxSystemName,
 					gapMinDist: [3 / 4, 1],
 					inkMinDist: [1],

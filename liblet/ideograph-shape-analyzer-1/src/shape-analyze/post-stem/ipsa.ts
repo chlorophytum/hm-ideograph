@@ -100,7 +100,7 @@ function cEq(key: AdjPoint, pt: AdjPoint, aux: number) {
 	return Math.abs(pt.y - key.y) < aux;
 }
 function ipWeight(key: AdjPoint, pt: AdjPoint) {
-	const xw = key.phantom ? (pt.x < key.phantom.xMin || pt.x > key.phantom.xMax ? 1000 : 0.1) : 10;
+	const xw = key.phantom ? (pt.x < key.phantom.xMin || pt.x > key.phantom.xMax ? 1 : 1 / 4) : 1;
 	return Math.hypot(xw * (key.x - pt.x), key.y - pt.y);
 }
 
@@ -246,7 +246,7 @@ function linkSoleStemPoints(
 ) {
 	for (let j = 0; j < analysis.radicals.length; j++) {
 		let radical = analysis.radicals[j];
-		let radicalStems = analysis.stems.filter(function(s) {
+		let radicalStems = analysis.stems.filter(function (s) {
 			return s.belongRadical === j;
 		});
 		linkRadicalSoleStemPoints(shortAbsorptions, strategy, radical, radicalStems, priority);
@@ -297,10 +297,19 @@ function createBlueZonePhantoms(
 
 function createLRPhantom(l: AdjPoint, r: AdjPoint, step: number) {
 	const p = new CPoint(l.x + (step / STEPS) * (r.x - l.x), l.y + (step / STEPS) * (r.y - l.y));
-	p.linkedKey = l.linkedKey || r.linkedKey;
+	p.linkedKey = step * 2 <= STEPS ? l : r;
 	p.phantom = {
 		xMin: l.x + ((step - 1 / 2) / STEPS) * (r.x - l.x),
 		xMax: l.x + ((step + 1 / 2) / STEPS) * (r.x - l.x)
+	};
+	return p;
+}
+function createLRYPhantom(z: AdjPoint, xMin: number, xMax: number, step: number) {
+	const p = new CPoint(xMin + (step / STEPS) * xMax - xMin, z.y);
+	p.linkedKey = z;
+	p.phantom = {
+		xMin: xMin + ((step - 1 / 2) / STEPS) * (xMax - xMin),
+		xMax: xMin + ((step + 1 / 2) / STEPS) * (xMax - xMin)
 	};
 	return p;
 }
@@ -309,14 +318,14 @@ function createStemPhantoms(glyphKeyPoints: AdjPoint[], stem: Stem, strategy: Hi
 	for (let j = 0; j < stem.high.length; j++) {
 		let l = stem.high[j][0];
 		let r = stem.high[j][stem.high[j].length - 1];
-		for (let step = 1; step < STEPS; step++) {
+		for (let step = 0; step <= STEPS; step++) {
 			glyphKeyPoints.push(createLRPhantom(l, r, step));
 		}
 	}
 	for (let j = 0; j < stem.low.length; j++) {
 		let l = stem.low[j][0];
 		let r = stem.low[j][stem.low[j].length - 1];
-		for (let step = 1; step < STEPS; step++) {
+		for (let step = 0; step <= STEPS; step++) {
 			glyphKeyPoints.push(createLRPhantom(l, r, step));
 		}
 	}
@@ -441,7 +450,7 @@ export default function AnalyzeIpSa(
 			records[j].topBot.filter(pt => pt.xStrongExtrema),
 			records[j].cka.filter(k => k.blued),
 			{ direct: true },
-			11
+			13
 		);
 		shortAbsorptionByKeys(
 			targets,
@@ -449,44 +458,107 @@ export default function AnalyzeIpSa(
 			records[j].middlePointsL.filter(pt => pt.xStrongExtrema),
 			records[j].blues.filter(k => k.blued),
 			{ direct: true },
-			9
+			11
 		);
 	}
-	linkSoleStemPoints(shortAbsorptions, strategy, analysis, 7);
-	let b: AdjPoint[] = [];
-	for (let j = 0; j < contours.length; j++) {
-		interpolateByKeys(
-			targets,
-			records[j].topBot,
-			glyphKeyPoints,
-			5,
-			strategy.Y_FUZZ * strategy.UPM
-		);
-		interpolateByKeys(targets, records[j].topBot, glyphKeyPoints, 5, 1);
-		b = b.concat(records[j].topBot.filter(z => z.touched));
+	linkSoleStemPoints(shortAbsorptions, strategy, analysis, 9);
+
+	// Do per-radical analysis
+	const IP_LOOSE = strategy.Y_FUZZ * strategy.UPM;
+	const IP_STRICT = 1;
+	for (const radical of analysis.radicals) {
+		const radicalContours = [radical.outline, ...radical.holes];
+		const radicalContourIndexes = radicalContours.map(c => contours.indexOf(c));
+		let xMin = 0xffff,
+			xMax = -0xffff;
+		const radicalPoints = new Set<AdjPoint>();
+		for (const c of radicalContours) {
+			for (const z of c.points) {
+				radicalPoints.add(z);
+				if (z.x < xMin) xMin = z.x;
+				if (z.x > xMax) xMax = z.x;
+			}
+		}
+
+		let b: AdjPoint[] = [];
+
+		// Outline top-bottom
+		{
+			const j = radicalContourIndexes[0];
+			if (j < 0) continue;
+			interpolateByKeys(targets, records[j].topBot, glyphKeyPoints, 7, IP_LOOSE);
+			interpolateByKeys(targets, records[j].topBot, glyphKeyPoints, 7, IP_STRICT);
+			b = b.concat(records[j].topBot.filter(z => z.touched));
+		}
+
+		// Amend phantoms
+		{
+			const radicalKeyPoints = [...glyphKeyPoints, ...b].filter(z => {
+				while (z.linkedKey) z = z.linkedKey;
+				return radicalPoints.has(z);
+			});
+			let yMin = 0xffff,
+				yMax = -0xffff,
+				zyMin: AdjPoint | null = null,
+				zyMax: AdjPoint | null = null;
+			for (const z of radicalKeyPoints) {
+				if (z.y < yMin) {
+					yMin = z.y;
+					zyMin = z;
+				}
+				if (z.y > yMax) {
+					yMax = z.y;
+					zyMax = z;
+				}
+			}
+			for (let step = 1; step < STEPS; step++) {
+				if (zyMin) b.push(createLRYPhantom(zyMin, xMin, xMax, step));
+				if (zyMax) b.push(createLRYPhantom(zyMax, xMin, xMax, step));
+			}
+		}
+
+		// Holes top-bottom
+		{
+			const radicalKeyPoints = [...glyphKeyPoints, ...b].filter(z => {
+				while (z.linkedKey) z = z.linkedKey;
+				return radicalPoints.has(z);
+			});
+			for (let jr = 1; jr < radicalContours.length; jr++) {
+				const j = radicalContourIndexes[jr];
+				if (j < 0) continue;
+				interpolateByKeys(targets, records[j].topBot, radicalKeyPoints, 5, IP_LOOSE);
+				interpolateByKeys(targets, records[j].topBot, radicalKeyPoints, 5, IP_STRICT);
+				b = b.concat(records[j].topBot.filter(z => z.touched));
+			}
+		}
+
+		// Inners
+		{
+			const radicalKeyPoints = [...glyphKeyPoints, ...b].filter(z => {
+				while (z.linkedKey) z = z.linkedKey;
+				return radicalPoints.has(z);
+			});
+			for (let jr = 0; jr < radicalContours.length; jr++) {
+				const j = radicalContourIndexes[jr];
+				if (j < 0) continue;
+				interpolateByKeys(targets, records[j].middlePoints, radicalKeyPoints, 3, IP_LOOSE);
+				interpolateByKeys(targets, records[j].middlePoints, radicalKeyPoints, 3, IP_STRICT);
+				shortAbsorptionByKeys(
+					targets,
+					strategy,
+					records[j].middlePointsL,
+					records[j].middlePoints.filter(z => z.touched || z.keyPoint),
+					{ ip: true },
+					1
+				);
+			}
+		}
 	}
-	glyphKeyPoints = glyphKeyPoints.concat(b).sort(byPointY);
-	for (let j = 0; j < contours.length; j++) {
-		interpolateByKeys(
-			targets,
-			records[j].middlePoints,
-			glyphKeyPoints,
-			3,
-			strategy.Y_FUZZ * strategy.UPM
-		);
-		interpolateByKeys(targets, records[j].middlePoints, glyphKeyPoints, 3, 1);
-		shortAbsorptionByKeys(
-			targets,
-			strategy,
-			records[j].middlePointsL,
-			records[j].middlePoints.filter(z => z.touched || z.keyPoint),
-			{ ip: true },
-			1
-		);
-	}
-	interpolations = interpolations.sort(function(u, v) {
+
+	interpolations = interpolations.sort(function (u, v) {
 		return u && v ? u.subject.x - v.subject.x : 0;
 	});
+
 	// cleanup
 	return cleanupInterpolations(glyph, strategy, interpolations, shortAbsorptions);
 }

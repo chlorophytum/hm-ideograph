@@ -8,7 +8,6 @@ import {
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import * as EmBox from "@chlorophytum/hint-embox";
 import * as _ from "lodash";
-
 import { PREFIX } from "./constants";
 import { THintMultipleStrokesExplicit } from "./hltt-programs";
 import { getRecPath, MultipleAlignZoneProps } from "./props";
@@ -66,7 +65,7 @@ export namespace MultipleAlignZone {
 			);
 			const recPathCollide = getRecPath(props.mergePriority, collidePriority, N);
 			const sink = this.sink;
-			this.sink.addSegment(function*($) {
+			this.sink.addSegment(function* ($) {
 				const spurBottom = $.symbol(EmBox.Twilights.SpurBottom(props.emBoxName));
 				const spurTop = $.symbol(EmBox.Twilights.SpurTop(props.emBoxName));
 
@@ -85,7 +84,8 @@ export namespace MultipleAlignZone {
 					props.topBalanceForbidden ? 1 : 0,
 					bottomPoint,
 					topPoint,
-					..._.flatten(props.middleStrokes).map(z => sink.resolveGlyphPoint(z))
+					..._.flatten(props.middleStrokes).map(z => sink.resolveGlyphPoint(z)),
+					props.giveUpMode || 0
 				);
 			});
 		}

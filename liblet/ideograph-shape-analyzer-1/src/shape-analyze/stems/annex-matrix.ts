@@ -144,7 +144,6 @@ class ACSComputer {
 		// Overlap weight
 		let ovr = this.overlapLengths[j][k];
 		const tb = this.computeTB(j, k);
-		let strong = this.computeStrong(j, k, tb, ovr);
 		let isSideTouch = this.isSideTouch(sj, sk);
 
 		// For side touches with low overlap, drop it.

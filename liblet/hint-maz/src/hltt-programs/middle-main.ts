@@ -9,7 +9,7 @@ import {
 	CollideDownTwoStrokes,
 	CollideHangBottom,
 	CollideHangTop,
-	CollideUpTwoStrokes,
+	CollideUpTwoStrokes
 } from "./stroke-omit";
 
 export const TwoN = Lib.Func(function* ($) {
@@ -75,7 +75,7 @@ const UpdateNewProps = Lib.Func(function* ($) {
 		vpOGapMD1,
 		vpGapMD1,
 		vpInkMD1,
-		vpZMids1,
+		vpZMids1
 	] = $.args(12);
 
 	const pOGapMD1 = $.coerce.fromIndex.variable(vpOGapMD1);
@@ -178,14 +178,15 @@ const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(
 		vpInkMD,
 		vpRecPath,
 		vpRecPathCollide,
-	] = $.args(10);
+		giveUpMode
+	] = $.args(11);
 
 	const pRecPath = $.coerce.fromIndex.variable(vpRecPath);
 	const pRecPathCollide = $.coerce.fromIndex.variable(vpRecPathCollide);
 	const pRecValue = pRecPath;
 
 	yield $.if($.eq(pRecValue, 0)).then(function* () {
-		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids);
+		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 		yield $.return(0);
 	});
 
@@ -227,7 +228,8 @@ const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(
 			gapMD1.ptr,
 			inkMD1.ptr,
 			$.part(pRecPath, 1).ptr,
-			$.part(pRecPathCollide, 1).ptr
+			$.part(pRecPathCollide, 1).ptr,
+			giveUpMode
 		)
 	)
 		.then(function* () {
@@ -241,7 +243,7 @@ const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(
 			yield $.return(1);
 		})
 		.else(function* () {
-			yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids);
+			yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 			yield $.return(0);
 		});
 });
@@ -303,13 +305,14 @@ const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Te
 		vpInkMD,
 		vpRecPath,
 		vpRecPathCollide,
-	] = $.args(10);
+		giveUpMode
+	] = $.args(11);
 	const pRecPath = $.coerce.fromIndex.variable(vpRecPath);
 	const pRecPathCollide = $.coerce.fromIndex.variable(vpRecPathCollide);
 	const pRecValue = pRecPathCollide;
 
 	yield $.if($.eq(pRecValue, 0)).then(function* () {
-		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids);
+		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 		yield $.return(0);
 	});
 
@@ -358,7 +361,8 @@ const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Te
 			gapMD1.ptr,
 			inkMD1.ptr,
 			$.part(pRecPath, 1).ptr,
-			$.part(pRecPathCollide, 1).ptr
+			$.part(pRecPathCollide, 1).ptr,
+			giveUpMode
 		)
 	)
 		.then(function* () {
@@ -372,7 +376,7 @@ const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Te
 			yield $.return(1);
 		})
 		.else(function* () {
-			yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids);
+			yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 			yield $.return(0);
 		});
 });
@@ -449,10 +453,11 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function* ($, N: number) {
 		vpInkMD,
 		vpRecPath,
 		vpRecPathCollide,
-	] = $.args(12);
+		giveUpMode
+	] = $.args(13);
 
 	if (N <= 1) {
-		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids);
+		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 		yield $.return(0);
 		return;
 	}
@@ -478,7 +483,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function* ($, N: number) {
 					vpGapMD,
 					vpInkMD,
 					vpRecPath,
-					vpRecPathCollide
+					vpRecPathCollide,
+					giveUpMode
 				)
 			)
 		)
@@ -495,7 +501,8 @@ const THintMultipleStrokes_OmitImpl = Lib.Template(function* ($, N: number) {
 					vpGapMD,
 					vpInkMD,
 					vpRecPath,
-					vpRecPathCollide
+					vpRecPathCollide,
+					giveUpMode
 				)
 			)
 		);
@@ -513,7 +520,8 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function* ($, N: number
 		vpInkMD,
 		vpRecPath,
 		vpRecPathCollide,
-	] = $.args(10);
+		giveUpMode
+	] = $.args(11);
 
 	const dist = $.local();
 	const frBot = $.local();
@@ -555,7 +563,8 @@ export const THintMultipleStrokesMainImpl = Lib.Template(function* ($, N: number
 				vpGapMD,
 				vpInkMD,
 				vpRecPath,
-				vpRecPathCollide
+				vpRecPathCollide,
+				giveUpMode
 			)
 		)
 	);

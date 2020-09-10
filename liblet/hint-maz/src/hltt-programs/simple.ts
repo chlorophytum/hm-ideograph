@@ -1,21 +1,31 @@
 import { Lib } from "./commons";
 
 const IP2Sh = Lib.Func(function* ($) {
-	const [zBot, zTop, zA, zB, sh] = $.args(5);
-	yield $.ip(zBot, zTop, zA, zB);
-	const y1 = $.local(),
-		y2 = $.local(),
-		yM = $.local();
-	yield $.set(y1, $.gc.cur(zA));
-	yield $.set(y2, $.gc.cur(zB));
-	yield $.set(yM, $.div($.add(y1, y2), $.coerce.toF26D6(2)));
-	yield $.scfs(zA, $.add(yM, $.mul(sh, $.sub(y1, yM))));
-	yield $.scfs(zB, $.add(yM, $.mul(sh, $.sub(y2, yM))));
+	const [mode, zBot, zTop, zA, zB, sh] = $.args(6);
+	yield $.if($.eq(mode, 0)).then(function* () {
+		yield $.ip(zBot, zTop, zA, zB);
+		const y1 = $.local(),
+			y2 = $.local(),
+			yM = $.local();
+		yield $.set(y1, $.gc.cur(zA));
+		yield $.set(y2, $.gc.cur(zB));
+		yield $.set(yM, $.div($.add(y1, y2), $.coerce.toF26D6(2)));
+		yield $.scfs(zA, $.add(yM, $.mul(sh, $.sub(y1, yM))));
+		yield $.scfs(zB, $.add(yM, $.mul(sh, $.sub(y2, yM))));
+	});
+	yield $.if($.gt(mode, 0)).then(function* () {
+		yield $.ip(zBot, zTop, zB);
+		yield $.mdrp(zB, zA);
+	});
+	yield $.if($.lt(mode, 0)).then(function* () {
+		yield $.ip(zBot, zTop, zA);
+		yield $.mdrp(zA, zB);
+	});
 });
 
 // This function is used at very small PPEM -- We can do almost nothing, just IP
 export const HintMultipleStrokesGiveUp = Lib.Func(function* ($) {
-	const [N, zBot, zTop, vpZMids] = $.args(4);
+	const [N, zBot, zTop, vpZMids, giveUpMode] = $.args(5);
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);
 	yield $.mdap(zBot);
 	yield $.mdap(zTop);
@@ -24,6 +34,7 @@ export const HintMultipleStrokesGiveUp = Lib.Func(function* ($) {
 	yield $.while($.lt(j, N), function* () {
 		yield $.call(
 			IP2Sh,
+			giveUpMode,
 			zBot,
 			zTop,
 			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),

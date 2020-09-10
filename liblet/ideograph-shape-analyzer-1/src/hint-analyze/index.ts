@@ -102,7 +102,8 @@ class HintAnalyzer {
 
 	private fetchImpl(hr: HintAnalysis.Result, sidPath: number[]) {
 		const fr: HintAnalysis.FetchResults = {
-			boundary: [],
+			boundaryBottom: null,
+			boundaryTop: null,
 			pile: null,
 			semiBottom: null,
 			semiTop: null,
@@ -142,11 +143,13 @@ class HintAnalyzer {
 				minDist: spMD
 			};
 		} else if (sp.botIsBoundary && !sp.topIsBoundary && !sp.botAtGlyphBottom) {
+			fr.boundaryBottom = null;
 			fr.semiBottom = {
 				stem: this.sa.stems[bot],
 				above: this.sa.stems[top]
 			};
 		} else if (sp.topIsBoundary && !sp.topAtGlyphTop && !sp.botIsBoundary) {
+			fr.boundaryTop = null;
 			fr.semiTop = {
 				stem: this.sa.stems[top],
 				below: this.sa.stems[bot]
@@ -252,11 +255,10 @@ class HintAnalyzer {
 		let path: number[] = [];
 		while (pathStart >= 0) {
 			path.push(pathStart);
-			if (this.stemMask[pathStart]) break;
+			if (path.length > 1 && this.stemMask[pathStart]) break;
 			const next = lpCache[pathStart]!.next;
 			pathStart = next;
 		}
-
 		return path;
 	}
 
@@ -399,14 +401,14 @@ class HintAnalyzer {
 			botAtGlyphBottom =
 				atGlyphBottom(stem, this.strategy) && !isHangingHookShape(stem, this.strategy);
 
-			fr.boundary.push({
+			fr.boundaryBottom = {
 				stem: stem,
 				locTop: false,
 				atBottom: botAtGlyphBottom,
 				atTop: atGlyphTop(stem, this.strategy),
 				flipsBelow: stem.turnsBelow,
 				flipsAbove: stem.turnsAbove
-			});
+			};
 
 			botIsBoundary = true;
 		}
@@ -421,14 +423,14 @@ class HintAnalyzer {
 			this.stemMask[top] = MaskState.Hinted;
 			topAtGlyphTop = atGlyphTop(stem, this.strategy);
 
-			fr.boundary.push({
+			fr.boundaryTop = {
 				stem: stem,
 				locTop: true,
 				atBottom: atGlyphBottom(stem, this.strategy),
 				atTop: topAtGlyphTop,
 				flipsBelow: stem.turnsBelow,
 				flipsAbove: stem.turnsAbove
-			});
+			};
 
 			topIsBoundary = true;
 		}
