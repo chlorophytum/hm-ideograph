@@ -1,11 +1,10 @@
-import { TtLibrary } from "@chlorophytum/hltt";
-
+import { Edsl } from "@chlorophytum/hltt";
 import { PREFIX } from "../constants";
 
-export const ProgramLib = new TtLibrary(`${PREFIX}::TtLib::HlttSupportPrograms`);
+export const ProgramLib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportPrograms`);
 
 export namespace Twilights {
-	const Lib = new TtLibrary(`${PREFIX}::TtLib::HlttSupportTwilights`);
+	const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportTwilights`);
 	export const StrokeBottom = Lib.TwilightTemplate<[string]>();
 	export const StrokeTop = Lib.TwilightTemplate<[string]>();
 	export const SpurBottom = Lib.TwilightTemplate<[string]>();
@@ -17,7 +16,7 @@ export namespace Twilights {
 }
 
 export namespace ControlValues {
-	const Lib = new TtLibrary(`${PREFIX}::TtLib::HlttSupportControlValues`);
+	const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportControlValues`);
 	export const StrokeBottom = Lib.ControlValueTemplate<[string]>();
 	export const StrokeTop = Lib.ControlValueTemplate<[string]>();
 	export const SpurBottom = Lib.ControlValueTemplate<[string]>();

@@ -1,13 +1,5 @@
-import { Expression, ProgramDsl, Variable } from "@chlorophytum/hltt";
-
 import { Lib } from "../commons";
-
-function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
-}
-function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
-}
+import { midBot, midTop } from "../macros";
 
 const PlaceStrokeDist2 = Lib.Func(function* ($) {
 	const [vpY, zBot, zTop, gap, ink] = $.args(5);

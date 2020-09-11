@@ -1,16 +1,7 @@
 import { AdjustStrokeDistT, OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
-import { Expression, ProgramDsl, Variable } from "@chlorophytum/hltt";
-
 import { Lib } from "../commons";
-
+import { midBot, midTop } from "../macros";
 import { MaxAverageDivisorIncreaseStep } from "./loop";
-
-function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
-}
-function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
-}
 
 export const InitMSDGapEntries = Lib.Func(function* ($) {
 	const [N, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, zBot, zTop, vpZMids, vpGapMD] = $.args(10);

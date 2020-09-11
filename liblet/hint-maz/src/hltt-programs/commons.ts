@@ -1,16 +1,15 @@
 import { OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
-import { Expression, ProgramDsl, TtLibrary, Variable } from "@chlorophytum/hltt";
-
+import { Edsl } from "@chlorophytum/hltt";
 import { PREFIX } from "../constants";
 
-export const Lib = new TtLibrary(`${PREFIX}::TtLib::HlttPrograms`);
+export const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttPrograms`);
 
 export const ConsideredDark = 3 / 4;
 
-function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
+function midBot(e: Edsl.ProgramDsl, zMids: Edsl.Variable<Edsl.VkStorage>, index: Edsl.Expression) {
 	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
 }
-function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
+function midTop(e: Edsl.ProgramDsl, zMids: Edsl.Variable<Edsl.VkStorage>, index: Edsl.Expression) {
 	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
 }
 export const GetFillRate = Lib.Func(function* ($) {

@@ -1,18 +1,10 @@
 import { OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
-import { Expression, ProgramDsl, Variable } from "@chlorophytum/hltt";
-
 import { splitNArgs } from "../util";
-
 import { Lib } from "./commons";
+import { midBot, midTop } from "./macros";
 import { MapArrIntToPx, TInitArr, TInitZMids } from "./middle-array";
 import { THintMultipleStrokesMainImpl } from "./middle-main";
 
-function midBot(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
-}
-function midTop(e: ProgramDsl, zMids: Variable, index: Expression) {
-	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
-}
 const AmendMinGapDist = Lib.Func(function* ($) {
 	const [N, zBot, zTop, vpZMids, vpGapMD] = $.args(5);
 	const pZMids = $.coerce.fromIndex.variable(vpZMids);

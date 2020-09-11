@@ -1,6 +1,5 @@
 import { VisDistT } from "@chlorophytum/hint-programs-stoke-adjust";
-import { EdslSymbolTemplate } from "@chlorophytum/hltt";
-
+import { Edsl } from "@chlorophytum/hltt";
 import { ConsideredDark, GetFillRate, Lib } from "./commons";
 import { DecideRequiredGap, THintMultipleStrokesMidSize } from "./middle-midsize";
 import { HintMultipleStrokesGiveUp, HintMultipleStrokesSimple } from "./simple";
@@ -163,7 +162,7 @@ const THintMultipleStrokes_DoMerge_ConsequenceEdge = Lib.Func(function* ($) {
 		yield $.scfs($.part(pZMids, $.call(TwoN_M1, N)), $.gc.cur(zTop));
 	});
 });
-const THintMultipleStrokes_DoMerge: EdslSymbolTemplate<[number]> = Lib.Template(function* (
+const THintMultipleStrokes_DoMerge: Edsl.Template<Edsl.VkFpgm, [number]> = Lib.Template(function* (
 	$,
 	N: number
 ) {
@@ -290,96 +289,95 @@ const THintMultipleStrokes_DoCollideMerge_ConsequenceEdge = Lib.Func(function* (
 	);
 });
 
-const THintMultipleStrokes_DoCollideMerge: EdslSymbolTemplate<[number]> = Lib.Template(function* (
-	$,
-	N: number
-) {
-	const [
-		forceRoundBottom,
-		forceRoundTop,
-		zBot,
-		zTop,
-		vpOGapMD,
-		vpZMids,
-		vpGapMD,
-		vpInkMD,
-		vpRecPath,
-		vpRecPathCollide,
-		giveUpMode
-	] = $.args(11);
-	const pRecPath = $.coerce.fromIndex.variable(vpRecPath);
-	const pRecPathCollide = $.coerce.fromIndex.variable(vpRecPathCollide);
-	const pRecValue = pRecPathCollide;
-
-	yield $.if($.eq(pRecValue, 0)).then(function* () {
-		yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
-		yield $.return(0);
-	});
-
-	const collideIndex = $.local();
-	const collideDown = $.local();
-	yield $.set(collideIndex, $.sub($.abs(pRecValue), 1));
-	yield $.set(collideDown, $.lt(pRecValue, 0));
-
-	const oGapMD1 = $.local(N);
-	const zMids1 = $.local(2 * N - 2);
-	const gapMD1 = $.local(N);
-	const inkMD1 = $.local(N - 1);
-	yield $.call(
-		UpdateNewProps,
-		N,
-		1,
-		collideIndex,
-		collideDown,
-		vpOGapMD,
-		vpGapMD,
-		vpInkMD,
-		vpZMids,
-		oGapMD1.ptr,
-		gapMD1.ptr,
-		inkMD1.ptr,
-		zMids1.ptr
-	);
-
-	yield $.call(
-		THintMultipleStrokes_DoCollideMerge_ConsequenceEdge,
-		N,
-		collideIndex,
-		zBot,
-		zTop,
-		vpZMids
-	);
-	yield $.if(
-		$.call(
-			THintMultipleStrokesMainImpl(N - 1),
+const THintMultipleStrokes_DoCollideMerge: Edsl.Template<Edsl.VkFpgm, [number]> = Lib.Template(
+	function* ($, N: number) {
+		const [
 			forceRoundBottom,
 			forceRoundTop,
 			zBot,
 			zTop,
-			oGapMD1.ptr,
-			zMids1.ptr,
-			gapMD1.ptr,
-			inkMD1.ptr,
-			$.part(pRecPath, 1).ptr,
-			$.part(pRecPathCollide, 1).ptr,
+			vpOGapMD,
+			vpZMids,
+			vpGapMD,
+			vpInkMD,
+			vpRecPath,
+			vpRecPathCollide,
 			giveUpMode
-		)
-	)
-		.then(function* () {
-			yield $.call(
-				THintMultipleStrokes_DoCollideMerge_Consequence,
-				N,
-				collideIndex,
-				collideDown,
-				vpZMids
-			);
-			yield $.return(1);
-		})
-		.else(function* () {
+		] = $.args(11);
+		const pRecPath = $.coerce.fromIndex.variable(vpRecPath);
+		const pRecPathCollide = $.coerce.fromIndex.variable(vpRecPathCollide);
+		const pRecValue = pRecPathCollide;
+
+		yield $.if($.eq(pRecValue, 0)).then(function* () {
 			yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
 			yield $.return(0);
 		});
-});
+
+		const collideIndex = $.local();
+		const collideDown = $.local();
+		yield $.set(collideIndex, $.sub($.abs(pRecValue), 1));
+		yield $.set(collideDown, $.lt(pRecValue, 0));
+
+		const oGapMD1 = $.local(N);
+		const zMids1 = $.local(2 * N - 2);
+		const gapMD1 = $.local(N);
+		const inkMD1 = $.local(N - 1);
+		yield $.call(
+			UpdateNewProps,
+			N,
+			1,
+			collideIndex,
+			collideDown,
+			vpOGapMD,
+			vpGapMD,
+			vpInkMD,
+			vpZMids,
+			oGapMD1.ptr,
+			gapMD1.ptr,
+			inkMD1.ptr,
+			zMids1.ptr
+		);
+
+		yield $.call(
+			THintMultipleStrokes_DoCollideMerge_ConsequenceEdge,
+			N,
+			collideIndex,
+			zBot,
+			zTop,
+			vpZMids
+		);
+		yield $.if(
+			$.call(
+				THintMultipleStrokesMainImpl(N - 1),
+				forceRoundBottom,
+				forceRoundTop,
+				zBot,
+				zTop,
+				oGapMD1.ptr,
+				zMids1.ptr,
+				gapMD1.ptr,
+				inkMD1.ptr,
+				$.part(pRecPath, 1).ptr,
+				$.part(pRecPathCollide, 1).ptr,
+				giveUpMode
+			)
+		)
+			.then(function* () {
+				yield $.call(
+					THintMultipleStrokes_DoCollideMerge_Consequence,
+					N,
+					collideIndex,
+					collideDown,
+					vpZMids
+				);
+				yield $.return(1);
+			})
+			.else(function* () {
+				yield $.call(HintMultipleStrokesGiveUp, N, zBot, zTop, vpZMids, giveUpMode);
+				yield $.return(0);
+			});
+	}
+);
 
 const THasLargeGap = Lib.Template(function* ($, N: number) {
 	const [vpOGapMD, vpGapMD] = $.args(2);

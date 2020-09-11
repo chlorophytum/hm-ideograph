@@ -8,12 +8,12 @@
 		"tslint": "^6.1.3",
 		"tslint-lerna-rules": "^1.0.4",
 		"typescript": "^4.0",
-		"@chlorophytum/cli": "^0.10.4",
-		"@chlorophytum/final-hint-format-hltt": "^0.10.4",
-		"@chlorophytum/font-format-otd": "^0.10.4",
-		"@chlorophytum/font-format-ttf": "^0.10.4",
-		"@chlorophytum/hint-store-provider-file": "^0.10.4",
-		"@chlorophytum/hm-combine": "^0.10.4"
+		"@chlorophytum/cli": "^0.11.0",
+		"@chlorophytum/final-hint-format-hltt": "^0.11.0",
+		"@chlorophytum/font-format-otd": "^0.11.0",
+		"@chlorophytum/font-format-ttf": "^0.11.0",
+		"@chlorophytum/hint-store-provider-file": "^0.11.0",
+		"@chlorophytum/hm-combine": "^0.11.0"
 	},
 	"scripts": {
 		"init": "npm install && node common/layermap && lerna bootstrap --hoist --no-ci",
