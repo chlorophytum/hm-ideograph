@@ -25,6 +25,8 @@
 		"rebuild": "npm run reset && npm run build",
 		"test": "lerna run --stream test",
 		"prepack": "npm run init && npm run build",
-		"add-dep": "lerna add"
+		"add-dep": "lerna add",
+		"publish": "lerna publish --force-publish=* --exact",
+		"publish:canary": "lerna publish --force-publish=* --exact"
 	}
 }
