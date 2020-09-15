@@ -27,6 +27,7 @@
 		"prepack": "npm run init && npm run build",
 		"add-dep": "lerna add",
 		"publish": "lerna publish --force-publish=* --exact",
-		"publish:canary": "lerna publish --force-publish=* --exact"
+		"publish:canary": "lerna publish --force-publish=* --exact",
+		"sync-external-links": "node common/sync-external-links"
 	}
 }
