@@ -1,7 +1,8 @@
 dist
 .idea
 node_modules
-liblet/*/lib
+liblet
+packages/*/lib
 *.log
 tmp
 payloads

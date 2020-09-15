@@ -109,8 +109,8 @@
 		"**/CVS": true,
 		"**/.DS_Store": true,
 		"node_modules": true,
-		"liblet/*/node_modules": true,
-		"liblet/*/lib": true,
+		"packages/*/node_modules": true,
+		"packages/*/lib": true,
 		".awcache": true,
 		"dist": true,
 		"**/.build-cache": true

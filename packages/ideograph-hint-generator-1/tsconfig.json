@@ -1,9 +1,8 @@
 {
-	"extends": "../tsconfig.settings.json",
+	"extends": "../../config/tsconfig.settings.json",
 	"references": [
 		{"path": "../hint-embox"},
 		{"path": "../hint-maz"},
-		{"path": "../ideograph-hint-generator-1"},
 		{"path": "../ideograph-shape-analyzer-1"},
 		{"path": "../ideograph-shape-analyzer-shared"}
 	],

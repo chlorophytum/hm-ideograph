@@ -1,10 +1,10 @@
 # HM-Ideograph
 
-This is a hint model plugin for ideographs, supporting all [HlTT](https://github.com/chlorophytum/Chlorophytum/tree/master/liblet/hltt)-based instruction formats.
+This is a hint model plugin for ideographs, supporting all [HlTT](https://github.com/chlorophytum/Chlorophytum/tree/master/packages/hltt)-based instruction formats.
 
 ## How it works
 
-The hint model’s shape analyzer will analyze all the Ideograph and Hangul glyphs in the input font, and generate a series of Y-axis stem hints. The major of these hints are [MAZ](https://github.com/chlorophytum/hm-ideograph/tree/master/liblet/hint-maz), which tries its best to arrange multiple stems *at once* to fit inside a certain space. For each stem gap, a priority can be assigned so when the space is not enough, MAZ hints would try to merge the stems around certain gaps to improve readability.
+The hint model’s shape analyzer will analyze all the Ideograph and Hangul glyphs in the input font, and generate a series of Y-axis stem hints. The major of these hints are [MAZ](https://github.com/chlorophytum/hm-ideograph/tree/master/packages/hint-maz), which tries its best to arrange multiple stems *at once* to fit inside a certain space. For each stem gap, a priority can be assigned so when the space is not enough, MAZ hints would try to merge the stems around certain gaps to improve readability.
 
 ## Usage
 

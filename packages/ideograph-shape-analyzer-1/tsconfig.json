@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig.settings.json",
+	"extends": "../../config/tsconfig.settings.json",
 	"references": [{"path": "../ideograph-shape-analyzer-shared"}],
 	"compilerOptions": {
 		"rootDir": "src",
