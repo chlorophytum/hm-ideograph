@@ -43,6 +43,33 @@ export const DropArrayItem = Lib.Func(function* ($) {
 		yield $.addSet(j, 1);
 	});
 });
+export const DropGapArrayItem = Lib.Func(function* ($) {
+	const [N, i, vpA, vpB, mode] = $.args(5);
+	const pA = $.coerce.fromIndex.variable(vpA);
+	const pB = $.coerce.fromIndex.variable(vpB);
+	const j = $.local();
+	const k = $.local();
+	yield $.set(j, 0);
+	yield $.set(k, 0);
+	yield $.while($.lt(j, N), function* () {
+		yield $.if($.neq(j, i), function* () {
+			yield $.if(
+				$.or(
+					$.and($.eq(mode, GAP_DROP_MODE_UP), $.eq($.add(j, 1), i)),
+					$.and($.eq(mode, GAP_DROP_MODE_DOWN), $.eq($.sub(j, 1), i))
+				)
+			)
+				.then(function* () {
+					yield $.set($.part(pB, k), $.max($.part(pA, j), $.part(pA, i)));
+				})
+				.else(function* () {
+					yield $.set($.part(pB, k), $.part(pA, j));
+				});
+			yield $.addSet(k, 1);
+		});
+		yield $.addSet(j, 1);
+	});
+});
 export const DropArrayItemX2 = Lib.Func(function* ($) {
 	const [N, i, vpA, vpB] = $.args(4);
 	const pA = $.coerce.fromIndex.variable(vpA);
@@ -61,6 +88,8 @@ export const DropArrayItemX2 = Lib.Func(function* ($) {
 	});
 });
 
+const GAP_DROP_MODE_DOWN = 0;
+const GAP_DROP_MODE_UP = 1;
 const UpdateNewProps = Lib.Func(function* ($) {
 	const [
 		N,
@@ -81,32 +110,37 @@ const UpdateNewProps = Lib.Func(function* ($) {
 	const pGapMD1 = $.coerce.fromIndex.variable(vpGapMD1);
 	const dropGapIndex = $.local();
 	const dropInkIndex = $.local();
+	const gapDropMode = $.local();
 	yield $.if($.lteq(mergeIndex, 0))
 		.then(function* () {
 			yield $.set(dropGapIndex, 0);
 			yield $.set(dropInkIndex, 0);
+			yield $.set(gapDropMode, GAP_DROP_MODE_UP);
 		})
 		.else(
 			$.if($.gteq(mergeIndex, N))
 				.then(function* () {
 					yield $.set(dropGapIndex, N);
 					yield $.set(dropInkIndex, $.sub(N, 1));
+					yield $.set(gapDropMode, GAP_DROP_MODE_DOWN);
 				})
 				.else(
 					$.if(mergeDown)
 						.then(function* () {
 							yield $.set(dropGapIndex, mergeIndex);
 							yield $.set(dropInkIndex, mergeIndex);
+							yield $.set(gapDropMode, GAP_DROP_MODE_DOWN);
 						})
 						.else(function* () {
 							yield $.set(dropGapIndex, mergeIndex);
 							yield $.set(dropInkIndex, $.sub(mergeIndex, 1));
+							yield $.set(gapDropMode, GAP_DROP_MODE_UP);
 						})
 				)
 		);
 
-	yield $.call(DropArrayItem, $.add(1, N), dropGapIndex, vpOGapMD, vpOGapMD1);
-	yield $.call(DropArrayItem, $.add(1, N), dropGapIndex, vpGapMD, vpGapMD1);
+	yield $.call(DropGapArrayItem, $.add(1, N), dropGapIndex, vpOGapMD, vpOGapMD1, gapDropMode);
+	yield $.call(DropGapArrayItem, $.add(1, N), dropGapIndex, vpGapMD, vpGapMD1, gapDropMode);
 	yield $.call(DropArrayItem, N, dropInkIndex, vpInkMD, vpInkMD1);
 	yield $.call(DropArrayItemX2, N, dropInkIndex, vpZMids, vpZMids1);
 

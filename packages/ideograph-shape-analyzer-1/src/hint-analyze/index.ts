@@ -125,16 +125,14 @@ class HintAnalyzer {
 		const { sidPileMiddle, repeatPatternMask } = this.getMiddleStems(sidPile, sp, bot, top);
 
 		if (sidPileMiddle.length) {
-			const mc = new MergeCalculator(this.sa, this.strategy);
-			const spMD = mc.getMinGap(this.sa.collisionMatrices.flips, top, bot, sidPileMiddle);
-			const annex = mc.getMergePriority(
+			const mc = new MergeCalculator(
 				this.sa.collisionMatrices.annexation,
-				top,
-				bot,
-				sidPileMiddle,
-				spMD,
-				repeatPatternMask
+				this.sa.collisionMatrices.flips,
+				this.sa,
+				this.strategy
 			);
+			const spMD = mc.getMinGap(top, bot, sidPileMiddle);
+			const annex = mc.getMergePriority(top, bot, sidPileMiddle, spMD, repeatPatternMask);
 			fr.pile = {
 				bot: this.sa.stems[bot],
 				middle: sidPileMiddle.map(j => this.sa.stems[j]),
@@ -341,14 +339,6 @@ class HintAnalyzer {
 		let mask: boolean[] = [];
 		for (const [s, e] of repeatPatterns) for (let j = s; j <= e; j++) mask[j] = true;
 		return { sidPileMiddle: pile, repeatPatternMask: mask };
-	}
-
-	private repeatStemMergePri(n: number) {
-		const a: number[] = [];
-		for (let j = 0; j <= n; j++) {
-			a.push(j === 0 || j === n ? 0 : j * (j % 2 ? 1 : -1));
-		}
-		return a;
 	}
 
 	private getDependents(path: number[]) {

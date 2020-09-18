@@ -13,17 +13,30 @@ interface MergeDecideGap {
 }
 
 export class MergeCalculator {
-	constructor(private sa: ShapeAnalysisResult, private readonly strategy: HintingStrategy) {}
+	constructor(
+		private m: number[][],
+		private f: number[][],
+		private sa: ShapeAnalysisResult,
+		private readonly strategy: HintingStrategy
+	) {}
+
+	private adjustedMValue(j: number, k: number, rpm: boolean[]) {
+		if (rpm[j] || rpm[k]) {
+			return Math.min(this.m[j][k], this.strategy.COEFF_A_SAME_RADICAL);
+		} else {
+			return this.m[j][k];
+		}
+	}
 
 	private getMergePairData(
-		m: number[][],
 		j: number,
 		k: number,
 		index: number,
-		repeatGapSide: boolean,
-		repeatGapCenter: boolean,
+		isRepeat: boolean[],
 		gaps: MergeDecideGap[]
 	) {
+		const fRepeatGapCenter = isRepeat[j] && isRepeat[k];
+		const fRepeatGapSide = isRepeat[j] || isRepeat[k];
 		const sj = this.sa.stems[j];
 		const sk = this.sa.stems[k];
 
@@ -33,13 +46,21 @@ export class MergeCalculator {
 
 		const sjXMiddle = Support.mix(sj.xMin, sj.xMax, 0.5);
 		const skXMiddle = Support.mix(sk.xMin, sk.xMax, 0.5);
+		const fLowerRepeating = isRepeat[j] && !isRepeat[k];
+		const fUpperRepeating = isRepeat[k] && !isRepeat[j];
 		const fLowerAtSide = sk.xMax < sjXMiddle || sk.xMin > sjXMiddle;
 		const fUpperAtSide = sj.xMax < skXMiddle || sj.xMin > skXMiddle;
 		const fUpperShorter = sj.xMax - sj.xMin < sk.xMax - sk.xMin;
-		const fMergeDown = fUpperAtSide === fLowerAtSide ? fUpperShorter : fUpperAtSide;
-		const multiplier =
-			j === k || fTooFar || m[j][k] >= this.strategy.DEADLY_MERGE ? 0 : fMergeDown ? -1 : 1;
-
+		const fMergeDown = fLowerRepeating
+			? true
+			: fUpperRepeating
+			? false
+			: fUpperAtSide === fLowerAtSide
+			? fUpperShorter
+			: fUpperAtSide;
+		const fDontMerge =
+			j === k || fTooFar || this.adjustedMValue(j, k, isRepeat) >= this.strategy.DEADLY_MERGE;
+		const multiplier = fDontMerge ? 0 : fMergeDown ? -1 : 1;
 		gaps.push({
 			index,
 			sidAbove: j,
@@ -47,11 +68,11 @@ export class MergeCalculator {
 			multiplier,
 			order: 0,
 			merged: false,
-			repeatGapMultiplier: repeatGapCenter ? 1 / 256 : repeatGapSide ? 1 / 16 : 1
+			repeatGapMultiplier: fRepeatGapCenter ? 1 / 256 : fRepeatGapSide ? 1 / 16 : 1
 		});
 	}
 
-	private optimizeMergeGaps(m: number[][], gaps: MergeDecideGap[]) {
+	private optimizeMergeGaps(isRepeat: boolean[], gaps: MergeDecideGap[]) {
 		let n = 1 + gaps.length;
 		for (;;) {
 			let mergeGapId = -1;
@@ -69,7 +90,7 @@ export class MergeCalculator {
 				for (let p = jMin + 1; p < jMax; p++) {
 					for (let q = jMin + 1; q <= p; q++) {
 						cost +=
-							m[gaps[p].sidAbove][gaps[q].sidBelow] *
+							this.adjustedMValue(gaps[p].sidAbove, gaps[q].sidBelow, isRepeat) *
 							Math.min(gaps[p].repeatGapMultiplier, gaps[q].repeatGapMultiplier);
 					}
 				}
@@ -92,50 +113,37 @@ export class MergeCalculator {
 	}
 
 	public getMergePriority(
-		m: number[][],
 		top: number,
 		bot: number,
 		middle: number[],
 		md: number[],
-		rpm: boolean[]
+		repeatPatternMask: boolean[]
 	) {
-		let gaps: MergeDecideGap[] = [];
-		this.getMergePairData(m, middle[0], bot, 0, rpm[0], false, gaps);
-		for (let j = 1; j < middle.length; j++) {
-			this.getMergePairData(
-				m,
-				middle[j],
-				middle[j - 1],
-				j,
-				rpm[j] || rpm[j - 1],
-				rpm[j] && rpm[j - 1],
-				gaps
-			);
+		let sidIsRepeat: boolean[] = [];
+		for (let j = 0; j < middle.length; j++) {
+			sidIsRepeat[middle[j]] = !!repeatPatternMask[j];
 		}
-		this.getMergePairData(
-			m,
-			top,
-			middle[middle.length - 1],
-			middle.length,
-			rpm[middle.length - 1],
-			false,
-			gaps
-		);
-		this.optimizeMergeGaps(m, gaps);
+		let gaps: MergeDecideGap[] = [];
+		this.getMergePairData(middle[0], bot, 0, sidIsRepeat, gaps);
+		for (let j = 1; j < middle.length; j++) {
+			this.getMergePairData(middle[j], middle[j - 1], j, sidIsRepeat, gaps);
+		}
+		this.getMergePairData(top, middle[middle.length - 1], middle.length, sidIsRepeat, gaps);
+		this.optimizeMergeGaps(sidIsRepeat, gaps);
 
 		return gaps.map((x, j) => x.order * x.multiplier * (md[j] ? 0 : 1));
 	}
 
-	private getMinGapData(f: number[][], j: number, k: number, gaps: number[]) {
-		gaps.push(f[j][k] > 2 || f[k][j] > 2 ? 1 : 0);
+	private getMinGapData(j: number, k: number, gaps: number[]) {
+		gaps.push(this.f[j][k] > 2 || this.f[k][j] > 2 ? 1 : 0);
 	}
-	public getMinGap(f: number[][], top: number, bot: number, middle: number[]) {
+	public getMinGap(top: number, bot: number, middle: number[]) {
 		let gaps: number[] = [];
-		this.getMinGapData(f, middle[0], bot, gaps);
+		this.getMinGapData(middle[0], bot, gaps);
 		for (let j = 1; j < middle.length; j++) {
-			this.getMinGapData(f, middle[j], middle[j - 1], gaps);
+			this.getMinGapData(middle[j], middle[j - 1], gaps);
 		}
-		this.getMinGapData(f, top, middle[middle.length - 1], gaps);
+		this.getMinGapData(top, middle[middle.length - 1], gaps);
 		return gaps;
 	}
 }
