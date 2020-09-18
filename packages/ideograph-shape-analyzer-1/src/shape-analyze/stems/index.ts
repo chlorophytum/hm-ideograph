@@ -52,6 +52,7 @@ export default function analyzeStems(
 		stems,
 		(p, q) => stemOverlapLength(p, q) / strategy.UPM
 	);
+	const slopeDifference = OverlapMatrix(stems, (p, q) => Math.abs(p.slope - q.slope));
 	analyzeStemSpatialRelationships(stems, radicals, stemOverlaps, strategy);
 	analyzeEntireContourAboveBelow(glyph, stems);
 	const F = analyzeTurns(glyph, strategy, stems);
@@ -99,4 +100,5 @@ export default function analyzeStems(
 	sa.collisionMatrices.flips = collisionMatrices1.flips;
 	sa.collisionMatrices.proximity = P;
 	sa.collisionMatrices.spatialProximity = Q;
+	sa.slopeDifference = slopeDifference;
 }

@@ -34,7 +34,7 @@ function LP(
 		let deltaWeight = 0;
 		const linkedStems = [...ds.sameSet(k)];
 		for (const s of linkedStems) deltaWeight += w1[j][s];
-		deltaWeight *= linkedStems.length;
+		deltaWeight *= linkedStems.length * (1 - w2[j][k]);
 
 		const ck = LP(g, ds, w1, w2, k, cache);
 		const newWeight = ck.weight + deltaWeight;
@@ -232,7 +232,7 @@ class HintAnalyzer {
 				this.sa.directOverlaps,
 				this.dependentSet,
 				this.sa.stemOverlapLengths,
-				this.sa.collisionMatrices.flips,
+				this.sa.slopeDifference,
 				j,
 				lpCache
 			);
@@ -264,10 +264,10 @@ class HintAnalyzer {
 		for (let m = 0; m < path.length; m++) {
 			const sm = this.sa.stems[path[m]];
 			if (!sm || !sm.rid) continue;
-			if ((!sm.hasGlyphStemBelow && sm.diagHigh) || (!sm.hasGlyphStemAbove && sm.diagLow)) {
-				// Our key path is on a strange track
-				// We selected a diagonal stroke half, but it is not a good half
-				// Try to swap. 2 parts of a diagonal never occur in a path, so swapping is ok.
+			// Our key path is on a strange track
+			// We selected a diagonal stroke half, but it is not a good half
+			// Try to swap. 2 parts of a diagonal never occur in a path, so swapping is ok.
+			if (!sm.hasGlyphStemBelow && sm.diagHigh) {
 				let opposite = -1;
 				for (let j = 0; j < this.sa.stems.length; j++) {
 					if (j !== path[m] && this.sa.stems[j].rid === sm.rid) opposite = j;

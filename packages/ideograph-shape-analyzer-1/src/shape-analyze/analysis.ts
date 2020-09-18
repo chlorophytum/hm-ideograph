@@ -35,6 +35,7 @@ export class ShapeAnalysisResult {
 	public stems: Stem[] = [];
 	public stemOverlaps: number[][] = [];
 	public stemOverlapLengths: number[][] = [];
+	public slopeDifference: number[][] = [];
 	public directOverlaps: boolean[][] = [];
 	public symmetry: boolean[][] = [];
 	public collisionMatrices = new ColMats();
