@@ -1,4 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
+import * as Util from "util";
 
 export interface AdjPoint extends Geometry.GlyphPoint {
 	prev?: AdjPoint;
@@ -66,5 +67,15 @@ export class CPoint implements AdjPoint {
 
 	public static adjacent(p: AdjPoint, q: AdjPoint) {
 		return p.next === q || p.prev === q || q.next === p || q.prev === p;
+	}
+
+	[Util.inspect.custom](depth: number, options: Util.InspectOptions) {
+		const posStr = `(${Util.inspect(this.x, options)}, ${Util.inspect(this.y, options)})`;
+		if (this.references && this.references.length) {
+			const zidStr = Util.inspect(this.references[0].id, options);
+			return `${posStr}#${zidStr}`;
+		} else {
+			return posStr;
+		}
 	}
 }

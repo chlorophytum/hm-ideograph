@@ -47,26 +47,21 @@ function contained(z1: Geometry.Point, z2: Geometry.Point, segments: Seg, fuzz: 
 	return true;
 }
 
-export function splitDiagonalStem(
-	s: Stem,
-	strategy: HintingStrategy,
-	rid: number,
-	results: Stem[]
-) {
-	let hl = leftmostZ_SS(s.high);
-	let ll = leftmostZ_SS(s.low);
-	let hr = rightmostZ_SS(s.high);
-	let lr = rightmostZ_SS(s.low);
+function splitDiagonalStem(s: Stem, strategy: HintingStrategy, rid: number, results: Stem[]) {
+	const hl = leftmostZ_SS(s.high);
+	const ll = leftmostZ_SS(s.low);
+	const hr = rightmostZ_SS(s.high);
+	const lr = rightmostZ_SS(s.low);
 
 	if (
 		shouldSplit(hl, ll, hr, lr, strategy) &&
 		contained(ll, lr, s.low, strategy.Y_FUZZ * strategy.UPM) &&
 		contained(hl, hr, s.high, strategy.Y_FUZZ * strategy.UPM)
 	) {
-		let hmx = (hl.x + hr.x) / 2;
-		let lmx = (ll.x + lr.x) / 2;
-		let hmy = (hl.y + hr.y) / 2;
-		let lmy = (ll.y + lr.y) / 2;
+		const hmx = (hl.x + hr.x) / 2;
+		const lmx = (ll.x + lr.x) / 2;
+		const hmy = (hl.y + hr.y) / 2;
+		const lmy = (ll.y + lr.y) / 2;
 		const sLeft = new Stem(
 			[[hl, new CPoint(hmx - 1, hmy)]],
 			[[ll, new CPoint(lmx - 1, lmy)]],

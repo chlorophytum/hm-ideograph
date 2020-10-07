@@ -1,13 +1,18 @@
 import { Support } from "@chlorophytum/arch";
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
 import { overlapInfo, overlapRatio } from "../../si-common/overlap";
-import { expandZ, leftmostZ_SS, rightmostZ_SS, slopeOf } from "../../si-common/seg";
+import {
+	expandZ,
+	leftmostZ_S,
+	leftmostZ_SS,
+	rightmostZ_S,
+	rightmostZ_SS,
+	slopeOf
+} from "../../si-common/seg";
 import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import { Seg, SegSpan } from "../../types/seg";
 import Stem from "../../types/stem";
-
 import { calculateExp, calculateMinMax, calculateYW } from "./calc";
 import findHorizontalSegments from "./segments";
 import { splitDiagonalStems } from "./split";
@@ -99,11 +104,19 @@ function stemShapeIsIncorrect(
 }
 
 function uuMatchable(sj: SegSpan, sk: SegSpan, radical: Radical, strategy: HintingStrategy) {
-	let slope = (slopeOf([sj]) + slopeOf([sk])) / 2;
-	let ref = leftmostZ_SS([sj]);
-	let focus = leftmostZ_SS([sk]);
-	let desired = ref.y + (focus.x - ref.x) * slope;
-	let delta = Math.abs(focus.x - ref.x) * strategy.SLOPE_FUZZ_P + strategy.Y_FUZZ * strategy.UPM;
+	if (leftmostZ_S(sj).x > leftmostZ_S(sk).x) {
+		return uuMatchableImpl(sk, sj, radical, strategy);
+	} else {
+		return uuMatchableImpl(sj, sk, radical, strategy);
+	}
+}
+function uuMatchableImpl(sj: SegSpan, sk: SegSpan, radical: Radical, strategy: HintingStrategy) {
+	const focus = leftmostZ_S(sk);
+	const ref = rightmostZ_S(sj);
+	const slope = (slopeOf([sj]) + slopeOf([sk])) / 2;
+	const desired = ref.y + (focus.x - ref.x) * slope;
+	const delta =
+		Math.abs(focus.x - ref.x) * strategy.SLOPE_FUZZ_P + strategy.Y_FUZZ * strategy.UPM;
 	return Math.abs(focus.y - desired) <= delta && segmentJoinable(sj, sk, radical);
 }
 function segmentJoinable(pivot: SegSpan, segment: SegSpan, radical: Radical) {

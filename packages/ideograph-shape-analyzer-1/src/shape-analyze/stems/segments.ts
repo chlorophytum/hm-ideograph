@@ -1,26 +1,20 @@
-import { Geometry } from "@chlorophytum/arch";
-import { AdjPoint, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
+import { AdjPoint, Contour } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import { SegSpan } from "../../types/seg";
 
-type SlopeOperator = (
-	z1: Geometry.GlyphPoint,
-	z2: Geometry.GlyphPoint,
-	strategy: HintingStrategy
-) => boolean;
+type SlopeOperator = (z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) => boolean;
 
-function approSlope(z1: Geometry.GlyphPoint, z2: Geometry.GlyphPoint, strategy: HintingStrategy) {
+function approSlope(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
 	const slope = (z1.y - z2.y) / (z1.x - z2.x);
 	return slope >= 0 ? slope <= strategy.SLOPE_FUZZ_POS : slope >= -strategy.SLOPE_FUZZ_NEG;
 }
 
-function eqSlopeA(z1: Geometry.GlyphPoint, z2: Geometry.GlyphPoint, _strategy: HintingStrategy) {
+function eqSlopeA(z1: AdjPoint, z2: AdjPoint, _strategy: HintingStrategy) {
 	return z1.y === z2.y && ((z1.on && z2.on) || (!z1.on && !z2.on));
 }
 
-function approSlopeA(z1: Geometry.GlyphPoint, z2: Geometry.GlyphPoint, strategy: HintingStrategy) {
+function approSlopeA(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
 	const slope = (z1.y - z2.y) / (z1.x - z2.x);
 	return (
 		Math.abs(z2.x - z1.x) >= strategy.Y_FUZZ * strategy.UPM * 2 &&
@@ -28,7 +22,7 @@ function approSlopeA(z1: Geometry.GlyphPoint, z2: Geometry.GlyphPoint, strategy:
 	);
 }
 
-function approSlopeT(z1: Geometry.GlyphPoint, z2: Geometry.GlyphPoint, strategy: HintingStrategy) {
+function approSlopeT(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
 	const slope = (z1.y - z2.y) / (z1.x - z2.x);
 	return slope >= 0 ? slope <= strategy.SLOPE_FUZZ_POST : slope >= -strategy.SLOPE_FUZZ_NEG;
 }
@@ -41,7 +35,7 @@ function tryPushSegment(
 	strategy: HintingStrategy
 ) {
 	while (s.length > 1) {
-		if (approSlopeA(s[0], s[s.length - 1], strategy)) {
+		if (approSlopeSegmentT(s, approSlopeA, strategy)) {
 			for (let z of s) coupled.add(z);
 			ss.push(s);
 			return;
@@ -50,6 +44,12 @@ function tryPushSegment(
 		}
 	}
 }
+function approSlopeSegmentT(s: SegSpan, approSlopeA: SlopeOperator, strategy: HintingStrategy) {
+	return s.length > 2
+		? approSlopeA(s[0], s[s.length - 2], strategy) ||
+				approSlopeA(s[1], s[s.length - 1], strategy)
+		: approSlopeA(s[0], s[s.length - 1], strategy);
+}
 
 const SEGMENT_STRATEGIES: [SlopeOperator, SlopeOperator, SlopeOperator][] = [
 	[eqSlopeA, eqSlopeA, eqSlopeA],
@@ -57,14 +57,14 @@ const SEGMENT_STRATEGIES: [SlopeOperator, SlopeOperator, SlopeOperator][] = [
 ];
 
 function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: HintingStrategy) {
-	function restart(z: CPoint) {
+	function restart(z: AdjPoint) {
 		lastPoint = z;
 		segment = [lastPoint];
 	}
 	let coupled: Set<AdjPoint> = new Set();
-	let z0 = contour.points[0];
-	let lastPoint = z0;
-	let segment = [lastPoint];
+	let z0: AdjPoint = contour.points[0];
+	let lastPoint: AdjPoint = z0;
+	let segment: AdjPoint[] = [lastPoint];
 	for (let [as1, as1t, as2] of SEGMENT_STRATEGIES) {
 		restart(z0);
 		let tores = false;
@@ -105,12 +105,12 @@ function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: Hint
 // Stem finding
 export default function findHorizontalSegments(radicals: Radical[], strategy: HintingStrategy) {
 	for (const radical of radicals) {
+		const radicalParts = [radical.outline].concat(radical.holes);
 		let segments: SegSpan[] = [];
-		let radicalParts = [radical.outline].concat(radical.holes);
 		for (let j = 0; j < radicalParts.length; j++) {
 			findHSegInContour(segments, radicalParts[j], strategy);
 		}
-		radical.segments = segments.sort(function(p, q) {
+		radical.segments = segments.sort(function (p, q) {
 			return p[0].x - q[0].x;
 		});
 	}
