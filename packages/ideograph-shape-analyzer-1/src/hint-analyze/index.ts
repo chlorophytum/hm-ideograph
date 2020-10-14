@@ -267,7 +267,7 @@ class HintAnalyzer {
 			// Our key path is on a strange track
 			// We selected a diagonal stroke half, but it is not a good half
 			// Try to swap. 2 parts of a diagonal never occur in a path, so swapping is ok.
-			if (!sm.hasGlyphStemBelow && sm.diagHigh) {
+			if ((!sm.hasGlyphStemBelow && sm.diagHigh) || (!sm.hasGlyphStemAbove && sm.diagLow)) {
 				let opposite = -1;
 				for (let j = 0; j < this.sa.stems.length; j++) {
 					if (j !== path[m] && this.sa.stems[j].rid === sm.rid) opposite = j;
