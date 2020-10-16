@@ -1,5 +1,4 @@
-import { Geometry } from "@chlorophytum/arch";
-
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import { correctYWForStem } from "../../si-common/hlkey";
 import {
 	expandZ,
@@ -57,8 +56,8 @@ export function calculateMinMax(stem: Stem, radicals: Radical[], strategy: Hinti
 	stem.xMaxP = stem.xMax = Math.max(stem.xMaxTop, stem.xMaxBot);
 }
 function _expandSeg(seg: SegSpan, radical: Radical, slope: number) {
-	let z0: Geometry.GlyphPoint = leftmostZ_S(seg),
-		zm: Geometry.GlyphPoint = rightmostZ_S(seg);
+	let z0: AdjPoint = leftmostZ_S(seg),
+		zm: AdjPoint = rightmostZ_S(seg);
 	if (radical) {
 		z0 = expandZ(radical, z0, -1, -slope, 1000);
 		zm = expandZ(radical, zm, 1, slope, 1000);

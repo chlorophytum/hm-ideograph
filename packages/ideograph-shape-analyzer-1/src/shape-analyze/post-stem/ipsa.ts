@@ -29,7 +29,7 @@ function shortAbsorptionPointByKeys(
 	accept: IpSaAcceptance,
 	priority: number
 ) {
-	if (pt.touched || pt.dontTouch || !pt.on || !strategy.DO_SHORT_ABSORPTION) return;
+	if (pt.touched || pt.dontTouch || !pt.isCorner() || !strategy.DO_SHORT_ABSORPTION) return;
 	let minDist = 0xffff,
 		minKey = null;
 	for (let m = 0; m < keys.length; m++) {
@@ -100,7 +100,11 @@ function cEq(key: AdjPoint, pt: AdjPoint, aux: number) {
 	return Math.abs(pt.y - key.y) < aux;
 }
 function ipWeight(key: AdjPoint, pt: AdjPoint) {
-	const xw = key.phantom ? (pt.x < key.phantom.xMin || pt.x > key.phantom.xMax ? 1 : 1 / 4) : 1;
+	const xw = key.isPhantom
+		? pt.x < key.isPhantom.xMin || pt.x > key.isPhantom.xMax
+			? 1
+			: 1 / 4
+		: 1;
 	return Math.hypot(xw * (key.x - pt.x), key.y - pt.y);
 }
 
@@ -150,7 +154,7 @@ function interpolateByKeys(
 
 		while (upperK.linkedKey) upperK = upperK.linkedKey;
 		while (lowerK.linkedKey) lowerK = lowerK.linkedKey;
-		if (!upperK.phantom && !lowerK.phantom) {
+		if (!upperK.isPhantom && !lowerK.isPhantom) {
 			if (upperK.y > lowerK.y + fuzz) {
 				pt.ipKeys = { upperK0, lowerK0, upperK, lowerK, ipPri: priority };
 				targets.interpolations.push(new Interpolation(upperK, lowerK, pt, priority));
@@ -173,7 +177,7 @@ function linkRadicalSoleStemPoints(
 	let radicalPoints = _.flatten(radicalParts.map(c => c.points.slice(0, -1)));
 	for (let k = 0; k < radicalPoints.length; k++) {
 		const z = radicalPoints[k];
-		if (z.keyPoint || z.touched || z.dontTouch) continue;
+		if (z.isKeyPoint || z.touched || z.dontTouch || !z.queryReference()) continue;
 		if (!z.xExtrema && !z.yExtrema) continue;
 		let candidate = null;
 		for (const stem of radicalStems) {
@@ -184,7 +188,7 @@ function linkRadicalSoleStemPoints(
 			const keyPoints = highPoints.concat(lowPoints);
 			for (let j = 0; j < keyPoints.length; j++) {
 				let zKey = keyPoints[j];
-				if (zKey === z || !zKey.references || zKey.dontTouch) continue;
+				if (zKey === z || !zKey.queryReference() || zKey.dontTouch) continue;
 				if (CPoint.adjacent(zKey, z) || CPoint.adjacentZ(zKey, z)) {
 					reject = true;
 					continue;
@@ -201,7 +205,7 @@ function linkRadicalSoleStemPoints(
 				// detect whether this sole point is attached to the stem edge.
 				// in most cases, absorbing a lower point should be stricter due to the topology of ideographs
 				// so we use asymmetric condition for "above" and "below" cases.
-				let yDifference = z.y - (zKey.y + (z.x - zKey.x) * (zKey.slope || 0));
+				let yDifference = z.y - (zKey.y + (z.x - zKey.x) * (zKey.associatedStemSlope || 0));
 				if (
 					!(yDifference > 0
 						? yDifference < strategy.Y_FUZZ * strategy.UPM * 2
@@ -221,6 +225,7 @@ function linkRadicalSoleStemPoints(
 			if (
 				!reject &&
 				sc &&
+				sc.queryReference() &&
 				(!candidate ||
 					Math.hypot(z.y - candidate.y, z.x - candidate.x) >=
 						Math.hypot(z.y - sc.y, z.x - sc.x))
@@ -257,19 +262,19 @@ function convertDiagStemIp(target: IpSaTarget, s: Stem) {
 	if (s.ipHigh) {
 		for (let g of s.ipHigh) {
 			const [z1, z2, z] = g;
-			if (z.touched || z.dontTouch) continue;
+			if (z.touched || z.dontTouch || !z.queryReference()) continue;
 			target.interpolations.push(new Interpolation(z1, z2, z, 20));
 			z.touched = true;
-			z.keyPoint = true;
+			z.isKeyPoint = true;
 		}
 	}
 	if (s.ipLow) {
 		for (let g of s.ipLow) {
 			const [z1, z2, z] = g;
-			if (z.touched || z.dontTouch) continue;
+			if (z.touched || z.dontTouch || !z.queryReference()) continue;
 			target.interpolations.push(new Interpolation(z1, z2, z, 20));
 			z.touched = true;
-			z.keyPoint = true;
+			z.isKeyPoint = true;
 		}
 	}
 }
@@ -284,7 +289,7 @@ function createBlueZonePhantoms(
 		for (let z of zone) {
 			for (let step = -STEPS; step <= 2 * STEPS; step++) {
 				const p = new CPoint((strategy.UPM * step) / STEPS, z.y);
-				p.phantom = {
+				p.isPhantom = {
 					xMin: (strategy.UPM * (step - 1 / 2)) / STEPS,
 					xMax: (strategy.UPM * (step - 1 / 2)) / STEPS
 				};
@@ -298,7 +303,7 @@ function createBlueZonePhantoms(
 function createLRPhantom(l: AdjPoint, r: AdjPoint, step: number) {
 	const p = new CPoint(l.x + (step / STEPS) * (r.x - l.x), l.y + (step / STEPS) * (r.y - l.y));
 	p.linkedKey = step * 2 <= STEPS ? l : r;
-	p.phantom = {
+	p.isPhantom = {
 		xMin: l.x + ((step - 1 / 2) / STEPS) * (r.x - l.x),
 		xMax: l.x + ((step + 1 / 2) / STEPS) * (r.x - l.x)
 	};
@@ -307,7 +312,7 @@ function createLRPhantom(l: AdjPoint, r: AdjPoint, step: number) {
 function createLRYPhantom(z: AdjPoint, xMin: number, xMax: number, step: number) {
 	const p = new CPoint(xMin + (step / STEPS) * xMax - xMin, z.y);
 	p.linkedKey = z;
-	p.phantom = {
+	p.isPhantom = {
 		xMin: xMin + ((step - 1 / 2) / STEPS) * (xMax - xMin),
 		xMax: xMin + ((step + 1 / 2) / STEPS) * (xMax - xMin)
 	};
@@ -345,7 +350,7 @@ function isIpSaPointExtrema(z: AdjPoint, pMin: AdjPoint, pMax: AdjPoint) {
 		z !== pMax &&
 		!z.touched &&
 		!z.dontTouch &&
-		(z.yExtrema || (z.xStrongExtrema && z.turn))
+		(z.yExtrema || (z.xStrongExtrema && z.isTurnAround))
 	);
 }
 
@@ -361,6 +366,7 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 		let pMin: AdjPoint = contourPoints[0],
 			pMax: AdjPoint = contourPoints[0];
 		for (let z of contourPoints) {
+			if (!z.queryReference()) continue;
 			if (!pMin || z.y < pMin.y) pMin = z;
 			if (!pMax || z.y > pMax.y) pMax = z;
 		}
@@ -369,6 +375,7 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 			let extrema = contourExtrema.filter(z => isIpSaPointExtrema(z, pMin, pMax));
 			let middlePoints = [];
 			for (let m = 0; m < extrema.length; m++) {
+				if (!extrema[m].queryReference()) continue;
 				if (extrema[m].y === pMin.y) {
 					if (!CPoint.adjacent(pMin, extrema[m])) {
 						shortAbsorptions.push(new ShortAbsorption(pMin, extrema[m], 1));
@@ -386,7 +393,9 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 				}
 			}
 			let blues = contourPoints.filter(p => p.blued);
-			let middlePointsL = contourExtrema.filter(p => p.xExtrema || p.yExtrema);
+			let middlePointsL = contourExtrema.filter(
+				p => p.queryReference() && (p.xExtrema || p.yExtrema)
+			);
 			records.push({
 				topBot: [pMin, pMax],
 				middlePoints: middlePoints,
@@ -423,15 +432,13 @@ export default function AnalyzeIpSa(
 	for (let j = 0; j < contours.length; j++) {
 		for (let k = 0; k < contours[j].points.length; k++) {
 			let z = contours[j].points[k];
-			if ((z.touched && z.keyPoint) || z.linkedKey) {
+			if ((z.touched && z.isKeyPoint) || z.linkedKey) {
 				glyphKeyPoints.push(z);
 			}
 		}
 	}
 
-	for (let s of analysis.stems) {
-		convertDiagStemIp(targets, s);
-	}
+	for (let s of analysis.stems) convertDiagStemIp(targets, s);
 
 	// blue zone phantom points
 	createBlueZonePhantoms(glyphKeyPoints, analysis.blueZone, strategy);
@@ -547,7 +554,7 @@ export default function AnalyzeIpSa(
 					targets,
 					strategy,
 					records[j].middlePointsL,
-					records[j].middlePoints.filter(z => z.touched || z.keyPoint),
+					records[j].middlePoints.filter(z => z.touched || z.isKeyPoint),
 					{ ip: true },
 					1
 				);

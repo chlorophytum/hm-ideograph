@@ -1,6 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
-import { AdjPoint, CGlyph, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
+import { AdjPoint, CGlyph, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import { HintingStrategy } from "../../strategy";
 import Stem from "../../types/stem";
 
@@ -83,11 +82,11 @@ export default function analyzeBlueZonePoints(
 }
 
 function markTouchProps(blue: Iterable<AdjPoint>, deco: Set<AdjPoint>) {
-	for (const z of blue) if (!deco.has(z)) z.touched = z.keyPoint = z.blued = true;
+	for (const z of blue) if (!deco.has(z)) z.touched = z.isKeyPoint = z.blued = true;
 }
 function markDecoProps(deco: Iterable<AdjPoint>) {
 	for (const z of deco) {
-		z.touched = z.keyPoint = z.blued = false;
+		z.touched = z.isKeyPoint = z.blued = false;
 		z.dontTouch = true;
 	}
 }
@@ -110,11 +109,12 @@ function considerPoint(
 	topBluePoints: Set<AdjPoint>,
 	decoSet: Set<AdjPoint>
 ) {
+	if (!point.queryReference()) return;
 	const possibleTop = point.y >= yTop && point.yExtrema && !point.touched && !point.dontTouch;
 	const possibleBottom =
 		point.y <= yBottom && point.yExtrema && !point.touched && !point.dontTouch;
 	for (let j = 0; j < glyph.contours.length; j++) {
-		for (let m = 0; m < glyph.contours[j].points.length - 1; m++) {
+		for (let m = 0; m < glyph.contours[j].points.length; m++) {
 			let zm = glyph.contours[j].points[m];
 			if (!(CPoint.adjacent(point, zm) || CPoint.adjacentZ(point, zm))) continue;
 			if (!(zm.touched || zm.dontTouch)) continue;

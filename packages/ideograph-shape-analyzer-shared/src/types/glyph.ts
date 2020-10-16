@@ -1,19 +1,16 @@
 import { Geometry } from "@chlorophytum/arch";
-
-import { Contour, inPoly } from "./contour";
+import { Contour } from "./contour";
 import { createStat, Stat } from "./stat";
 
 export class CGlyph {
 	constructor(public contours: Contour[] = []) {}
-	public nPoints = 0;
-
 	public stats: Stat = createStat();
 
 	public containsPoint(z: Geometry.Point) {
 		let nCW = 0,
 			nCCW = 0;
 		for (let j = 0; j < this.contours.length; j++) {
-			if (inPoly(z, this.contours[j].points)) {
+			if (this.contours[j].includesPoint(z)) {
 				if (this.contours[j].ccw) nCCW += 1;
 				else nCW += 1;
 			}

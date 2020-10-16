@@ -1,5 +1,5 @@
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
+import * as util from "util";
 import { HintAnalysis } from "../hint-analyze/type";
 import Radical from "../types/radical";
 import Stem from "../types/stem";
@@ -10,11 +10,19 @@ export class Interpolation implements HintAnalysis.InterpolationOrLink {
 		public ref2: AdjPoint,
 		public subject: AdjPoint,
 		public priority: number
-	) {}
+	) {
+		if (!ref1.queryReference() || !ref2.queryReference() || !subject.queryReference())
+			throw new Error(
+				`UNREF! ${util.inspect(ref1)} -- ${util.inspect(subject)} -- ${util.inspect(ref2)}`
+			);
+	}
 }
 export class ShortAbsorption implements HintAnalysis.InterpolationOrLink {
 	public ref2 = null;
-	constructor(public ref1: AdjPoint, public subject: AdjPoint, public priority: number) {}
+	constructor(public ref1: AdjPoint, public subject: AdjPoint, public priority: number) {
+		if (!ref1.queryReference() || !subject.queryReference())
+			throw new Error(`UNREF! ${util.inspect(ref1)} -- ${util.inspect(subject)}`);
+	}
 }
 
 export class BlueZone {

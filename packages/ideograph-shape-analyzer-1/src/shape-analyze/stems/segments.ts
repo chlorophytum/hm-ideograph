@@ -3,15 +3,33 @@ import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import { SegSpan } from "../../types/seg";
 
-type SlopeOperator = (z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) => boolean;
-
-function approSlope(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
-	const slope = (z1.y - z2.y) / (z1.x - z2.x);
-	return slope >= 0 ? slope <= strategy.SLOPE_FUZZ_POS : slope >= -strategy.SLOPE_FUZZ_NEG;
+export default function findHorizontalSegments(radicals: Radical[], strategy: HintingStrategy) {
+	for (const radical of radicals) {
+		const radicalParts = [radical.outline].concat(radical.holes);
+		let segments: SegSpan[] = [];
+		for (let j = 0; j < radicalParts.length; j++) {
+			const coupled = new Set<AdjPoint>();
+			findHSegInContour2(segments, radicalParts[j], strategy, coupled);
+			findHTangents(segments, radicalParts[j], strategy, coupled);
+		}
+		radical.segments = segments.sort(function (p, q) {
+			return p[0].x - q[0].x;
+		});
+	}
 }
 
-function eqSlopeA(z1: AdjPoint, z2: AdjPoint, _strategy: HintingStrategy) {
-	return z1.y === z2.y && ((z1.on && z2.on) || (!z1.on && !z2.on));
+type SlopeOperator = (z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) => boolean;
+
+function approSlope(z2: AdjPoint, z1: AdjPoint, strategy: HintingStrategy) {
+	if (z1.nextZ && z2.prevZ && z1.nextZ !== z2) {
+		return approSlopeImpl(z1, z1.nextZ, strategy) && approSlopeImpl(z2.prevZ, z2, strategy);
+	} else {
+		return approSlopeImpl(z1, z2, strategy);
+	}
+}
+
+function eqSlopeA(z2: AdjPoint, z1: AdjPoint, _strategy: HintingStrategy) {
+	return z1.y === z2.y && z1.isCorner() === z2.isCorner();
 }
 
 function approSlopeA(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
@@ -22,9 +40,23 @@ function approSlopeA(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
 	);
 }
 
-function approSlopeT(z1: AdjPoint, z2: AdjPoint, strategy: HintingStrategy) {
+function approSlopeT(z2: AdjPoint, z1: AdjPoint, strategy: HintingStrategy) {
+	if (z1.nextZ && z2.prevZ && z1.nextZ !== z2) {
+		return (
+			(approSlopeImpl(z1, z1.nextZ, strategy) && approSlopeTImpl(z2.prevZ, z2, strategy)) ||
+			(approSlopeTImpl(z1, z1.nextZ, strategy) && approSlopeImpl(z2.prevZ, z2, strategy))
+		);
+	} else {
+		return approSlopeTImpl(z1, z2, strategy);
+	}
+}
+function approSlopeTImpl(z2: AdjPoint, z1: AdjPoint, strategy: HintingStrategy) {
 	const slope = (z1.y - z2.y) / (z1.x - z2.x);
 	return slope >= 0 ? slope <= strategy.SLOPE_FUZZ_POST : slope >= -strategy.SLOPE_FUZZ_NEG;
+}
+function approSlopeImpl(z2: AdjPoint, z1: AdjPoint, strategy: HintingStrategy) {
+	const slope = (z1.y - z2.y) / (z1.x - z2.x);
+	return slope >= 0 ? slope <= strategy.SLOPE_FUZZ_POS : slope >= -strategy.SLOPE_FUZZ_NEG;
 }
 
 function tryPushSegment(
@@ -36,8 +68,10 @@ function tryPushSegment(
 ) {
 	while (s.length > 1) {
 		if (approSlopeSegmentT(s, approSlopeA, strategy)) {
-			for (let z of s) coupled.add(z);
-			ss.push(s);
+			let s1 = [s[0]];
+			for (let k = 1; k < s.length; k++) linkSegment(s1, s[k]);
+			for (let z of s1) coupled.add(z);
+			ss.push(s1);
 			return;
 		} else {
 			s.shift();
@@ -56,30 +90,51 @@ const SEGMENT_STRATEGIES: [SlopeOperator, SlopeOperator, SlopeOperator][] = [
 	[approSlope, approSlopeT, approSlopeA]
 ];
 
-function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: HintingStrategy) {
-	function restart(z: AdjPoint) {
-		lastPoint = z;
-		segment = [lastPoint];
+function findStart(contour: Contour) {
+	for (const z of contour.points) if (z.queryReference()) return z;
+	return null;
+}
+function linkSegment(segment: AdjPoint[], z: AdjPoint) {
+	const last = segment[segment.length - 1];
+	let subject = last.nextZ;
+	while (subject && subject !== z && subject !== last) {
+		segment.push(subject);
+		subject = subject.nextZ;
 	}
-	let coupled: Set<AdjPoint> = new Set();
-	let z0: AdjPoint = contour.points[0];
-	let lastPoint: AdjPoint = z0;
-	let segment: AdjPoint[] = [lastPoint];
+	segment.push(z);
+}
+function findHSegInContour2(
+	segments: SegSpan[],
+	contour: Contour,
+	strategy: HintingStrategy,
+	coupled: Set<AdjPoint>
+) {
+	let zStart = findStart(contour);
+	if (!zStart) return;
+
+	let zLast: AdjPoint = zStart;
+	let segment: AdjPoint[] = [zLast];
+
+	function restart(z: AdjPoint) {
+		zLast = z;
+		segment = [zLast];
+	}
+
 	for (let [as1, as1t, as2] of SEGMENT_STRATEGIES) {
-		restart(z0);
 		let tores = false;
-		for (let k = 1; k < contour.points.length - 1; k++) {
-			const z = contour.points[k];
-			if (tores || !z.references || coupled.has(lastPoint)) {
+		restart(zStart);
+		let z = zLast.next;
+		while (z && z !== zStart) {
+			if (tores || !z.queryReference() || coupled.has(zLast)) {
 				restart(z);
 				tores = false;
-			} else if (!coupled.has(z) && as1t(z, lastPoint, strategy)) {
+			} else if (!coupled.has(z) && as1t(z, zLast, strategy)) {
 				segment.push(z);
-				if (segment.length > 2 && !as1(z, lastPoint, strategy)) {
+				if (segment.length > 2 && !as1(z, zLast, strategy)) {
 					tryPushSegment(segment, segments, as2, coupled, strategy);
 					tores = true;
 				} else {
-					lastPoint = z;
+					zLast = z;
 					tores = false;
 				}
 			} else {
@@ -87,31 +142,45 @@ function findHSegInContour(segments: SegSpan[], contour: Contour, strategy: Hint
 				restart(z);
 				tores = false;
 			}
+			z = z.next;
 		}
-		if (!coupled.has(z0) && as1(z0, lastPoint, strategy)) {
-			if (segments[0] && segments[0][0] === z0) {
+
+		if (z && !coupled.has(z) && as1(z, zLast, strategy)) {
+			if (segments[0] && segments[0][0] === z) {
 				const firstSeg = [...segment, ...segments[0]];
 				segment.shift();
 				tryPushSegment(firstSeg, segments, as2, coupled, strategy);
-				segment = [z0];
+				segment = [z];
 			} else {
-				segment.push(z0);
+				segment.push(z);
 			}
 		}
 		tryPushSegment(segment, segments, as2, coupled, strategy);
 	}
 }
 
-// Stem finding
-export default function findHorizontalSegments(radicals: Radical[], strategy: HintingStrategy) {
-	for (const radical of radicals) {
-		const radicalParts = [radical.outline].concat(radical.holes);
-		let segments: SegSpan[] = [];
-		for (let j = 0; j < radicalParts.length; j++) {
-			findHSegInContour(segments, radicalParts[j], strategy);
+function findHTangents(
+	segments: SegSpan[],
+	contour: Contour,
+	strategy: HintingStrategy,
+	coupled: Set<AdjPoint>
+) {
+	for (const z of contour.points) {
+		if (
+			z.queryReference() &&
+			z.prevZ &&
+			z.nextZ &&
+			!coupled.has(z) &&
+			!coupled.has(z.prevZ) &&
+			!coupled.has(z.nextZ) &&
+			!z.prevZ.queryReference() &&
+			!z.nextZ.queryReference()
+		) {
+			if (approSlopeImpl(z.prevZ, z, strategy) && approSlopeImpl(z.nextZ, z, strategy)) {
+				console.log(z, [z.prevZ, z, z.nextZ]);
+				segments.push([z.prevZ, z, z.nextZ]);
+				coupled.add(z);
+			}
 		}
-		radical.segments = segments.sort(function (p, q) {
-			return p[0].x - q[0].x;
-		});
 	}
 }

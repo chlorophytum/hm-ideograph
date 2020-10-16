@@ -1,58 +1,28 @@
 import { Geometry } from "@chlorophytum/arch";
 import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
-
-import { leftmostZ_SS, rightmostZ_SS } from "../../si-common/seg";
+import { findHighLowKeys } from "../../si-common/hlkey";
+import { leftmostZ_SS_Ref, rightmostZ_SS_Ref } from "../../si-common/seg";
 import { HintingStrategy } from "../../strategy";
 import { PostHint } from "../../types/post-hint";
 import { Seg } from "../../types/seg";
 import Stem from "../../types/stem";
 
-function shouldSplit(
-	hl: AdjPoint,
-	ll: AdjPoint,
-	hr: AdjPoint,
-	lr: AdjPoint,
-	strategy: HintingStrategy
-) {
-	if (hl === hr || ll === lr) return false;
-	if (hl.y === hr.y || ll.y === lr.y) return false;
-	if ((hl.on && ll.on && !hr.on && !lr.on) || (!hl.on && !ll.on && hr.on && lr.on)) {
-		if (CPoint.adjacentZ(hl, hr) && CPoint.adjacentZ(ll, lr)) return false;
+export function splitDiagonalStems(ss: Stem[], strategy: HintingStrategy) {
+	let ans: Stem[] = [];
+	let rid = 1;
+	for (let s of ss) {
+		splitDiagonalStem(s, strategy, rid, ans);
+		rid += 1;
 	}
-
-	return (
-		Math.abs(hr.y - hl.y) >= Math.abs(hr.x - hl.x) * strategy.SLOPE_FUZZ_R &&
-		Math.abs(lr.y - ll.y) >= Math.abs(lr.x - ll.x) * strategy.SLOPE_FUZZ_R &&
-		Math.abs(Math.min(hl.x, ll.x) - Math.max(hr.x, lr.x)) >=
-			2 * Math.max(Math.abs(hl.y - ll.y), Math.abs(hr.y - lr.y)) &&
-		Math.abs(Math.max(hl.x, ll.x) - Math.min(hr.x, lr.x)) >=
-			Math.max(Math.abs(hl.y - ll.y), Math.abs(hr.y - lr.y)) &&
-		Math.abs(hl.x - ll.x) * 2.25 < Math.max(Math.abs(hl.x - hr.x), Math.abs(ll.x - lr.x)) &&
-		Math.abs(hr.x - lr.x) * 2.25 < Math.max(Math.abs(hl.x - hr.x), Math.abs(ll.x - lr.x)) &&
-		(Math.abs(hl.y - hr.y) >= strategy.Y_FUZZ_DIAG * strategy.UPM ||
-			Math.abs(ll.y - lr.y) >= strategy.Y_FUZZ_DIAG * strategy.UPM)
-	);
-}
-function contained(z1: Geometry.Point, z2: Geometry.Point, segments: Seg, fuzz: number) {
-	for (let seg of segments) {
-		for (let z of seg) {
-			if (
-				(z.y > z1.y + fuzz && z.y > z2.y + fuzz) ||
-				(z.y < z1.y - fuzz && z.y < z2.y - fuzz)
-			) {
-				return false;
-			}
-		}
-	}
-	return true;
+	return ans;
 }
 
 function splitDiagonalStem(s: Stem, strategy: HintingStrategy, rid: number, results: Stem[]) {
-	const hl = leftmostZ_SS(s.high);
-	const ll = leftmostZ_SS(s.low);
-	const hr = rightmostZ_SS(s.high);
-	const lr = rightmostZ_SS(s.low);
-
+	const hl = leftmostZ_SS_Ref(s.high);
+	const ll = leftmostZ_SS_Ref(s.low);
+	const hr = rightmostZ_SS_Ref(s.high);
+	const lr = rightmostZ_SS_Ref(s.low);
+	if (!hl || !hr || !ll || !lr) return;
 	if (
 		shouldSplit(hl, ll, hr, lr, strategy) &&
 		contained(ll, lr, s.low, strategy.Y_FUZZ * strategy.UPM) &&
@@ -83,36 +53,77 @@ function splitDiagonalStem(s: Stem, strategy: HintingStrategy, rid: number, resu
 			sRight.diagHigh = true;
 			sLeft.diagLow = true;
 		}
-		// intermediate knots
-		const ipHigh: PostHint[] = [];
-		const ipLow: PostHint[] = [];
-		for (let sg of s.high) {
-			for (let z of [sg[0], sg[sg.length - 1]]) {
-				if (!z.references) continue;
-				if (z === hl || z === hr) continue;
-				ipHigh.push([hl, hr, z]);
-			}
-		}
-		for (let sg of s.low) {
-			for (let z of [sg[0], sg[sg.length - 1]]) {
-				if (!z.references) continue;
-				if (z === ll || z === lr) continue;
-				ipLow.push([ll, lr, z]);
-			}
-		}
-		sLeft.ipHigh = ipHigh;
-		sLeft.ipLow = ipLow;
+		addIp(s, sLeft, sRight);
 		results.push(sLeft, sRight);
 	} else {
 		results.push(s);
 	}
 }
-export function splitDiagonalStems(ss: Stem[], strategy: HintingStrategy) {
-	let ans: Stem[] = [];
-	let rid = 1;
-	for (let s of ss) {
-		splitDiagonalStem(s, strategy, rid, ans);
-		rid += 1;
+
+function shouldSplit(
+	hl: AdjPoint,
+	ll: AdjPoint,
+	hr: AdjPoint,
+	lr: AdjPoint,
+	strategy: HintingStrategy
+) {
+	if (hl === hr || ll === lr) return false;
+	if (hl.y === hr.y || ll.y === lr.y) return false;
+	if (
+		(hl.isCorner() && ll.isCorner() && !hr.isCorner() && !lr.isCorner()) ||
+		(!hl.isCorner() && !ll.isCorner() && hr.isCorner() && lr.isCorner())
+	) {
+		if (CPoint.adjacentZ(hl, hr) && CPoint.adjacentZ(ll, lr)) return false;
 	}
-	return ans;
+
+	return (
+		Math.abs(hr.y - hl.y) >= Math.abs(hr.x - hl.x) * strategy.SLOPE_FUZZ_R &&
+		Math.abs(lr.y - ll.y) >= Math.abs(lr.x - ll.x) * strategy.SLOPE_FUZZ_R &&
+		Math.abs(Math.min(hl.x, ll.x) - Math.max(hr.x, lr.x)) >=
+			2 * Math.max(Math.abs(hl.y - ll.y), Math.abs(hr.y - lr.y)) &&
+		Math.abs(Math.max(hl.x, ll.x) - Math.min(hr.x, lr.x)) >=
+			Math.max(Math.abs(hl.y - ll.y), Math.abs(hr.y - lr.y)) &&
+		Math.abs(hl.x - ll.x) * 2.25 < Math.max(Math.abs(hl.x - hr.x), Math.abs(ll.x - lr.x)) &&
+		Math.abs(hr.x - lr.x) * 2.25 < Math.max(Math.abs(hl.x - hr.x), Math.abs(ll.x - lr.x)) &&
+		(Math.abs(hl.y - hr.y) >= strategy.Y_FUZZ_DIAG * strategy.UPM ||
+			Math.abs(ll.y - lr.y) >= strategy.Y_FUZZ_DIAG * strategy.UPM)
+	);
+}
+
+function contained(z1: Geometry.Point, z2: Geometry.Point, segments: Seg, fuzz: number) {
+	for (let seg of segments) {
+		for (let z of seg) {
+			if (
+				(z.y > z1.y + fuzz && z.y > z2.y + fuzz) ||
+				(z.y < z1.y - fuzz && z.y < z2.y - fuzz)
+			) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+function addIp(s: Stem, sLeft: Stem, sRight: Stem) {
+	const hlkLeft = findHighLowKeys(sLeft);
+	const hlkRight = findHighLowKeys(sRight);
+	// intermediate knots
+	const ipHigh: PostHint[] = [];
+	const ipLow: PostHint[] = [];
+	for (let sg of s.high) {
+		for (let z of [sg[0], sg[sg.length - 1]]) {
+			if (!z.queryReference()) continue;
+			if (z === hlkLeft.highKey || z === hlkRight.highKey) continue;
+			ipHigh.push([hlkLeft.highKey, hlkRight.highKey, z]);
+		}
+	}
+	for (let sg of s.low) {
+		for (let z of [sg[0], sg[sg.length - 1]]) {
+			if (!z.queryReference()) continue;
+			if (z === hlkLeft.lowKey || z === hlkRight.lowKey) continue;
+			ipLow.push([hlkLeft.lowKey, hlkRight.lowKey, z]);
+		}
+	}
+	sLeft.ipHigh = ipHigh;
+	sLeft.ipLow = ipLow;
 }

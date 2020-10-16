@@ -18,11 +18,7 @@ export function hashGlyphContours(glyph: CGlyph) {
 		buf += "a";
 		let c = input[j];
 		for (let k = 0; k < c.points.length; k++) {
-			if (c.points[k].on) {
-				buf += "l";
-			} else {
-				buf += "c";
-			}
+			buf += "z" + c.points[k].type + " ";
 			buf += c.points[k].x + " " + c.points[k].y;
 		}
 	}

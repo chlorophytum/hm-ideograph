@@ -1,25 +1,30 @@
 import { Geometry } from "@chlorophytum/arch";
 import * as Util from "util";
 
-export interface AdjPoint extends Geometry.GlyphPoint {
-	prev?: AdjPoint;
-	next?: AdjPoint;
-	prevZ?: AdjPoint;
-	nextZ?: AdjPoint;
-	xExtrema?: boolean;
-	xStrongExtrema?: boolean;
-	yExtrema?: boolean;
-	yStrongExtrema?: boolean;
-	atLeft?: boolean;
-	turn?: boolean;
+export interface AdjPoint {
+	readonly x: number;
+	readonly y: number;
+	isCorner(): boolean;
+	queryReference(): null | Geometry.PointReference;
+
+	readonly prev?: AdjPoint;
+	readonly next?: AdjPoint;
+	readonly prevZ?: AdjPoint;
+	readonly nextZ?: AdjPoint;
+	readonly xExtrema?: boolean;
+	readonly xStrongExtrema?: boolean;
+	readonly yExtrema?: boolean;
+	readonly yStrongExtrema?: boolean;
+	readonly atLeft?: boolean;
+	readonly isTurnAround?: boolean;
+	readonly isPhantom?: IpPhantom;
 	touched?: boolean;
 	dontTouch?: boolean;
-	keyPoint?: boolean;
-	linkedKey?: AdjPoint;
-	slope?: number;
+	isKeyPoint?: boolean;
+	linkedKey?: undefined | null | AdjPoint;
+	associatedStemSlope?: number;
 	blued?: boolean;
 	ipKeys?: IpKeys;
-	phantom?: IpPhantom;
 }
 
 export interface IpPhantom {
@@ -38,20 +43,31 @@ export class CPoint implements AdjPoint {
 	constructor(
 		public readonly x: number,
 		public readonly y: number,
-		public readonly on: boolean = true,
-		public readonly references: null | Geometry.PointReference[] = null
-	) {}
+		public readonly type: number = Geometry.GlyphPointType.Corner,
+		private readonly rawReferences: null | Geometry.PointReference[] = null
+	) {
+		this.references = type === Geometry.GlyphPointType.Corner ? rawReferences : null;
+	}
+
+	public static from(gz: Geometry.GlyphPoint) {
+		return new CPoint(gz.x, gz.y, gz.type, gz.references);
+	}
+	public static cornerFrom(gz: Geometry.GlyphPoint) {
+		return new CPoint(gz.x, gz.y, Geometry.GlyphPointType.Corner, gz.references);
+	}
+
+	public references: null | Geometry.PointReference[];
 	public xExtrema: boolean = false;
 	public xStrongExtrema: boolean = false;
 	public yExtrema: boolean = false;
 	public yStrongExtrema: boolean = false;
 	public atLeft: boolean = false;
-	public turn: boolean = false;
+	public isTurnAround: boolean = false;
 	public touched: boolean = false;
 	public dontTouch: boolean = false;
-	public keyPoint: boolean = false;
+	public isKeyPoint: boolean = false;
 	public linkedKey?: AdjPoint;
-	public slope?: number;
+	public associatedStemSlope?: number;
 	public blued?: boolean;
 
 	public prev?: AdjPoint;
@@ -59,7 +75,14 @@ export class CPoint implements AdjPoint {
 	public prevZ?: AdjPoint;
 	public nextZ?: AdjPoint;
 	public ipKeys?: IpKeys;
-	public phantom?: IpPhantom;
+	public isPhantom?: IpPhantom;
+
+	public queryReference() {
+		return this.references && this.references.length > 0 ? this.references[0] : null;
+	}
+	public isCorner() {
+		return this.type === Geometry.GlyphPointType.Corner;
+	}
 
 	public static adjacentZ(p: AdjPoint, q: AdjPoint) {
 		return p.nextZ === q || p.prevZ === q || q.nextZ === p || q.prevZ === p;
@@ -74,6 +97,9 @@ export class CPoint implements AdjPoint {
 		if (this.references && this.references.length) {
 			const zidStr = Util.inspect(this.references[0].id, options);
 			return `${posStr}#${zidStr}`;
+		} else if (this.rawReferences && this.rawReferences.length) {
+			const zidStr = Util.inspect(this.rawReferences[0].id, options);
+			return `${posStr}(#${zidStr})`;
 		} else {
 			return posStr;
 		}

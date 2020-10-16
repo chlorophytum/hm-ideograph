@@ -1,5 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
-import { CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import Radical from "../types/radical";
 import { Seg, SegSpan } from "../types/seg";
@@ -29,25 +29,35 @@ export function segmentsProximity(s1: Seg, s2: Seg) {
 	return (2 * count) / (s1.length + s2.length);
 }
 
-export function leftmostZ_S(seg: SegSpan) {
+export function leftmostZ_S(seg: SegSpan): AdjPoint {
 	let m = seg[0];
 	for (let z of seg) if (!m || (z && z.x < m.x)) m = z;
 	return m;
 }
-export function rightmostZ_S(seg: SegSpan) {
+export function rightmostZ_S(seg: SegSpan): AdjPoint {
 	let m = seg[0];
 	for (let z of seg) if (!m || (z && z.x > m.x)) m = z;
 	return m;
 }
 
-export function leftmostZ_SS(s: Seg) {
+export function leftmostZ_SS(s: Seg): AdjPoint {
 	let m = s[0][0];
 	for (let seg of s) for (let z of seg) if (!m || (z && z.x < m.x)) m = z;
 	return m;
 }
-export function rightmostZ_SS(s: Seg) {
+export function rightmostZ_SS(s: Seg): AdjPoint {
 	let m = s[0][0];
 	for (let seg of s) for (let z of seg) if (!m || (z && z.x > m.x)) m = z;
+	return m;
+}
+export function leftmostZ_SS_Ref(s: Seg): null | AdjPoint {
+	let m: AdjPoint | null = null;
+	for (let seg of s) for (let z of seg) if (z.queryReference() && (!m || (z && z.x < m.x))) m = z;
+	return m;
+}
+export function rightmostZ_SS_Ref(s: Seg): null | AdjPoint {
+	let m: AdjPoint | null = null;
+	for (let seg of s) for (let z of seg) if (z.queryReference() && (!m || (z && z.x > m.x))) m = z;
 	return m;
 }
 
@@ -57,8 +67,8 @@ export function expandZ(
 	dx: number,
 	dy: number,
 	maxTicks: number
-): Geometry.GlyphPoint {
-	let z1 = { x: z.x + dx, y: z.y + dy, on: true, references: [] },
+): AdjPoint {
+	let z1 = { x: z.x + dx, y: z.y + dy },
 		steps = 0;
 	while (radical.includesEdge(z1, 0, 2) && steps < maxTicks) {
 		z1.x += dx;
@@ -67,7 +77,7 @@ export function expandZ(
 	}
 	z1.x -= dx;
 	z1.y -= dy;
-	return z1;
+	return new CPoint(z1.x, z1.y);
 }
 export function expandZ0(
 	radical: Radical,
@@ -75,8 +85,8 @@ export function expandZ0(
 	dx: number,
 	dy: number,
 	maxTicks: number
-): Geometry.GlyphPoint {
-	let z1 = { x: z.x + dx, y: z.y + dy, on: true, references: [] },
+): AdjPoint {
+	let z1 = { x: z.x + dx, y: z.y + dy },
 		steps = 0;
 	while (radical.includes(z1) && steps < maxTicks) {
 		z1.x += dx;
@@ -85,7 +95,7 @@ export function expandZ0(
 	}
 	z1.x -= dx;
 	z1.y -= dy;
-	return z1;
+	return new CPoint(z1.x, z1.y);
 }
 
 export function slopeOf(s: Seg) {

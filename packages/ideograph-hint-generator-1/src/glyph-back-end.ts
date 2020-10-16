@@ -5,9 +5,12 @@ import { MultipleAlignZone } from "@chlorophytum/hint-maz";
 import { HintAnalysis, HintingStrategy, Stem } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared/src";
 
+import * as util from "util";
+
 function ref(z: AdjPoint) {
-	if (!z.references) throw new Error("Unable to reference point.");
-	return z.references[0];
+	const r = z.queryReference();
+	if (!r) throw new Error("Unable to reference point: " + util.inspect(z));
+	return r;
 }
 
 export class GlyphHintGenBackEnd {

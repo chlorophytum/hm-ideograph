@@ -100,10 +100,10 @@ export default class Radical {
 				for (let sg = 0; sg <= N; sg++) {
 					let zTop = Support.mixZ(p, q, sg / N);
 					let zBot = Support.mixZ(r, s, sg / N);
-					if (!p.turn && zTop.x < xMin1 + dS) continue;
-					if (!q.turn && zTop.x > xMax1 - dS) continue;
-					if (!r.turn && zBot.x < xMin2 + dS) continue;
-					if (!s.turn && zBot.x > xMax2 - dS) continue;
+					if (!p.isTurnAround && zTop.x < xMin1 + dS) continue;
+					if (!q.isTurnAround && zTop.x > xMax1 - dS) continue;
+					if (!r.isTurnAround && zBot.x < xMin2 + dS) continue;
+					if (!s.isTurnAround && zBot.x > xMax2 - dS) continue;
 					if (!this.includesSegmentEdge(zTop, zBot, 1, 1, 1, 1)) return false;
 				}
 			}

@@ -21,7 +21,7 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 					continue;
 				}
 				stem.high[j][k].linkedKey = highKey;
-				if (!stem.high[j][k].references) {
+				if (!stem.high[j][k].queryReference()) {
 					continue;
 				}
 				if (k === 0) {
@@ -40,7 +40,7 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 					continue;
 				}
 				stem.low[j][k].linkedKey = lowKey;
-				if (!stem.low[j][k].references) {
+				if (!stem.low[j][k].queryReference()) {
 					continue;
 				}
 				if (k === stem.low[j].length - 1) {
@@ -57,8 +57,8 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 		stem.lowKey = lowKey;
 		stem.highAlign = highNonKey;
 		stem.lowAlign = lowNonKey;
-		stem.highKey.keyPoint = true;
-		stem.lowKey.keyPoint = true;
-		stem.highKey.slope = stem.lowKey.slope = stem.slope;
+		stem.highKey.isKeyPoint = true;
+		stem.lowKey.isKeyPoint = true;
+		stem.highKey.associatedStemSlope = stem.lowKey.associatedStemSlope = stem.slope;
 	}
 }

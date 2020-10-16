@@ -318,7 +318,7 @@ function analyzeRadicalPointsToStemRelationships(
 		xMax = Math.max(a0, b0, az, bz);
 	const radicalParts = [radical.outline].concat(radical.holes);
 	for (let j = 0; j < radicalParts.length; j++) {
-		for (let k = 0; k < radicalParts[j].points.length - 1; k++) {
+		for (let k = 0; k < radicalParts[j].points.length; k++) {
 			const point = radicalParts[j].points[k];
 			PtAbove(point, stem, xMin, xMax, yFuzz, sameRadical);
 			PtRightAdjAbove(point, stem, xMin, xMax, yFuzz, sameRadical);
@@ -393,7 +393,7 @@ function analyzePBS(u: Stem, v: Stem, radical: Radical, strategy: HintingStrateg
 	const radicalParts = [radical.outline].concat(radical.holes);
 	let ans = 0;
 	for (let j = 0; j < radicalParts.length; j++) {
-		for (let k = 0; k < radicalParts[j].points.length - 1; k++) {
+		for (let k = 0; k < radicalParts[j].points.length; k++) {
 			let point = radicalParts[j].points[k];
 			if (
 				(!u.hasGlyphPointAbove ||

@@ -47,12 +47,13 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 			if (!glyphRep) return;
 			let hints: null | undefined | IHint = null;
 
-			const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, glyphRep);
+			const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, gn, glyphRep);
 			const runPct = arb.runParallelCoTask(pct);
 			if (runPct) {
 				hints = await runPct;
 			} else {
 				const pt = new ParallelGlyphHintTask(
+					gn,
 					this.font.metadata,
 					this.analyzer,
 					this.codeGen,
@@ -77,6 +78,7 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 }
 
 export type GlyphHintParallelArgRep<S> = {
+	readonly gn: string;
 	readonly fmd: IFontSourceMetadata;
 	readonly params: S;
 	readonly glyphRep: Glyph.Rep;
@@ -96,13 +98,18 @@ export class ParallelGlyphHintCoTask<GID, S>
 		private readonly font: IFontSource<GID>,
 		private readonly ee: IHintingModelExecEnv,
 		private readonly params: S,
-
+		private readonly gn: string,
 		private readonly glyphRep: Glyph.Rep
 	) {}
 	public readonly taskType = ParallelTaskType;
 
 	public async getArgRep() {
-		return { fmd: this.font.metadata, params: this.params, glyphRep: this.glyphRep };
+		return {
+			gn: this.gn,
+			fmd: this.font.metadata,
+			params: this.params,
+			glyphRep: this.glyphRep
+		};
 	}
 	public async getResult(rep: GlyphHintParallelResultRep) {
 		return this.ee.hintFactory.readJson(rep.hints, this.ee.hintFactory);
@@ -113,6 +120,7 @@ export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
 	implements IParallelTask<GlyphHintParallelResultRep> {
 	public readonly type = ParallelTaskType;
 	constructor(
+		private readonly gn: string,
 		fmd: IFontSourceMetadata,
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,
 		private readonly codeGen: IHintGen<S, G, A>,

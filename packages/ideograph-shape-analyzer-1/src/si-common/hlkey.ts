@@ -11,9 +11,9 @@ function keyPointPriority(
 	atl?: boolean,
 	atr?: boolean
 ) {
-	if (atr) {
+	if (atl) {
 		return current.x < incoming.x;
-	} else if (atl) {
+	} else if (atr) {
 		return current.x > incoming.x;
 	} else {
 		if (current.y === incoming.y) {
@@ -30,25 +30,23 @@ export function findHighLowKeys(s: Stem) {
 
 	for (let j = 0; j < s.high.length; j++) {
 		for (let k = 0; k < s.high[j].length; k++) {
-			if (
-				!highKey ||
-				(s.high[j][k].references &&
-					keyPointPriority(s.high[j][k], highKey, s.atLeft, s.atRight))
-			) {
+			if (!s.high[j][k].queryReference()) continue;
+			if (!highKey || keyPointPriority(s.high[j][k], highKey, s.atLeft, s.atRight)) {
 				highKey = s.high[j][k];
 			}
 		}
 	}
 	for (let j = 0; j < s.low.length; j++) {
 		for (let k = 0; k < s.low[j].length; k++) {
-			if (
-				!lowKey ||
-				(s.low[j][k].references &&
-					keyPointPriority(s.low[j][k], lowKey, s.atLeft, s.atRight))
-			) {
+			if (!s.low[j][k].queryReference()) continue;
+			if (!lowKey || keyPointPriority(s.low[j][k], lowKey, s.atLeft, s.atRight)) {
 				lowKey = s.low[j][k];
 			}
 		}
+	}
+	if (!highKey || !lowKey) {
+		console.error(s);
+		throw new Error("Stem built with irregular geometry.");
 	}
 	return { highKey: highKey!, lowKey: lowKey! };
 }
