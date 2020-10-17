@@ -1,4 +1,5 @@
 import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+import * as Util from "util";
 
 import { PostHint } from "./post-hint";
 import { Seg } from "./seg";
@@ -101,6 +102,8 @@ export default class Stem {
 	public glyphLeftDistancedDescent = 0;
 	public glyphRightDistancedDescent = 0;
 
+	public linkedWholeStem?: Stem;
+
 	constructor(public high: Seg, public low: Seg, r: number) {
 		this.high = high;
 		this.low = low;
@@ -110,6 +113,20 @@ export default class Stem {
 		this.width = Math.abs(high[0][0].y - low[0][0].y);
 		this.slope = 0;
 		this.belongRadical = r;
+	}
+
+	[Util.inspect.custom](depth: number, options: Util.InspectOptions) {
+		let s = this.inspectKeysImpl(depth, options);
+		if (this.atLeft && this.linkedWholeStem) {
+			s += `@<${this.linkedWholeStem.inspectKeysImpl(depth, options)}`;
+		}
+		if (this.atRight && this.linkedWholeStem) {
+			s += `@>${this.linkedWholeStem.inspectKeysImpl(depth, options)}`;
+		}
+		return s;
+	}
+	private inspectKeysImpl(depth: number, options: Util.InspectOptions) {
+		return `[${Util.inspect(this.lowKey, options)} -- ${Util.inspect(this.highKey, options)}]`;
 	}
 }
 

@@ -1,6 +1,5 @@
 import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import * as _ from "lodash";
-
 import { ShapeAnalysisResult } from "../shape-analyze/analysis";
 import analyzePostStemHints from "../shape-analyze/post-stem";
 import analyzeRadicals from "../shape-analyze/radicals";
@@ -9,7 +8,6 @@ import { stemsAreSimilar } from "../shape-analyze/stems/rel";
 import { atGlyphBottom, atGlyphTop, isHangingHookShape } from "../si-common/stem-spatial";
 import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
-
 import { MergeCalculator } from "./calc-annex";
 import { DisjointSet } from "./disjoint-set";
 import { HintAnalysis } from "./type";
@@ -122,7 +120,7 @@ class HintAnalyzer {
 			...this.analyzeTopStemSpatial(fr, top)
 		};
 
-		const { sidPileMiddle, repeatPatternMask } = this.getMiddleStems(sidPile, sp, bot, top);
+		const { sidPileMiddle, sidIsRepeat } = this.getMiddleStems(sidPile, sp, bot, top);
 
 		if (sidPileMiddle.length) {
 			const mc = new MergeCalculator(
@@ -132,7 +130,7 @@ class HintAnalyzer {
 				this.strategy
 			);
 			const spMD = mc.getMinGap(top, bot, sidPileMiddle);
-			const annex = mc.getMergePriority(top, bot, sidPileMiddle, spMD, repeatPatternMask);
+			const annex = mc.getMergePriority(top, bot, sidPileMiddle, spMD, sidIsRepeat);
 			fr.pile = {
 				bot: this.sa.stems[bot],
 				middle: sidPileMiddle.map(j => this.sa.stems[j]),
@@ -280,31 +278,27 @@ class HintAnalyzer {
 	private getMiddleStems(sidPile: number[], sp: StemPileSpatial, bot: number, top: number) {
 		const repeatPatternsOrig = this.findRepeatPatterns(sidPile);
 		const m = this.filterRepeatPatternStemIDs(sidPile, repeatPatternsOrig);
-
 		const sidPileMiddle: number[] = [];
-		const mask: boolean[] = [];
 		for (let j = 0; j < m.sidPileMiddle.length; j++) {
 			const item = m.sidPileMiddle[j];
 			if (!sp.botAtGlyphBottom && item === bot) continue;
 			if (!sp.topAtGlyphTop && item === top) continue;
 			sidPileMiddle.push(item);
-			mask.push(m.repeatPatternMask[j]);
 		}
-		return { sidPileMiddle, repeatPatternMask: mask };
+		return { sidPileMiddle, sidIsRepeat: m.sidIsRepeat };
 	}
 
-	private findRepeatPatterns(sidPileMiddle: number[]) {
+	private findRepeatPatterns(sidPile: number[]) {
 		let repeatPatterns: [number, number][] = [];
-		let patternStart = 0,
-			patternEnd = 0;
-		for (let sid = 1; sid < sidPileMiddle.length - 1; sid++) {
-			if (!patternStart) {
+		let patternStart = -1,
+			patternEnd = -1;
+		for (let sid = 0; sid < sidPile.length; sid++) {
+			if (patternStart < 0) {
 				patternStart = patternEnd = sid;
 			} else {
-				const lastStem = this.sa.stems[sidPileMiddle[patternEnd]];
-				const currentStem = this.sa.stems[sidPileMiddle[sid]];
-
-				if (stemsAreSimilar(this.strategy, currentStem, lastStem)) {
+				const lastStem = this.sa.stems[sidPile[patternEnd]];
+				const currentStem = this.sa.stems[sidPile[sid]];
+				if (stemsAreSimilar(this.strategy, lastStem, currentStem)) {
 					patternEnd = sid;
 				} else {
 					this.flushRepeatPattern(repeatPatterns, patternStart, patternEnd);
@@ -333,12 +327,13 @@ class HintAnalyzer {
 	}
 
 	private filterRepeatPatternStemIDs(
-		pile: readonly number[],
+		sidPile: readonly number[],
 		repeatPatterns: readonly [number, number][]
 	) {
-		let mask: boolean[] = [];
-		for (const [s, e] of repeatPatterns) for (let j = s; j <= e; j++) mask[j] = true;
-		return { sidPileMiddle: pile, repeatPatternMask: mask };
+		let mask: number[] = [];
+		for (const [s, e] of repeatPatterns)
+			for (let j = s; j <= e; j++) mask[sidPile[j]] = j === s || j === e ? 1 : 2;
+		return { sidPileMiddle: sidPile, sidIsRepeat: mask };
 	}
 
 	private getDependents(path: number[]) {

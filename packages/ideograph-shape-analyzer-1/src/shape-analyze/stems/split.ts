@@ -54,6 +54,7 @@ function splitDiagonalStem(s: Stem, strategy: HintingStrategy, rid: number, resu
 			sLeft.diagLow = true;
 		}
 		addIp(s, sLeft, sRight);
+		sLeft.linkedWholeStem = sRight.linkedWholeStem = s;
 		results.push(sLeft, sRight);
 	} else {
 		results.push(s);

@@ -60,32 +60,23 @@ export default function analyzeStems(
 	const { P, Q } = computePQMatrices(strategy, stems, F);
 	// We need to calculate ProximityUp and ProximityDown
 	// so computeACS would be ran TWICE
-	const collisionMatrices = computeACSMatrices(
-		strategy,
-		stems,
-		stemOverlaps,
-		stemOverlapLengths,
-		Q,
-		F,
-		S
-	);
-	const directOverlaps = analyzeDirectOverlaps(
+	const collisionMatrices = computeACSMatrices(strategy, stems, stemOverlapLengths, Q, F, S);
+	const dov = analyzeDirectOverlaps(
 		stems,
 		stemOverlaps,
 		collisionMatrices.darkness,
 		strategy,
 		true
 	);
-	updateProximity(stems, directOverlaps, P, F);
+	updateProximity(stems, dov, P, F);
 	const collisionMatrices1 = computeACSMatrices(
 		strategy,
 		stems,
-		stemOverlaps,
 		stemOverlapLengths,
 		Q,
 		F,
 		S,
-		directOverlaps
+		dov
 	);
 
 	analyzeStemKeyPoints(stems);
@@ -94,7 +85,7 @@ export default function analyzeStems(
 	sa.stems = stems;
 	sa.stemOverlaps = stemOverlaps;
 	sa.stemOverlapLengths = stemOverlapLengths;
-	sa.directOverlaps = directOverlaps;
+	sa.directOverlaps = dov;
 	sa.collisionMatrices.annexation = collisionMatrices1.annexation;
 	sa.collisionMatrices.darkness = collisionMatrices1.darkness;
 	sa.collisionMatrices.flips = collisionMatrices1.flips;

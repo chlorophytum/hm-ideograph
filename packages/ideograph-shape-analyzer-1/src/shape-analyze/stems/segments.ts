@@ -180,5 +180,29 @@ function findHTangents(
 				coupled.add(z);
 			}
 		}
+		if (
+			z.queryReference() &&
+			z.prevZ &&
+			!coupled.has(z) &&
+			!coupled.has(z.prevZ) &&
+			!z.prevZ.queryReference()
+		) {
+			if (approSlopeImpl(z.prevZ, z, strategy)) {
+				segments.push([z.prevZ, z]);
+				coupled.add(z);
+			}
+		}
+		if (
+			z.queryReference() &&
+			z.nextZ &&
+			!coupled.has(z) &&
+			!coupled.has(z.nextZ) &&
+			!z.nextZ.queryReference()
+		) {
+			if (approSlopeImpl(z.nextZ, z, strategy)) {
+				segments.push([z, z.nextZ]);
+				coupled.add(z);
+			}
+		}
 	}
 }

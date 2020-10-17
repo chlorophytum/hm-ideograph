@@ -454,19 +454,17 @@ export function analyzeEntireContourAboveBelow(glyph: CGlyph, stems: Stem[]) {
 	}
 }
 
-export function stemsAreSimilar(strategy: HintingStrategy, a: Stem, b: Stem) {
+export function stemsAreSimilar(strategy: HintingStrategy, last: Stem, current: Stem) {
 	return (
-		((b.belongRadical === a.belongRadical &&
-			b.hasSameRadicalStemBelow &&
-			a.hasSameRadicalStemAbove) ||
-			(!b.hasSameRadicalStemBelow &&
-				!b.hasSameRadicalStemAbove &&
-				!a.hasSameRadicalStemBelow &&
-				!a.hasSameRadicalStemAbove)) &&
-		Math.abs(a.xMinBot - b.xMinBot) < strategy.UPM * strategy.X_FUZZ &&
-		Math.abs(a.xMinTop - b.xMinTop) < strategy.UPM * strategy.X_FUZZ &&
-		Math.abs(a.xMaxBot - b.xMaxBot) < strategy.UPM * strategy.X_FUZZ &&
-		Math.abs(a.xMaxTop - b.xMaxTop) < strategy.UPM * strategy.X_FUZZ &&
-		Math.abs(a.width - b.width) < strategy.UPM * strategy.Y_FUZZ
+		((current.belongRadical === last.belongRadical &&
+			current.hasSameRadicalStemBelow &&
+			last.hasSameRadicalStemAbove) ||
+			(!current.hasSameRadicalStemBelow &&
+				!current.hasSameRadicalStemAbove &&
+				!last.hasSameRadicalStemBelow &&
+				!last.hasSameRadicalStemAbove)) &&
+		Math.abs(last.xMinEx - current.xMinEx) < strategy.UPM * strategy.X_FUZZ &&
+		Math.abs(last.xMaxEx - current.xMaxEx) < strategy.UPM * strategy.X_FUZZ &&
+		Math.abs(last.width - current.width) < strategy.UPM * strategy.Y_FUZZ
 	);
 }

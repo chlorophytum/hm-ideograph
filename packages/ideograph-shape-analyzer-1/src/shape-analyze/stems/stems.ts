@@ -329,6 +329,11 @@ export default function findStems(radicals: Radical[], strategy: HintingStrategy
 		calculateYW(s);
 		calculateMinMax(s, radicals, strategy);
 		calculateExp(s, radicals[s.belongRadical]);
+		if (s.linkedWholeStem) {
+			calculateYW(s.linkedWholeStem);
+			calculateMinMax(s.linkedWholeStem, radicals, strategy);
+			calculateExp(s.linkedWholeStem, radicals[s.belongRadical]);
+		}
 	}
 	return ss.sort(byY);
 }

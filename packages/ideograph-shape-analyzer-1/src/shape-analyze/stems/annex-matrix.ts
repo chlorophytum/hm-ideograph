@@ -1,5 +1,4 @@
 import { Support } from "@chlorophytum/arch";
-
 import { isSideTouch } from "../../si-common/overlap";
 import { segmentsProximity, slopeOf } from "../../si-common/seg";
 import {
@@ -70,7 +69,6 @@ class ACSComputer {
 	constructor(
 		private readonly strategy: HintingStrategy,
 		private readonly stems: Stem[],
-		private readonly overlapRatios: number[][],
 		private readonly overlapLengths: number[][],
 		private readonly Q: number[][],
 		private readonly F: number[][],
@@ -89,15 +87,9 @@ class ACSComputer {
 			(atGlyphBottom(sk, this.strategy) && !sj.diagHigh)
 		);
 	}
-	private computeStrong(j: number, k: number, tb: boolean, ovr: number) {
-		return (
-			this.overlapRatios[j][k] > 0.85 ||
-			this.overlapRatios[k][j] > 0.85 ||
-			ovr > 1 / 3 ||
-			(tb && (this.overlapRatios[j][k] > 0.4 || this.overlapRatios[k][j] > 0.4))
-		);
-	}
-	private isSideTouch(sj: Stem, sk: Stem) {
+	private isSideTouch(_sj: Stem, _sk: Stem) {
+		const sj = _sj.linkedWholeStem || _sj;
+		const sk = _sk.linkedWholeStem || _sk;
 		return (sj.xMin < sk.xMin && sj.xMax < sk.xMax) || (sj.xMin > sk.xMin && sj.xMax > sk.xMax);
 	}
 
@@ -145,7 +137,6 @@ class ACSComputer {
 		let ovr = this.overlapLengths[j][k];
 		const tb = this.computeTB(j, k);
 		let isSideTouch = this.isSideTouch(sj, sk);
-
 		// For side touches with low overlap, drop it.
 		if (ovr < this.strategy.SIDETOUCH_LIMIT && isSideTouch) {
 			ovr = 0;
@@ -178,6 +169,8 @@ class ACSComputer {
 			proximityCoefficient *
 			slopesCoefficient;
 		if (!isFinite(a)) a = 0;
+		if (coefficientA >= this.strategy.COEFF_A_SHAPE_LOST_XX)
+			a = Math.max(a, this.strategy.COEFF_A_SHAPE_LOST_XX);
 
 		return { a, d: ovr };
 	}
@@ -251,7 +244,6 @@ class ACSComputer {
 export function computeACSMatrices(
 	strategy: HintingStrategy,
 	stems: Stem[],
-	overlapRatios: number[][],
 	overlapLengths: number[][],
 	Q: number[][],
 	F: number[][],
@@ -271,7 +263,7 @@ export function computeACSMatrices(
 		}
 	}
 
-	const comp = new ACSComputer(strategy, stems, overlapRatios, overlapLengths, Q, F, S, dov);
+	const comp = new ACSComputer(strategy, stems, overlapLengths, Q, F, S, dov);
 
 	for (let j = 0; j < n; j++) {
 		for (let k = 0; k < j; k++) {
