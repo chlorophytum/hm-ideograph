@@ -12,9 +12,7 @@ export default function findHorizontalSegments(radicals: Radical[], strategy: Hi
 			findHSegInContour2(segments, radicalParts[j], strategy, coupled);
 			findHTangents(segments, radicalParts[j], strategy, coupled);
 		}
-		radical.segments = segments.sort(function (p, q) {
-			return p[0].x - q[0].x;
-		});
+		radical.segments = segments.sort((p, q) => p[0].x - q[0].x);
 	}
 }
 
@@ -91,8 +89,9 @@ const SEGMENT_STRATEGIES: [SlopeOperator, SlopeOperator, SlopeOperator][] = [
 ];
 
 function findStart(contour: Contour) {
-	for (const z of contour.points) if (z.queryReference()) return z;
-	return null;
+	let m: null | AdjPoint = null;
+	for (const z of contour.points) if (z.queryReference()) if (!m || z.x < m.x) m = z;
+	return m;
 }
 function linkSegment(segment: AdjPoint[], z: AdjPoint) {
 	const last = segment[segment.length - 1];
@@ -145,7 +144,7 @@ function findHSegInContour2(
 			z = z.next;
 		}
 
-		if (z && !coupled.has(z) && as1(z, zLast, strategy)) {
+		if (z && !coupled.has(z) && as1t(z, zLast, strategy)) {
 			if (segments[0] && segments[0][0] === z) {
 				const firstSeg = [...segment, ...segments[0]];
 				segment.shift();
@@ -177,7 +176,6 @@ function findHTangents(
 			!z.nextZ.queryReference()
 		) {
 			if (approSlopeImpl(z.prevZ, z, strategy) && approSlopeImpl(z.nextZ, z, strategy)) {
-				console.log(z, [z.prevZ, z, z.nextZ]);
 				segments.push([z.prevZ, z, z.nextZ]);
 				coupled.add(z);
 			}
