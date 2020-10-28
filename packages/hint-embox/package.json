@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-embox",
-	"version": "0.20.4",
+	"version": "0.20.5",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.20.0",
 		"@chlorophytum/final-hint-format-hltt": "^0.20.0",
-		"@chlorophytum/hint-programs-stoke-adjust": "0.20.4",
+		"@chlorophytum/hint-programs-stoke-adjust": "0.20.5",
 		"@chlorophytum/hltt": "^0.20.0",
 		"tslib": "^2.0.1",
 		"typable": "^1.0.0"
