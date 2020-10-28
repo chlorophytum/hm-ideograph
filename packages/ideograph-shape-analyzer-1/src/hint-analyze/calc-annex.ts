@@ -24,11 +24,21 @@ export class MergeCalculator {
 		return rpm[j] && rpm[k] && (rpm[j] > 1 || rpm[k] > 1) && rpm[j] >= rpm[k];
 	}
 
+	private adjustPDistance(m: number, pDistance: number) {
+		if (m < this.strategy.COEFF_A_SHAPE_LOST_XX) return pDistance * m;
+		else return m;
+	}
 	private adjustedMValue(j: number, k: number, rpm: number[]) {
+		const pDistance =
+			Math.abs(this.sa.stems[j].y - this.sa.stems[k].y) /
+			(this.strategy.UPM * (this.strategy.EmBox.SpurTop - this.strategy.EmBox.SpurBottom));
 		if (this.validRep(j, k, rpm)) {
-			return Math.min(this.m[j][k], this.strategy.COEFF_A_SAME_RADICAL);
+			return Math.min(
+				this.adjustPDistance(this.m[j][k], pDistance),
+				this.strategy.COEFF_A_SAME_RADICAL
+			);
 		} else {
-			return this.m[j][k];
+			return this.adjustPDistance(this.m[j][k], pDistance);
 		}
 	}
 
@@ -62,7 +72,9 @@ export class MergeCalculator {
 			? fUpperShorter
 			: fUpperAtSide;
 		const fDontMerge =
-			k === j || fTooFar || this.adjustedMValue(k, j, isRepeat) >= this.strategy.DEADLY_MERGE;
+			k === j ||
+			fTooFar ||
+			this.adjustedMValue(k, j, isRepeat) >= this.strategy.COEFF_A_SHAPE_LOST_XX;
 		const multiplier = fDontMerge ? 0 : fMergeDown ? -1 : 1;
 		gaps.push({
 			index: gapIndex,
@@ -79,7 +91,7 @@ export class MergeCalculator {
 		let n = 1 + gaps.length;
 		for (;;) {
 			let mergeGapId = -1;
-			let minCost = this.strategy.DEADLY_MERGE;
+			let minCost = this.strategy.COEFF_A_SHAPE_LOST_XX;
 			for (let j = 0; j < gaps.length; j++) {
 				const gap = gaps[j];
 				if (!gap.multiplier || gap.merged) continue;

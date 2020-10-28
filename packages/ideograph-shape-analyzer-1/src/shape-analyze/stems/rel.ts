@@ -320,6 +320,7 @@ function analyzeRadicalPointsToStemRelationships(
 	for (let j = 0; j < radicalParts.length; j++) {
 		for (let k = 0; k < radicalParts[j].points.length; k++) {
 			const point = radicalParts[j].points[k];
+			if (!point.queryReference()) continue;
 			PtAbove(point, stem, xMin, xMax, yFuzz, sameRadical);
 			PtRightAdjAbove(point, stem, xMin, xMax, yFuzz, sameRadical);
 			PtLeftAdjAbove(point, stem, xMin, xMax, yFuzz, sameRadical);
@@ -372,18 +373,18 @@ export function analyzeStemSpatialRelationships(
 			}
 		}
 	}
-	// share stat data between two halfs of diagonal stems
+	// share stat data between two halves of diagonal stems
 	for (let j = 0; j < stems.length; j++) {
 		for (let k = 0; k < j; k++) {
-			const sj = stems[j],
-				sk = stems[k];
-			if (!(sj.rid && sj.rid === sk.rid)) continue;
-			for (let p of StemSharedBoolKeys) sj[p] = sk[p] = !!sj[p] || !!sk[p];
-			for (let p of StemSharedNumberKeys) sj[p] = sk[p] = Math.max(sj[p] || 0, sk[p] || 0);
-			sj.xMinP = sk.xMinP = Math.min(sj.xMin, sk.xMin);
-			sj.xMaxP = sk.xMaxP = Math.max(sj.xMax, sk.xMax);
-			sj.xMinExP = sk.xMinExP = Math.min(sj.xMinEx, sk.xMinEx);
-			sj.xMaxExP = sk.xMaxExP = Math.max(sj.xMaxEx, sk.xMaxEx);
+			const sR = stems[j],
+				sL = stems[k];
+			if (!(sR.rid && sR.rid === sL.rid && sR.atRight && sL.atLeft)) continue;
+			for (let p of StemSharedBoolKeys) sR[p] = sL[p] = !!sR[p] || !!sL[p];
+			for (let p of StemSharedNumberKeys) sR[p] = sL[p] = Math.max(sR[p] || 0, sL[p] || 0);
+			sR.xMinP = sL.xMinP = Math.min(sR.xMin, sL.xMin);
+			sR.xMaxP = sL.xMaxP = Math.max(sR.xMax, sL.xMax);
+			sR.xMinExP = sL.xMinExP = Math.min(sR.xMinEx, sL.xMinEx);
+			sR.xMaxExP = sL.xMaxExP = Math.max(sR.xMaxEx, sL.xMaxEx);
 		}
 	}
 }

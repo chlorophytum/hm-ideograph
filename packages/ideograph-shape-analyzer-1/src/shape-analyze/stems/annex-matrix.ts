@@ -41,21 +41,21 @@ export function computePQMatrices(
 				segmentsProximity(stems[j].high, stems[k].high);
 			let spatialProximity = structuralProximity;
 
-			// PBS
 			if (
 				(!nothingInBetween || !stems[j].hasGlyphStemAbove || !stems[k].hasGlyphStemBelow) &&
-				spatialProximity < strategy.COEFF_PBS_MIN_PROMIX
+				spatialProximity < strategy.COEFF_PROXIMITY_SQUASH_HAPPENED
 			) {
-				spatialProximity = strategy.COEFF_PBS_MIN_PROMIX;
+				spatialProximity = strategy.COEFF_PROXIMITY_SQUASH_HAPPENED;
 			}
-			if (!nothingInBetween && spatialProximity < strategy.COEFF_PBS_MIN_PROMIX) {
-				structuralProximity = strategy.COEFF_PBS_MIN_PROMIX;
+			if (!nothingInBetween && spatialProximity < strategy.COEFF_PROXIMITY_SQUASH_HAPPENED) {
+				structuralProximity = strategy.COEFF_PROXIMITY_SQUASH_HAPPENED;
 			}
-			// Top/bottom
+
+			// Top / bottom
 			if (tb) {
-				spatialProximity *= strategy.COEFF_STRICT_TOP_BOT_PROMIX;
+				spatialProximity *= strategy.COEFF_STRICT_TOP_BOT_PROXIMITY;
 			} else if (!stems[j].hasGlyphStemAbove || !stems[k].hasGlyphStemBelow) {
-				spatialProximity *= strategy.COEFF_TOP_BOT_PROMIX;
+				spatialProximity *= strategy.COEFF_TOP_BOT_PROXIMITY;
 			}
 			P[j][k] = Math.round(structuralProximity + (!nothingInBetween ? 1 : 0));
 			Q[j][k] = spatialProximity;
@@ -136,11 +136,10 @@ class ACSComputer {
 		// Overlap weight
 		let ovr = this.overlapLengths[j][k];
 		const tb = this.computeTB(j, k);
-		let isSideTouch = this.isSideTouch(sj, sk);
+
 		// For side touches with low overlap, drop it.
-		if (ovr < this.strategy.SIDETOUCH_LIMIT && isSideTouch) {
-			ovr = 0;
-		}
+		const isSideTouch = this.isSideTouch(sj, sk);
+		if (ovr < this.strategy.SIDE_TOUCH_LIMIT && isSideTouch) ovr = 0;
 
 		let slopesCoefficient =
 			nothingInBetween && sj.belongRadical !== sk.belongRadical
@@ -162,12 +161,7 @@ class ACSComputer {
 			this.isOffCenterTouch(j, k)
 		);
 
-		let a =
-			this.strategy.COEFF_A_MULTIPLIER *
-			ovr *
-			coefficientA *
-			proximityCoefficient *
-			slopesCoefficient;
+		let a = ovr * coefficientA * proximityCoefficient * slopesCoefficient;
 		if (!isFinite(a)) a = 0;
 		if (coefficientA >= this.strategy.COEFF_A_SHAPE_LOST_XX)
 			a = Math.max(a, this.strategy.COEFF_A_SHAPE_LOST_XX);
@@ -192,9 +186,9 @@ class ACSComputer {
 		}
 		if (!sj.hasGlyphStemAbove || !sk.hasGlyphStemBelow) {
 			if (sj.belongRadical === sk.belongRadical) {
-				coefficientA *= this.strategy.COEFF_A_TOPBOT_MERGED_SR;
+				coefficientA *= this.strategy.COEFF_A_TOP_BOT_MERGED_SR;
 			} else {
-				coefficientA *= this.strategy.COEFF_A_TOPBOT_MERGED;
+				coefficientA *= this.strategy.COEFF_A_TOP_BOT_MERGED;
 			}
 			if (this.isGlyphSevereShapeLoss(sj, sk)) {
 				coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XX;
@@ -204,8 +198,24 @@ class ACSComputer {
 			coefficientA *= this.strategy.COEFF_A_SAME_RADICAL;
 			if (!sj.hasSameRadicalStemAbove && !sk.hasSameRadicalStemBelow) {
 				coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XX;
-			} else if (!sj.hasSameRadicalStemAbove || !sk.hasSameRadicalStemBelow) {
-				coefficientA *= this.strategy.COEFF_A_SHAPE_LOST;
+			} else if (!sj.hasSameRadicalStemAbove) {
+				if (
+					sj.xMinEx > sk.xMinEx + this.strategy.X_FUZZ &&
+					sj.xMaxEx < sk.xMaxEx - this.strategy.X_FUZZ
+				) {
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_B;
+				} else {
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST;
+				}
+			} else if (!sk.hasSameRadicalStemBelow) {
+				if (
+					sk.xMinEx > sj.xMinEx + this.strategy.X_FUZZ &&
+					sk.xMaxEx < sj.xMaxEx - this.strategy.X_FUZZ
+				) {
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_B;
+				} else {
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST;
+				}
 			} else if (this.isInRadicalTolerableShapeLoss(sj, sk)) {
 				coefficientA /=
 					this.strategy.COEFF_A_SAME_RADICAL * this.strategy.COEFF_A_SHAPE_LOST;
@@ -213,10 +223,13 @@ class ACSComputer {
 		} else {
 			coefficientA *= this.strategy.COEFF_A_RADICAL_MERGE;
 			if (sjRadBot && skRadTop) {
+				// pass
 			} else if (skRadTop) {
-				if (offCenter) coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
+				if (offCenter || atRadicalBottom(sk, this.strategy))
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
 			} else if (sjRadBot) {
-				if (offCenter) coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
+				if (offCenter || atRadicalTop(sj, this.strategy))
+					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
 			}
 		}
 		return coefficientA;
@@ -294,7 +307,10 @@ function cleanupTB(D: number[][], A: number[][], stems: Stem[], strategy: Hintin
 			const maxDiff = Math.abs(stems[j].xMin - stems[k].xMax);
 			const unbalance =
 				minDiff + maxDiff <= 0 ? 0 : Math.abs(minDiff - maxDiff) / (minDiff + maxDiff);
-			if (!isSideTouch(stems[j], stems[k]) && unbalance >= strategy.TBST_LIMIT) {
+			if (
+				!isSideTouch(stems[j], stems[k]) &&
+				unbalance >= strategy.TOP_BOT_MIN_UNBALANCE_AS_SHAPE_LOSS
+			) {
 				A[k][j] *= strategy.COEFF_A_FEATURE_LOSS;
 			}
 		}
@@ -310,7 +326,10 @@ function cleanupTB(D: number[][], A: number[][], stems: Stem[], strategy: Hintin
 			const maxDiff = Math.abs(stems[j].xMin - stems[k].xMax);
 			const unbalance =
 				minDiff + maxDiff <= 0 ? 0 : Math.abs(minDiff - maxDiff) / (minDiff + maxDiff);
-			if (!isSideTouch(stems[j], stems[k]) && unbalance >= strategy.TBST_LIMIT) {
+			if (
+				!isSideTouch(stems[j], stems[k]) &&
+				unbalance >= strategy.TOP_BOT_MIN_UNBALANCE_AS_SHAPE_LOSS
+			) {
 				A[j][k] *= strategy.COEFF_A_FEATURE_LOSS;
 			}
 		}

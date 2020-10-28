@@ -139,10 +139,6 @@ export type StemSharedBoolKey =
 	| "hasRadicalRightAdjacentPointAbove"
 	| "hasGlyphLeftAdjacentPointAbove"
 	| "hasGlyphRightAdjacentPointAbove"
-	| "hasRadicalLeftDistancedPointAbove"
-	| "hasRadicalRightDistancedPointAbove"
-	| "hasGlyphLeftDistancedPointAbove"
-	| "hasGlyphRightDistancedPointAbove"
 	| "hasGlyphStemBelow"
 	| "hasSameRadicalStemBelow"
 	| "hasRadicalPointBelow"
@@ -151,10 +147,6 @@ export type StemSharedBoolKey =
 	| "hasRadicalRightAdjacentPointBelow"
 	| "hasGlyphLeftAdjacentPointBelow"
 	| "hasGlyphRightAdjacentPointBelow"
-	| "hasRadicalLeftDistancedPointBelow"
-	| "hasRadicalRightDistancedPointBelow"
-	| "hasGlyphLeftDistancedPointBelow"
-	| "hasGlyphRightDistancedPointBelow"
 	| "hasGlyphFoldAbove"
 	| "hasRadicalFoldAbove"
 	| "hasGlyphSideFoldAbove"
@@ -174,20 +166,12 @@ export type StemSharedNumberKey =
 	| "radicalLeftAdjacentRise"
 	| "glyphRightAdjacentRise"
 	| "glyphLeftAdjacentRise"
-	| "radicalRightDistancedRise"
-	| "radicalLeftDistancedRise"
-	| "glyphRightDistancedRise"
-	| "glyphLeftDistancedRise"
 	| "radicalCenterDescent"
 	| "glyphCenterDescent"
 	| "radicalLeftAdjacentDescent"
 	| "radicalRightAdjacentDescent"
 	| "glyphLeftAdjacentDescent"
-	| "glyphRightAdjacentDescent"
-	| "radicalLeftDistancedDescent"
-	| "radicalRightDistancedDescent"
-	| "glyphLeftDistancedDescent"
-	| "glyphRightDistancedDescent";
+	| "glyphRightAdjacentDescent";
 export const StemSharedBoolKeys: StemSharedBoolKey[] = [
 	"hasGlyphStemAbove",
 	"hasSameRadicalStemAbove",
@@ -197,10 +181,6 @@ export const StemSharedBoolKeys: StemSharedBoolKey[] = [
 	"hasRadicalRightAdjacentPointAbove",
 	"hasGlyphLeftAdjacentPointAbove",
 	"hasGlyphRightAdjacentPointAbove",
-	"hasRadicalLeftDistancedPointAbove",
-	"hasRadicalRightDistancedPointAbove",
-	"hasGlyphLeftDistancedPointAbove",
-	"hasGlyphRightDistancedPointAbove",
 	"hasGlyphStemBelow",
 	"hasSameRadicalStemBelow",
 	"hasRadicalPointBelow",
@@ -209,10 +189,6 @@ export const StemSharedBoolKeys: StemSharedBoolKey[] = [
 	"hasRadicalRightAdjacentPointBelow",
 	"hasGlyphLeftAdjacentPointBelow",
 	"hasGlyphRightAdjacentPointBelow",
-	"hasRadicalLeftDistancedPointBelow",
-	"hasRadicalRightDistancedPointBelow",
-	"hasGlyphLeftDistancedPointBelow",
-	"hasGlyphRightDistancedPointBelow",
 	"hasGlyphFoldAbove",
 	"hasRadicalFoldAbove",
 	"hasGlyphSideFoldAbove",
@@ -233,18 +209,10 @@ export const StemSharedNumberKeys: StemSharedNumberKey[] = [
 	"radicalLeftAdjacentRise",
 	"glyphRightAdjacentRise",
 	"glyphLeftAdjacentRise",
-	"radicalRightDistancedRise",
-	"radicalLeftDistancedRise",
-	"glyphRightDistancedRise",
-	"glyphLeftDistancedRise",
 	"radicalCenterDescent",
 	"glyphCenterDescent",
 	"radicalLeftAdjacentDescent",
 	"radicalRightAdjacentDescent",
 	"glyphLeftAdjacentDescent",
-	"glyphRightAdjacentDescent",
-	"radicalLeftDistancedDescent",
-	"radicalRightDistancedDescent",
-	"glyphLeftDistancedDescent",
-	"glyphRightDistancedDescent"
+	"glyphRightAdjacentDescent"
 ];

@@ -5,7 +5,12 @@ import analyzePostStemHints from "../shape-analyze/post-stem";
 import analyzeRadicals from "../shape-analyze/radicals";
 import analyzeStems from "../shape-analyze/stems";
 import { stemsAreSimilar } from "../shape-analyze/stems/rel";
-import { atGlyphBottom, atGlyphTop, isHangingHookShape } from "../si-common/stem-spatial";
+import {
+	atGlyphBottom,
+	atGlyphTop,
+	atRadicalTop,
+	isHangingHookShape
+} from "../si-common/stem-spatial";
 import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
 import { MergeCalculator } from "./calc-annex";

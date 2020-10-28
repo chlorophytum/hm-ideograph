@@ -29,7 +29,7 @@ function shortAbsorptionPointByKeys(
 	accept: IpSaAcceptance,
 	priority: number
 ) {
-	if (pt.touched || pt.dontTouch || !pt.isCorner() || !strategy.DO_SHORT_ABSORPTION) return;
+	if (pt.touched || pt.dontTouch || !pt.isCorner()) return;
 	let minDist = 0xffff,
 		minKey = null;
 	for (let m = 0; m < keys.length; m++) {
@@ -99,13 +99,18 @@ function cGT(key: AdjPoint, pt: AdjPoint, aux: number) {
 function cEq(key: AdjPoint, pt: AdjPoint, aux: number) {
 	return Math.abs(pt.y - key.y) < aux;
 }
-function ipWeight(key: AdjPoint, pt: AdjPoint) {
-	const WEIGHT_IN_RANGE = 1 / 4;
+
+type IpKnotKind = { inRangWeight: number };
+const IpKnotTB: IpKnotKind = { inRangWeight: 1 / 4 };
+const IpKnotInner: IpKnotKind = { inRangWeight: 1 / 4 };
+
+function ipWeight(kind: IpKnotKind, key: AdjPoint, pt: AdjPoint) {
 	const inRange = key.isPhantom && pt.x >= key.isPhantom.xMin && pt.x <= key.isPhantom.xMax;
-	return Math.hypot(key.x - pt.x, (inRange ? WEIGHT_IN_RANGE : 1) * (key.y - pt.y));
+	return Math.hypot(key.x - pt.x, (inRange ? kind.inRangWeight : 1) * (key.y - pt.y));
 }
 
 function interpolateByKeys(
+	kind: IpKnotKind,
 	targets: IpSaTarget,
 	pts: AdjPoint[],
 	keys: AdjPoint[],
@@ -130,17 +135,17 @@ function interpolateByKeys(
 		if (pt.touched || pt.dontTouch) continue;
 		for (let m = keys.length - 1; m >= 0; m--) {
 			if (compareZ(keys[m], pt, fuzz, cLT)) {
-				if (!lowerK || ipWeight(keys[m], pt) < lowerDist) {
+				if (!lowerK || ipWeight(kind, keys[m], pt) < lowerDist) {
 					lowerK = keys[m];
-					lowerDist = ipWeight(keys[m], pt);
+					lowerDist = ipWeight(kind, keys[m], pt);
 				}
 			}
 		}
 		for (let m = keys.length - 1; m >= 0; m--) {
 			if (compareZ(keys[m], pt, fuzz, cGT)) {
-				if (!upperK || ipWeight(keys[m], pt) < upperDist) {
+				if (!upperK || ipWeight(kind, keys[m], pt) < upperDist) {
 					upperK = keys[m];
-					upperDist = ipWeight(keys[m], pt);
+					upperDist = ipWeight(kind, keys[m], pt);
 				}
 			}
 		}
@@ -492,8 +497,8 @@ export default function AnalyzeIpSa(
 		{
 			const j = radicalContourIndexes[0];
 			if (j < 0) continue;
-			interpolateByKeys(targets, records[j].topBot, glyphKeyPoints, 7, IP_STRICT);
-			interpolateByKeys(targets, records[j].topBot, glyphKeyPoints, 7, IP_LOOSE);
+			interpolateByKeys(IpKnotTB, targets, records[j].topBot, glyphKeyPoints, 7, IP_STRICT);
+			interpolateByKeys(IpKnotTB, targets, records[j].topBot, glyphKeyPoints, 7, IP_LOOSE);
 			b = b.concat(records[j].topBot.filter(z => z.touched));
 		}
 
@@ -532,8 +537,22 @@ export default function AnalyzeIpSa(
 			for (let jr = 1; jr < radicalContours.length; jr++) {
 				const j = radicalContourIndexes[jr];
 				if (j < 0) continue;
-				interpolateByKeys(targets, records[j].topBot, radicalKeyPoints, 5, IP_STRICT);
-				interpolateByKeys(targets, records[j].topBot, radicalKeyPoints, 5, IP_LOOSE);
+				interpolateByKeys(
+					IpKnotInner,
+					targets,
+					records[j].topBot,
+					radicalKeyPoints,
+					5,
+					IP_STRICT
+				);
+				interpolateByKeys(
+					IpKnotInner,
+					targets,
+					records[j].topBot,
+					radicalKeyPoints,
+					5,
+					IP_LOOSE
+				);
 				b = b.concat(records[j].topBot.filter(z => z.touched));
 			}
 		}
@@ -547,8 +566,22 @@ export default function AnalyzeIpSa(
 			for (let jr = 0; jr < radicalContours.length; jr++) {
 				const j = radicalContourIndexes[jr];
 				if (j < 0) continue;
-				interpolateByKeys(targets, records[j].middlePoints, radicalKeyPoints, 3, IP_STRICT);
-				interpolateByKeys(targets, records[j].middlePoints, radicalKeyPoints, 3, IP_LOOSE);
+				interpolateByKeys(
+					IpKnotInner,
+					targets,
+					records[j].middlePoints,
+					radicalKeyPoints,
+					3,
+					IP_STRICT
+				);
+				interpolateByKeys(
+					IpKnotInner,
+					targets,
+					records[j].middlePoints,
+					radicalKeyPoints,
+					3,
+					IP_LOOSE
+				);
 				shortAbsorptionByKeys(
 					targets,
 					strategy,
