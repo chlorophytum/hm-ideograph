@@ -52,7 +52,7 @@ export function createImageBitmap(g: CGlyph, strategy: HintingStrategy) {
 }
 
 class FlipAnalyzer {
-	constructor(private readonly hLimit: number, private readonly vLimit: number) {}
+	constructor(private readonly vLimit: number) {}
 	public lifetime: number[] = [];
 	public enter<T>(clrBefore: T, a: readonly T[], clrAfter: T) {
 		const turns = this.analyzeBands(clrBefore, a, clrAfter);
@@ -87,17 +87,19 @@ class FlipAnalyzer {
 		}
 		return turns;
 	}
-	public computeFlips() {
+	public computeFlips(hLimit: number) {
 		let turns = 0;
-		while (this.lifetime[turns] >= this.hLimit) turns++;
+		while (this.lifetime[turns] >= hLimit) turns++;
 		return turns;
 	}
 }
 
 export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]) {
 	const bitmap = createImageBitmap(g, strategy);
-	const HLimit = bitmap.transform(strategy.UPM / 6, 0).x;
-	const VLimit = bitmap.transform(strategy.CANONICAL_STEM_WIDTH / 2, 0).x;
+	const HLimit = bitmap.transform(strategy.UPM / 16, 0).x;
+	const HLimitSig = bitmap.transform(strategy.UPM / 4, 0).x;
+	const VLimit = 0;
+
 	for (let s of stems) {
 		let x1 = bitmap.transform(s.xMin, 0).x;
 		let x2 = bitmap.transform(s.xMax, 0).x;
@@ -105,37 +107,40 @@ export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]
 		let yTop = bitmap.transform(0, s.y).y + 1;
 		if (!bitmap.array[x1] || !bitmap.array[x2]) continue;
 		if (yBot > 0) {
-			const fa = new FlipAnalyzer(HLimit / 4, VLimit / 4);
+			const fa = new FlipAnalyzer(VLimit);
 			for (let x = x1; x <= x2; x++) {
 				if (!bitmap.array[x]) continue;
 				fa.enter(0, bitmap.array[x].slice(0, yBot), 1);
 			}
-			s.turnsBelow = fa.computeFlips();
+			s.turnsBelow = fa.computeFlips(HLimitSig / 6);
 		}
 		if (yTop > 0) {
-			const fa = new FlipAnalyzer(HLimit / 4, VLimit / 4);
+			const fa = new FlipAnalyzer(VLimit);
 			for (let x = x1; x <= x2; x++) {
 				if (!bitmap.array[x]) continue;
 				fa.enter(1, bitmap.array[x].slice(yTop), 0);
 			}
-			s.turnsAbove = fa.computeFlips();
+			s.turnsAbove = fa.computeFlips(HLimitSig / 6);
 		}
 	}
 
 	let turnMatrix: number[][] = [];
+	let turnMatrixSig: number[][] = [];
 	for (let j = 0; j < stems.length; j++) {
 		turnMatrix[j] = [];
-		turnMatrix[j][j] = 0;
+		turnMatrixSig[j] = [];
+		turnMatrix[j][j] = turnMatrixSig[j][j] = 0;
 		const sj = stems[j];
 		for (let k = 0; k < j; k++) {
 			turnMatrix[j][k] = turnMatrix[k][j] = 0;
-			const fa = new FlipAnalyzer(HLimit, VLimit);
+			turnMatrixSig[j][k] = turnMatrixSig[k][j] = 0;
+			const fa = new FlipAnalyzer(VLimit);
 
 			const sk = stems[k];
-			const xj1 = bitmap.transform(sj.xMin, 0).x;
-			const xj2 = bitmap.transform(sj.xMax, 0).x;
-			const xk1 = bitmap.transform(sk.xMin, 0).x;
-			const xk2 = bitmap.transform(sk.xMax, 0).x;
+			const xj1 = bitmap.transform(sj.xMinEx, 0).x;
+			const xj2 = bitmap.transform(sj.xMaxEx, 0).x;
+			const xk1 = bitmap.transform(sk.xMinEx, 0).x;
+			const xk2 = bitmap.transform(sk.xMaxEx, 0).x;
 			const yBot = bitmap.transform(0, sj.y - sj.width).y - 2;
 			const yTop = bitmap.transform(0, sk.y).y + 2;
 
@@ -147,11 +152,12 @@ export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]
 				if (!bitmap.array[x]) continue;
 				fa.enter(1, bitmap.array[x].slice(yTop, yBot), 1);
 			}
-			turnMatrix[j][k] = turnMatrix[k][j] = fa.computeFlips();
+
+			turnMatrix[j][k] = turnMatrix[k][j] = fa.computeFlips(HLimit);
+			turnMatrixSig[j][k] = turnMatrixSig[k][j] = fa.computeFlips(HLimitSig);
 		}
 	}
-
-	return turnMatrix;
+	return [turnMatrix, turnMatrixSig] as [number[][], number[][]];
 }
 
 export function analyzeSquash(g: CGlyph, strategy: HintingStrategy, stems: Stem[]) {

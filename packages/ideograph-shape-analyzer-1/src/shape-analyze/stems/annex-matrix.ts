@@ -289,8 +289,7 @@ export function computeACSMatrices(
 	closure(n, A);
 	return {
 		annexation: A,
-		darkness: D,
-		flips: F
+		darkness: D
 	};
 }
 

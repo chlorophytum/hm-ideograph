@@ -131,6 +131,7 @@ class HintAnalyzer {
 			const mc = new MergeCalculator(
 				this.sa.collisionMatrices.annexation,
 				this.sa.collisionMatrices.flips,
+				this.sa.collisionMatrices.flipsSig,
 				this.sa,
 				this.strategy
 			);

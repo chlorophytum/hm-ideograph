@@ -16,6 +16,7 @@ export class MergeCalculator {
 	constructor(
 		private m: number[][],
 		private f: number[][],
+		private fSig: number[][],
 		private sa: ShapeAnalysisResult,
 		private readonly strategy: HintingStrategy
 	) {}
@@ -145,7 +146,11 @@ export class MergeCalculator {
 	}
 
 	private getMinGapData(j: number, k: number, gaps: number[]) {
-		gaps.push(this.f[j][k] >= 2 || this.f[k][j] >= 2 ? 1 : 0);
+		gaps.push(
+			this.f[j][k] >= 3 || this.f[k][j] >= 3 || this.fSig[j][k] >= 2 || this.fSig[k][j] >= 2
+				? 1
+				: 0
+		);
 	}
 	public getMinGap(top: number, bot: number, middle: number[]) {
 		let gaps: number[] = [];

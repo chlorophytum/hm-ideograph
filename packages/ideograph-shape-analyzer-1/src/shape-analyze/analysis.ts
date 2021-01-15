@@ -34,6 +34,7 @@ export class ColMats {
 	public annexation: number[][] = [];
 	public darkness: number[][] = [];
 	public flips: number[][] = [];
+	public flipsSig: number[][] = [];
 	public proximity: number[][] = [];
 	public spatialProximity: number[][] = [];
 }

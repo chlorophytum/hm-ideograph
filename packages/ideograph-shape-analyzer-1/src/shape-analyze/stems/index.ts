@@ -55,7 +55,7 @@ export default function analyzeStems(
 	const slopeDifference = OverlapMatrix(stems, (p, q) => Math.abs(p.slope - q.slope));
 	analyzeStemSpatialRelationships(stems, radicals, stemOverlaps, strategy);
 	analyzeEntireContourAboveBelow(glyph, stems);
-	const F = analyzeTurns(glyph, strategy, stems);
+	const [F, FSig] = analyzeTurns(glyph, strategy, stems);
 	const S = analyzeSquash(glyph, strategy, stems);
 	const { P, Q } = computePQMatrices(strategy, stems, F);
 	// We need to calculate ProximityUp and ProximityDown
@@ -88,7 +88,8 @@ export default function analyzeStems(
 	sa.directOverlaps = dov;
 	sa.collisionMatrices.annexation = collisionMatrices1.annexation;
 	sa.collisionMatrices.darkness = collisionMatrices1.darkness;
-	sa.collisionMatrices.flips = collisionMatrices1.flips;
+	sa.collisionMatrices.flips = F;
+	sa.collisionMatrices.flipsSig = FSig;
 	sa.collisionMatrices.proximity = P;
 	sa.collisionMatrices.spatialProximity = Q;
 	sa.slopeDifference = slopeDifference;
