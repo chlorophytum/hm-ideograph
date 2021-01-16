@@ -1,4 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
+
 import { Contour } from "./contour";
 import { createStat, Stat } from "./stat";
 
@@ -19,7 +20,7 @@ export class CGlyph {
 	}
 
 	public stat() {
-		for (let c of this.contours) {
+		for (const c of this.contours) {
 			c.stat();
 			if (c.stats.xMin < this.stats.xMin) this.stats.xMin = c.stats.xMin;
 			if (c.stats.yMin < this.stats.yMin) this.stats.yMin = c.stats.yMin;

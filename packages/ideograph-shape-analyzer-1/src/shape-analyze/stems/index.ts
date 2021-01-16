@@ -13,7 +13,7 @@ import findStems from "./stems";
 import { analyzeSquash, analyzeTurns } from "./turn";
 
 function OverlapMatrix(stems: Stem[], fn: (a: Stem, b: Stem) => number) {
-	let transitions: number[][] = [];
+	const transitions: number[][] = [];
 	for (let j = 0; j < stems.length; j++) {
 		transitions[j] = [];
 		for (let k = 0; k < stems.length; k++) {

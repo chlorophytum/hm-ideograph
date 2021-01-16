@@ -1,6 +1,8 @@
 import { AdjustStrokeDistT, OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
+
 import { Lib } from "../commons";
 import { midBot, midTop } from "../macros";
+
 import { MaxAverageDivisorIncreaseStep } from "./loop";
 
 export const InitMSDGapEntries = Lib.Func(function* ($) {

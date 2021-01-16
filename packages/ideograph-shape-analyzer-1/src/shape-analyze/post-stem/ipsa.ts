@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Geometry } from "@chlorophytum/arch";
 import { AdjPoint, CGlyph, Contour, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import * as _ from "lodash";
@@ -33,7 +34,7 @@ function shortAbsorptionPointByKeys(
 	let minDist = 0xffff,
 		minKey = null;
 	for (let m = 0; m < keys.length; m++) {
-		let key = keys[m];
+		const key = keys[m];
 		const dist = Math.hypot(pt.y - key.y, pt.x - key.x);
 		if (key.yStrongExtrema && dist <= strategy.ABSORPTION_LIMIT * strategy.UPM && key !== pt) {
 			if (dist < minDist) {
@@ -118,7 +119,7 @@ function interpolateByKeys(
 	fuzz: number
 ) {
 	for (let k = 0; k < pts.length; k++) {
-		let pt = pts[k];
+		const pt = pts[k];
 		if (pt.touched || pt.dontTouch) continue;
 
 		let upperK = null,
@@ -175,8 +176,8 @@ function linkRadicalSoleStemPoints(
 	radicalStems: Stem[],
 	priority: number
 ) {
-	let radicalParts = [radical.outline].concat(radical.holes);
-	let radicalPoints = _.flatten(radicalParts.map(c => c.points.slice(0, -1)));
+	const radicalParts = [radical.outline].concat(radical.holes);
+	const radicalPoints = _.flatten(radicalParts.map(c => c.points.slice(0, -1)));
 	for (let k = 0; k < radicalPoints.length; k++) {
 		const z = radicalPoints[k];
 		if (z.isKeyPoint || z.touched || z.dontTouch || !z.queryReference()) continue;
@@ -189,7 +190,7 @@ function linkRadicalSoleStemPoints(
 			const lowPoints = _.flatten(stem.low);
 			const keyPoints = highPoints.concat(lowPoints);
 			for (let j = 0; j < keyPoints.length; j++) {
-				let zKey = keyPoints[j];
+				const zKey = keyPoints[j];
 				if (zKey === z || !zKey.queryReference() || zKey.dontTouch) continue;
 				if (CPoint.adjacent(zKey, z) || CPoint.adjacentZ(zKey, z)) {
 					reject = true;
@@ -207,7 +208,8 @@ function linkRadicalSoleStemPoints(
 				// detect whether this sole point is attached to the stem edge.
 				// in most cases, absorbing a lower point should be stricter due to the topology of ideographs
 				// so we use asymmetric condition for "above" and "below" cases.
-				let yDifference = z.y - (zKey.y + (z.x - zKey.x) * (zKey.associatedStemSlope || 0));
+				const yDifference =
+					z.y - (zKey.y + (z.x - zKey.x) * (zKey.associatedStemSlope || 0));
 				if (
 					!(yDifference > 0
 						? yDifference < strategy.Y_FUZZ * strategy.UPM * 2
@@ -252,8 +254,8 @@ function linkSoleStemPoints(
 	priority: number
 ) {
 	for (let j = 0; j < analysis.radicals.length; j++) {
-		let radical = analysis.radicals[j];
-		let radicalStems = analysis.stems.filter(function (s) {
+		const radical = analysis.radicals[j];
+		const radicalStems = analysis.stems.filter(function (s) {
 			return s.belongRadical === j;
 		});
 		linkRadicalSoleStemPoints(shortAbsorptions, strategy, radical, radicalStems, priority);
@@ -262,7 +264,7 @@ function linkSoleStemPoints(
 
 function convertDiagStemIp(target: IpSaTarget, s: Stem) {
 	if (s.ipHigh) {
-		for (let g of s.ipHigh) {
+		for (const g of s.ipHigh) {
 			const [z1, z2, z] = g;
 			if (z.touched || z.dontTouch || !z.queryReference()) continue;
 			target.interpolations.push(new Interpolation(z1, z2, z, 20));
@@ -271,7 +273,7 @@ function convertDiagStemIp(target: IpSaTarget, s: Stem) {
 		}
 	}
 	if (s.ipLow) {
-		for (let g of s.ipLow) {
+		for (const g of s.ipLow) {
 			const [z1, z2, z] = g;
 			if (z.touched || z.dontTouch || !z.queryReference()) continue;
 			target.interpolations.push(new Interpolation(z1, z2, z, 20));
@@ -286,9 +288,9 @@ function createBlueZonePhantoms(
 	blues: BlueZone,
 	strategy: HintingStrategy
 ) {
-	for (let zone of [blues.topZs, blues.bottomZs]) {
+	for (const zone of [blues.topZs, blues.bottomZs]) {
 		if (!zone.length) continue;
-		for (let z of zone) {
+		for (const z of zone) {
 			for (let step = -STEPS; step <= 2 * STEPS; step++) {
 				const p = new CPoint((strategy.UPM * step) / STEPS, z.y);
 				p.isPhantom = {
@@ -323,16 +325,16 @@ function createLRYPhantom(z: AdjPoint, xMin: number, xMax: number, step: number)
 
 function createStemPhantoms(glyphKeyPoints: AdjPoint[], stem: Stem, strategy: HintingStrategy) {
 	for (let j = 0; j < stem.high.length; j++) {
-		let l = stem.high[j][0];
-		let r = stem.high[j][stem.high[j].length - 1];
+		const l = stem.high[j][0];
+		const r = stem.high[j][stem.high[j].length - 1];
 		for (let step = 0; step <= STEPS; step++) {
 			if (l.x <= r.x) glyphKeyPoints.push(createLRPhantom(l, r, step));
 			else glyphKeyPoints.push(createLRPhantom(r, l, step));
 		}
 	}
 	for (let j = 0; j < stem.low.length; j++) {
-		let l = stem.low[j][0];
-		let r = stem.low[j][stem.low[j].length - 1];
+		const l = stem.low[j][0];
+		const r = stem.low[j][stem.low[j].length - 1];
 		for (let step = 0; step <= STEPS; step++) {
 			if (l.x <= r.x) glyphKeyPoints.push(createLRPhantom(l, r, step));
 			else glyphKeyPoints.push(createLRPhantom(r, l, step));
@@ -359,25 +361,25 @@ function isIpSaPointExtrema(z: AdjPoint, pMin: AdjPoint, pMax: AdjPoint) {
 }
 
 function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorption[]) {
-	let records: IpSaRecord[] = [];
+	const records: IpSaRecord[] = [];
 
 	for (let j = 0; j < contours.length; j++) {
-		let contourPoints = contours[j].points.slice(0, -1);
+		const contourPoints = contours[j].points.slice(0, -1);
 		if (!contourPoints.length) continue;
-		let contourAlignPoints = contourPoints.filter(p => p.touched).sort(byPointY);
-		let contourExtrema = contourPoints.filter(p => p.xExtrema || p.yExtrema).sort(byPointY);
+		const contourAlignPoints = contourPoints.filter(p => p.touched).sort(byPointY);
+		const contourExtrema = contourPoints.filter(p => p.xExtrema || p.yExtrema).sort(byPointY);
 
 		let pMin: AdjPoint = contourPoints[0],
 			pMax: AdjPoint = contourPoints[0];
-		for (let z of contourPoints) {
+		for (const z of contourPoints) {
 			if (!z.queryReference()) continue;
 			if (!pMin || z.y < pMin.y) pMin = z;
 			if (!pMax || z.y > pMax.y) pMax = z;
 		}
 
 		if (contourExtrema.length > 1) {
-			let extrema = contourExtrema.filter(z => isIpSaPointExtrema(z, pMin, pMax));
-			let middlePoints = [];
+			const extrema = contourExtrema.filter(z => isIpSaPointExtrema(z, pMin, pMax));
+			const middlePoints = [];
 			for (let m = 0; m < extrema.length; m++) {
 				if (!extrema[m].queryReference()) continue;
 				if (extrema[m].y === pMin.y) {
@@ -396,8 +398,8 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 					middlePoints.push(extrema[m]);
 				}
 			}
-			let blues = contourPoints.filter(p => p.blued);
-			let middlePointsL = contourExtrema.filter(
+			const blues = contourPoints.filter(p => p.blued);
+			const middlePointsL = contourExtrema.filter(
 				p => p.queryReference() && (p.xExtrema || p.yExtrema)
 			);
 			records.push({
@@ -427,7 +429,7 @@ export default function AnalyzeIpSa(
 	strategy: HintingStrategy
 ) {
 	let interpolations: (Interpolation | null)[] = [];
-	let shortAbsorptions: ShortAbsorption[] = [];
+	const shortAbsorptions: ShortAbsorption[] = [];
 
 	const targets: IpSaTarget = { interpolations, shortAbsorptions };
 
@@ -435,25 +437,25 @@ export default function AnalyzeIpSa(
 	let glyphKeyPoints: AdjPoint[] = [];
 	for (let j = 0; j < contours.length; j++) {
 		for (let k = 0; k < contours[j].points.length; k++) {
-			let z = contours[j].points[k];
+			const z = contours[j].points[k];
 			if ((z.touched && z.isKeyPoint) || z.linkedKey) {
 				glyphKeyPoints.push(z);
 			}
 		}
 	}
 
-	for (let s of analysis.stems) convertDiagStemIp(targets, s);
+	for (const s of analysis.stems) convertDiagStemIp(targets, s);
 
 	// blue zone phantom points
 	createBlueZonePhantoms(glyphKeyPoints, analysis.blueZone, strategy);
 
 	// stem phantom points
 	for (let s = 0; s < analysis.stems.length; s++) {
-		let stem = analysis.stems[s];
+		const stem = analysis.stems[s];
 		createStemPhantoms(glyphKeyPoints, stem, strategy);
 	}
 	glyphKeyPoints = glyphKeyPoints.sort(byPointY);
-	let records: IpSaRecord[] = analyzeIpSaRecords(contours, shortAbsorptions);
+	const records: IpSaRecord[] = analyzeIpSaRecords(contours, shortAbsorptions);
 	for (let j = 0; j < contours.length; j++) {
 		shortAbsorptionByKeys(
 			targets,

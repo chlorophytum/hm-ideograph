@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Geometry } from "@chlorophytum/arch";
 
 import Radical from "../types/radical";
@@ -40,7 +41,7 @@ function pushEvents(
 export function overlapInfo(a: Seg, b: Seg, ra?: Radical, rb?: Radical) {
 	const slopeA = slopeOf(a),
 		slopeB = slopeOf(b);
-	let events: OverlapEvent[] = [];
+	const events: OverlapEvent[] = [];
 	for (let j = 0; j < a.length; j++) {
 		pushEvents(events, a[j], slopeA, true, ra);
 	}
@@ -129,7 +130,7 @@ export function stemOverlapLength(a: Stem, b: Stem) {
 }
 
 export function transitionClosure(d: boolean[][]) {
-	let o = [];
+	const o = [];
 	for (let j = 0; j < d.length; j++) {
 		o[j] = d[j].slice(0);
 	}
@@ -142,7 +143,7 @@ export function transitionClosure(d: boolean[][]) {
 }
 
 export function transitiveReduce(g: boolean[][]) {
-	let o = [];
+	const o = [];
 	for (let j = 0; j < g.length; j++) {
 		o[j] = g[j].slice(0);
 	}

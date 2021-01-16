@@ -1,5 +1,7 @@
+/* eslint-disable complexity */
 import { Support } from "@chlorophytum/arch";
 import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { HintingStrategy } from "../../strategy";
 import Stem from "../../types/stem";
 
@@ -11,9 +13,9 @@ export class Bitmap {
 	public yMax: number;
 
 	constructor(strategy: HintingStrategy, public array: number[][]) {
-		let scale = strategy.UPM / SIZE;
-		let yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
-		let yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
+		const scale = strategy.UPM / SIZE;
+		const yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
+		const yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
 		this.scale = scale;
 		this.yMin = yMin;
 		this.yMax = yMax;
@@ -38,10 +40,10 @@ export class Bitmap {
 }
 
 export function createImageBitmap(g: CGlyph, strategy: HintingStrategy) {
-	let scale = strategy.UPM / SIZE;
-	let yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
-	let yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
-	let bitmap = new Array(SIZE + 1);
+	const scale = strategy.UPM / SIZE;
+	const yMin = Math.floor((strategy.EmBox.Bottom * strategy.UPM) / scale);
+	const yMax = Math.ceil((strategy.EmBox.Top * strategy.UPM) / scale);
+	const bitmap = new Array(SIZE + 1);
 	for (let x = 0; x <= SIZE; x++) {
 		bitmap[x] = new Array(yMax - yMin + 1);
 		for (let y = yMin; y <= yMax; y++) {
@@ -100,11 +102,11 @@ export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]
 	const HLimitSig = bitmap.transform(strategy.UPM / 4, 0).x;
 	const VLimit = 0;
 
-	for (let s of stems) {
-		let x1 = bitmap.transform(s.xMin, 0).x;
-		let x2 = bitmap.transform(s.xMax, 0).x;
-		let yBot = bitmap.transform(0, s.y - s.width).y - 1;
-		let yTop = bitmap.transform(0, s.y).y + 1;
+	for (const s of stems) {
+		const x1 = bitmap.transform(s.xMin, 0).x;
+		const x2 = bitmap.transform(s.xMax, 0).x;
+		const yBot = bitmap.transform(0, s.y - s.width).y - 1;
+		const yTop = bitmap.transform(0, s.y).y + 1;
 		if (!bitmap.array[x1] || !bitmap.array[x2]) continue;
 		if (yBot > 0) {
 			const fa = new FlipAnalyzer(VLimit);
@@ -124,8 +126,8 @@ export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]
 		}
 	}
 
-	let turnMatrix: number[][] = [];
-	let turnMatrixSig: number[][] = [];
+	const turnMatrix: number[][] = [];
+	const turnMatrixSig: number[][] = [];
 	for (let j = 0; j < stems.length; j++) {
 		turnMatrix[j] = [];
 		turnMatrixSig[j] = [];
@@ -163,7 +165,7 @@ export function analyzeTurns(g: CGlyph, strategy: HintingStrategy, stems: Stem[]
 export function analyzeSquash(g: CGlyph, strategy: HintingStrategy, stems: Stem[]) {
 	const bitmap = createImageBitmap(g, strategy);
 
-	let squashMatrix: number[][] = [];
+	const squashMatrix: number[][] = [];
 	for (let j = 0; j < stems.length; j++) {
 		squashMatrix[j] = [];
 		squashMatrix[j][j] = 0;

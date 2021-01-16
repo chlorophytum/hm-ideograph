@@ -28,13 +28,13 @@ function inclusionToRadicals(
 	} else {
 		// contours[j] is an outer contour
 		// find out its inner contours and radicals inside it
-		let radical = new Radical(contours[j]);
+		const radical = new Radical(contours[j]);
 		let radicals: Radical[] = [radical];
 		for (let k = 0; k < contours.length; k++) {
 			if (inclusions[j][k]) {
 				if (contours[k].ccw !== orient) {
 					radical.holes.push(contours[k]);
-					let inner = inclusionToRadicals(inclusions, contours, k, !orient);
+					const inner = inclusionToRadicals(inclusions, contours, k, !orient);
 					radical.subs = inner;
 					radicals = radicals.concat(inner);
 				}
@@ -45,7 +45,7 @@ function inclusionToRadicals(
 }
 
 export default function analyzeRadicals(contours: Contour[]) {
-	let inclusions: boolean[][] = [];
+	const inclusions: boolean[][] = [];
 	let radicals: Radical[] = [];
 	for (let j = 0; j < contours.length; j++) {
 		inclusions[j] = [];

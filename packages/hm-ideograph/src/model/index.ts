@@ -28,7 +28,7 @@ export class IdeographHintingTask<GID, G, S extends IdeographHintingParams, A>
 		const entries = await this.font.getEntries();
 
 		// Collect effective glyphs and the first EHR associated to it
-		let glyphs: Set<GID> = new Set();
+		const glyphs: Set<GID> = new Set();
 		for (const entry of entries) {
 			const ga = new EffectiveGlyphAnalysisTask(entry, this.params);
 			const gs = await arb.demand(ga);

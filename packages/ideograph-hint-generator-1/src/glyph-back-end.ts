@@ -1,11 +1,11 @@
+import * as util from "util";
+
 import { IHint, Support } from "@chlorophytum/arch";
 import { Interpolate, LinkChain, Sequence, Smooth, WithDirection } from "@chlorophytum/hint-common";
 import { EmBoxEdge, EmBoxStroke, UseEmBox } from "@chlorophytum/hint-embox";
 import { MultipleAlignZone } from "@chlorophytum/hint-maz";
 import { HintAnalysis, HintingStrategy, Stem } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared/src";
-
-import * as util from "util";
 
 function ref(z: AdjPoint) {
 	const r = z.queryReference();
@@ -137,8 +137,8 @@ export class GlyphHintGenBackEnd {
 		const topSame = pile.top === pile.middle[pile.middle.length - 1];
 		const zBot = !pile.bot ? null : botSame ? ref(pile.bot.lowKey) : ref(pile.bot.highKey);
 		const zTop = !pile.top ? null : topSame ? ref(pile.top.highKey) : ref(pile.top.lowKey);
-		let inkMD: number[] = Array(pile.middle.length).fill(1);
-		let gapMD: number[] = pile.minDist.map(t => (t ? 2 : 1));
+		const inkMD: number[] = Array(pile.middle.length).fill(1);
+		const gapMD: number[] = pile.minDist.map(t => (t ? 2 : 1));
 
 		const allowCollide = pile.annex.map(a => true);
 

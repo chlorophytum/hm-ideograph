@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 
 import { CGlyph } from "./glyph";
+
 function simpleHash(text: string) {
 	const hash = crypto.createHash("sha1");
 	hash.update(text);
@@ -16,7 +17,7 @@ export function hashGlyphContours(glyph: CGlyph) {
 	let buf = "";
 	for (let j = 0; j < input.length; j++) {
 		buf += "a";
-		let c = input[j];
+		const c = input[j];
 		for (let k = 0; k < c.points.length; k++) {
 			buf += "z" + c.points[k].type + " ";
 			buf += c.points[k].x + " " + c.points[k].y;

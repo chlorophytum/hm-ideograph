@@ -1,5 +1,6 @@
-import { Geometry } from "@chlorophytum/arch";
 import * as Util from "util";
+
+import { Geometry } from "@chlorophytum/arch";
 
 export interface AdjPoint {
 	readonly x: number;

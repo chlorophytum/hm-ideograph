@@ -9,13 +9,13 @@ enum GapOcc {
 	MoreClear,
 	MoreUp,
 	MoreDown,
-	MoreBoth,
+	MoreBoth
 }
 enum InkOcc {
 	Clear,
 	Up,
 	Down,
-	Both,
+	Both
 }
 
 const DARKNESS_ADJUST_PIXELS_MAX = 1 / 4;
@@ -254,7 +254,7 @@ const BalanceOneStroke = Lib.Func(function* (e) {
 		vpGaps,
 		vpInks,
 		vpaGap,
-		vpaInk,
+		vpaInk
 	] = e.args(10);
 	const pGaps = e.coerce.fromIndex.variable(vpGaps);
 	const pInks = e.coerce.fromIndex.variable(vpInks);
@@ -348,7 +348,7 @@ const BalanceOneStroke = Lib.Func(function* (e) {
 						vpGaps,
 						vpInks
 					)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canExtendUp), () => [
 				e.set(
@@ -363,19 +363,19 @@ const BalanceOneStroke = Lib.Func(function* (e) {
 						vpGaps,
 						vpInks
 					)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
 				e.set(
 					progress,
 					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
 				e.set(
 					progress,
 					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
-				),
+				)
 			]);
 		},
 		function* () {
@@ -392,7 +392,7 @@ const BalanceOneStroke = Lib.Func(function* (e) {
 						vpGaps,
 						vpInks
 					)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canExtendDown), () => [
 				e.set(
@@ -407,19 +407,19 @@ const BalanceOneStroke = Lib.Func(function* (e) {
 						vpGaps,
 						vpInks
 					)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
 				e.set(
 					progress,
 					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
-				),
+				)
 			]);
 			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
 				e.set(
 					progress,
 					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
-				),
+				)
 			]);
 		}
 	);
@@ -439,7 +439,7 @@ export const BalanceStrokes = Lib.Func(function* ($) {
 		vpInks,
 		vpaGap,
 		vpaInk,
-		vpfStrokeBalanced,
+		vpfStrokeBalanced
 	] = $.args(13);
 
 	const pfStrokeBalanced = $.coerce.fromIndex.variable(vpfStrokeBalanced);

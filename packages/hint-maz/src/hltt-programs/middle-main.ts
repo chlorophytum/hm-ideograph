@@ -1,5 +1,6 @@
 import { VisDistT } from "@chlorophytum/hint-programs-stoke-adjust";
 import { Edsl } from "@chlorophytum/hltt";
+
 import { ConsideredDark, GetFillRate, Lib } from "./commons";
 import { DecideRequiredGap, THintMultipleStrokesMidSize } from "./middle-midsize";
 import { HintMultipleStrokesGiveUp, HintMultipleStrokesSimple } from "./simple";

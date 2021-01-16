@@ -1,4 +1,5 @@
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { correctYWForStem } from "../../si-common/hlkey";
 import {
 	expandZ,
@@ -69,10 +70,10 @@ export function calculateExp(stem: Stem, radical: Radical) {
 	const slopeL = slopeOf(stem.low);
 	stem.highExp = [];
 	stem.lowExp = [];
-	for (let seg of stem.high) {
+	for (const seg of stem.high) {
 		stem.highExp.push(_expandSeg(seg, radical, slopeH));
 	}
-	for (let seg of stem.low) {
+	for (const seg of stem.low) {
 		stem.lowExp.push(_expandSeg(seg, radical, slopeL));
 	}
 }

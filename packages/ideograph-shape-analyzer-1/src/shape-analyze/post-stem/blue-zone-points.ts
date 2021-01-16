@@ -1,5 +1,6 @@
 import { Geometry } from "@chlorophytum/arch";
 import { AdjPoint, CGlyph, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { HintingStrategy } from "../../strategy";
 import Stem from "../../types/stem";
 
@@ -9,13 +10,13 @@ export default function analyzeBlueZonePoints(
 	strategy: HintingStrategy
 ) {
 	// Blue zone points
-	let topBluePoints = new Set<AdjPoint>();
-	let bottomBluePoints = new Set<AdjPoint>();
-	let glyphTopMostPoint = new Set<AdjPoint>();
-	let glyphBottomMostPoint = new Set<AdjPoint>();
+	const topBluePoints = new Set<AdjPoint>();
+	const bottomBluePoints = new Set<AdjPoint>();
+	const glyphTopMostPoint = new Set<AdjPoint>();
+	const glyphBottomMostPoint = new Set<AdjPoint>();
 
 	// Set of points considered a decoration of an existing key point
-	let decoSet = new Set<AdjPoint>();
+	const decoSet = new Set<AdjPoint>();
 
 	// We go two passes to get "better" results
 	for (const point of OrderedContourPoints(glyph)) {
@@ -98,6 +99,7 @@ function nearBot(z1: Geometry.Point, z2: Geometry.Point, d: number) {
 	return Math.abs(z1.y - z2.y) <= d;
 }
 
+// eslint-disable-next-line complexity
 function considerPoint(
 	glyph: CGlyph,
 	strategy: HintingStrategy,
@@ -115,7 +117,7 @@ function considerPoint(
 		point.y <= yBottom && point.yExtrema && !point.touched && !point.dontTouch;
 	for (let j = 0; j < glyph.contours.length; j++) {
 		for (let m = 0; m < glyph.contours[j].points.length; m++) {
-			let zm = glyph.contours[j].points[m];
+			const zm = glyph.contours[j].points[m];
 			if (!(CPoint.adjacent(point, zm) || CPoint.adjacentZ(point, zm))) continue;
 			if (!(zm.touched || zm.dontTouch)) continue;
 

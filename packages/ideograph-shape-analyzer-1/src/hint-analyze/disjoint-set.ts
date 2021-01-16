@@ -8,7 +8,7 @@ export class DisjointSet {
 		let root = x;
 		while (root != this.store[root]) root = this.store[root];
 		while (this.store[x] !== root) {
-			let parent = this.store[x];
+			const parent = this.store[x];
 			this.store[x] = root;
 			x = parent;
 		}

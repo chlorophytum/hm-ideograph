@@ -35,7 +35,7 @@ export function analyzeDirectOverlaps(
 	strategy: HintingStrategy,
 	loose: boolean
 ) {
-	let d: boolean[][] = [];
+	const d: boolean[][] = [];
 	for (let j = 0; j < stemOverlaps.length; j++) {
 		d[j] = [];
 		for (let k = 0; k < j; k++) {

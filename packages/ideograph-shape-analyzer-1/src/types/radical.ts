@@ -32,7 +32,7 @@ export default class Radical {
 	public includesSegment(z1: Geometry.Point, z2: Geometry.Point) {
 		const SEGMENTS = 64;
 		for (let s = 1; s < SEGMENTS; s++) {
-			let test = {
+			const test = {
 				x: z2.x + (z1.x - z2.x) * (s / SEGMENTS),
 				y: z2.y + (z1.y - z2.y) * (s / SEGMENTS)
 			};
@@ -56,8 +56,8 @@ export default class Radical {
 			for (let u2 = -umy; u2 <= umy; u2++) {
 				for (let u3 = -umx; u3 <= umx; u3++) {
 					for (let u4 = -umy; u4 <= umy; u4++) {
-						let z1a = { x: z1.x + u1 * deltaX, y: z1.y + u2 * deltaY };
-						let z2a = { x: z2.x + u3 * deltaX, y: z2.y + u4 * deltaY };
+						const z1a = { x: z1.x + u1 * deltaX, y: z1.y + u2 * deltaY };
+						const z2a = { x: z2.x + u3 * deltaX, y: z2.y + u4 * deltaY };
 						if (this.includesSegment(z1a, z2a)) return true;
 					}
 				}
@@ -66,6 +66,7 @@ export default class Radical {
 		return false;
 	}
 
+	// eslint-disable-next-line complexity
 	public includesTetragon(s1: AdjPoint[], s2: AdjPoint[], _dS: number) {
 		let xMin1 = s1[0].x,
 			xMax1 = s1[0].x,
@@ -87,19 +88,19 @@ export default class Radical {
 				let r = s2[v],
 					s = s2[v + 1];
 				if (p.x > q.x) {
-					let t = p;
+					const t = p;
 					p = q;
 					q = t;
 				}
 				if (r.x > s.x) {
-					let t = r;
+					const t = r;
 					r = s;
 					s = t;
 				}
 				const N = 8;
 				for (let sg = 0; sg <= N; sg++) {
-					let zTop = Support.mixZ(p, q, sg / N);
-					let zBot = Support.mixZ(r, s, sg / N);
+					const zTop = Support.mixZ(p, q, sg / N);
+					const zBot = Support.mixZ(r, s, sg / N);
 					if (!p.isTurnAround && zTop.x < xMin1 + dS) continue;
 					if (!q.isTurnAround && zTop.x > xMax1 - dS) continue;
 					if (!r.isTurnAround && zBot.x < xMin2 + dS) continue;

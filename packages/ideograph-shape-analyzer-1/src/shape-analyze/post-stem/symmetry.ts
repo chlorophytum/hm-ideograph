@@ -7,7 +7,7 @@ export default function analyzeSymmetry(
 	directOverlaps: boolean[][],
 	strategy: HintingStrategy
 ) {
-	let sym: boolean[][] = [];
+	const sym: boolean[][] = [];
 	const limitX = strategy.UPM / strategy.SYMMETRY_TEST_PPEM;
 	const limitY = strategy.UPM / (strategy.SYMMETRY_TEST_PPEM * 2);
 	for (let j = 0; j < stems.length; j++) {

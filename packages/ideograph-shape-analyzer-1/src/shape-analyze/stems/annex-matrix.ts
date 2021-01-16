@@ -1,4 +1,6 @@
+/* eslint-disable complexity */
 import { Support } from "@chlorophytum/arch";
+
 import { isSideTouch } from "../../si-common/overlap";
 import { segmentsProximity, slopeOf } from "../../si-common/seg";
 import {
@@ -16,7 +18,7 @@ export function computePQMatrices(
 	stems: Stem[],
 	flipMatrix: number[][]
 ) {
-	let P: number[][] = [],
+	const P: number[][] = [],
 		Q: number[][] = [],
 		n = stems.length;
 	for (let j = 0; j < n; j++) {
@@ -141,12 +143,12 @@ class ACSComputer {
 		const isSideTouch = this.isSideTouch(sj, sk);
 		if (ovr < this.strategy.SIDE_TOUCH_LIMIT && isSideTouch) ovr = 0;
 
-		let slopesCoefficient =
+		const slopesCoefficient =
 			nothingInBetween && sj.belongRadical !== sk.belongRadical
 				? Math.max(0.25, 1 - Math.abs(this.slopes[j] - this.slopes[k]) * 10)
 				: 1;
 
-		let proximityCoefficient = 1 + (this.Q[j][k] > 2 ? 5 : 1) * this.Q[j][k];
+		const proximityCoefficient = 1 + (this.Q[j][k] > 2 ? 5 : 1) * this.Q[j][k];
 
 		// Annexation coefficients
 		const coefficientA = this.computeCoefficientA(

@@ -32,7 +32,7 @@ export const THintMultipleStrokesMidSize = Lib.Template(function* (e, NMax: numb
 		zTop,
 		vpZMids,
 		vpGapMD,
-		vpInkMD,
+		vpInkMD
 	] = e.args(11);
 
 	const pxReqGap = e.local();

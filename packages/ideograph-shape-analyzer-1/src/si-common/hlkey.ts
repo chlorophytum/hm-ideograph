@@ -53,7 +53,7 @@ export function findHighLowKeys(s: Stem) {
 
 export function correctYWForStem(s: Stem) {
 	const slope = (slopeOf(s.high) + slopeOf(s.low)) / 2;
-	let { highKey, lowKey } = findHighLowKeys(s);
+	const { highKey, lowKey } = findHighLowKeys(s);
 	s.highKey = highKey;
 	s.lowKey = lowKey;
 	s.slope = slope;

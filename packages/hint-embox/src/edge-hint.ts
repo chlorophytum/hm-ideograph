@@ -41,6 +41,7 @@ export namespace EmBoxEdge {
 
 	export class HintFactory implements IHintFactory {
 		public readonly type = TAG;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public readJson(json: any) {
 			if (json && json.type === TAG) {
 				return new Hint(json.boxName, json.top, json.zEdge);
@@ -59,19 +60,19 @@ export namespace EmBoxEdge {
 		public doCompile() {
 			const { boxName, top, zEdge } = this;
 			const zidEdge = this.sink.resolveGlyphPoint(zEdge);
-			this.sink.addSegment(function*($) {
+			this.sink.addSegment(function* ($) {
 				if (top) {
 					yield $.call(
 						THintTopEdge,
-						$.symbol(Twilights.SpurTop(boxName)),
-						$.symbol(Twilights.SpurTopOrig(boxName)),
+						$.Linkable(Twilights.SpurTop(boxName)),
+						$.Linkable(Twilights.SpurTopOrig(boxName)),
 						zidEdge
 					);
 				} else {
 					yield $.call(
 						THintBottomEdge,
-						$.symbol(Twilights.SpurBottom(boxName)),
-						$.symbol(Twilights.SpurBottomOrig(boxName)),
+						$.Linkable(Twilights.SpurBottom(boxName)),
+						$.Linkable(Twilights.SpurBottomOrig(boxName)),
 						zidEdge
 					);
 				}

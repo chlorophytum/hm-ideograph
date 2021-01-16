@@ -67,7 +67,7 @@ export const TInitEmBoxTwilightPoints = ProgramLib.Template(function* ($, rate: 
 		strokeBottomOrig,
 		strokeTopOrig,
 		spurBottomOrig,
-		spurTopOrig,
+		spurTopOrig
 	] = $.args(8);
 
 	yield $.mdap(strokeBottom);

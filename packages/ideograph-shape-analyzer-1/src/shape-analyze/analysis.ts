@@ -1,5 +1,7 @@
-import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import * as util from "util";
+
+import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { HintAnalysis } from "../hint-analyze/type";
 import Radical from "../types/radical";
 import Stem from "../types/stem";

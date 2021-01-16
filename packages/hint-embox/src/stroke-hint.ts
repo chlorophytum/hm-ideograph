@@ -51,6 +51,7 @@ export namespace EmBoxStroke {
 
 	export class HintFactory implements IHintFactory {
 		public readonly type = TAG;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public readJson(json: any) {
 			if (json && json.type === TAG) {
 				return new Hint(json.boxName, json);
@@ -69,16 +70,16 @@ export namespace EmBoxStroke {
 			const { boxName, props } = this;
 			const zsBot = this.sink.resolveGlyphPoint(this.props.zsBot);
 			const zsTop = this.sink.resolveGlyphPoint(this.props.zsTop);
-			this.sink.addSegment(function*($) {
-				const spurBottom = $.symbol(Twilights.SpurBottom(boxName));
-				const spurTop = $.symbol(Twilights.SpurTop(boxName));
-				const strokeBottom = $.symbol(Twilights.StrokeBottom(boxName));
-				const strokeTop = $.symbol(Twilights.StrokeTop(boxName));
+			this.sink.addSegment(function* ($) {
+				const spurBottom = $.Linkable(Twilights.SpurBottom(boxName));
+				const spurTop = $.Linkable(Twilights.SpurTop(boxName));
+				const strokeBottom = $.Linkable(Twilights.StrokeBottom(boxName));
+				const strokeTop = $.Linkable(Twilights.StrokeTop(boxName));
 
-				const spurBottomOrig = $.symbol(Twilights.SpurBottomOrig(boxName));
-				const spurTopOrig = $.symbol(Twilights.SpurTopOrig(boxName));
-				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(boxName));
-				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(boxName));
+				const spurBottomOrig = $.Linkable(Twilights.SpurBottomOrig(boxName));
+				const spurTopOrig = $.Linkable(Twilights.SpurTopOrig(boxName));
+				const strokeBottomOrig = $.Linkable(Twilights.StrokeBottomOrig(boxName));
+				const strokeTopOrig = $.Linkable(Twilights.StrokeTopOrig(boxName));
 
 				if (props.spur) {
 					yield $.call(

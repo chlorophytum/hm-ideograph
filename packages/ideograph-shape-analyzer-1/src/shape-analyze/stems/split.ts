@@ -1,5 +1,7 @@
+/* eslint-disable complexity */
 import { Geometry } from "@chlorophytum/arch";
 import { AdjPoint, CPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { findHighLowKeys } from "../../si-common/hlkey";
 import { leftmostZ_SS_Ref, rightmostZ_SS_Ref } from "../../si-common/seg";
 import { HintingStrategy } from "../../strategy";
@@ -8,9 +10,9 @@ import { Seg } from "../../types/seg";
 import Stem from "../../types/stem";
 
 export function splitDiagonalStems(ss: Stem[], strategy: HintingStrategy) {
-	let ans: Stem[] = [];
+	const ans: Stem[] = [];
 	let rid = 1;
-	for (let s of ss) {
+	for (const s of ss) {
 		splitDiagonalStem(s, strategy, rid, ans);
 		rid += 1;
 	}
@@ -92,8 +94,8 @@ function shouldSplit(
 }
 
 function contained(z1: Geometry.Point, z2: Geometry.Point, segments: Seg, fuzz: number) {
-	for (let seg of segments) {
-		for (let z of seg) {
+	for (const seg of segments) {
+		for (const z of seg) {
 			if (
 				(z.y > z1.y + fuzz && z.y > z2.y + fuzz) ||
 				(z.y < z1.y - fuzz && z.y < z2.y - fuzz)
@@ -111,15 +113,15 @@ function addIp(s: Stem, sLeft: Stem, sRight: Stem) {
 	// intermediate knots
 	const ipHigh: PostHint[] = [];
 	const ipLow: PostHint[] = [];
-	for (let sg of s.high) {
-		for (let z of [sg[0], sg[sg.length - 1]]) {
+	for (const sg of s.high) {
+		for (const z of [sg[0], sg[sg.length - 1]]) {
 			if (!z.queryReference()) continue;
 			if (z === hlkLeft.highKey || z === hlkRight.highKey) continue;
 			ipHigh.push([hlkLeft.highKey, hlkRight.highKey, z]);
 		}
 	}
-	for (let sg of s.low) {
-		for (let z of [sg[0], sg[sg.length - 1]]) {
+	for (const sg of s.low) {
+		for (const z of [sg[0], sg[sg.length - 1]]) {
 			if (!z.queryReference()) continue;
 			if (z === hlkLeft.lowKey || z === hlkRight.lowKey) continue;
 			ipLow.push([hlkLeft.lowKey, hlkRight.lowKey, z]);

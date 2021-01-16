@@ -28,7 +28,7 @@ export class EffectiveGlyphAnalysisTask<GID> implements ITask<Set<GID>> {
 			return new Set(await this.font.getGlyphSet());
 		} else {
 			const charSet = await this.font.getCharacterSet();
-			let gidSet: Set<GID> = new Set();
+			const gidSet: Set<GID> = new Set();
 			for (const ch of charSet) await this.analyzeEffectiveGlyphsForChar(gidSet, ch);
 			return gidSet;
 		}

@@ -1,4 +1,5 @@
 import { Support } from "@chlorophytum/arch";
+
 import { ShapeAnalysisResult } from "../shape-analyze/analysis";
 import { HintingStrategy } from "../strategy";
 
@@ -135,7 +136,7 @@ export class MergeCalculator {
 		md: number[],
 		sidIsRepeat: number[]
 	) {
-		let gaps: MergeDecideGap[] = [];
+		const gaps: MergeDecideGap[] = [];
 		this.getMergePairData(bot, middle[0], 0, sidIsRepeat, gaps);
 		for (let j = 1; j < middle.length; j++) {
 			this.getMergePairData(middle[j - 1], middle[j], j, sidIsRepeat, gaps);
@@ -153,7 +154,7 @@ export class MergeCalculator {
 		);
 	}
 	public getMinGap(top: number, bot: number, middle: number[]) {
-		let gaps: number[] = [];
+		const gaps: number[] = [];
 		this.getMinGapData(middle[0], bot, gaps);
 		for (let j = 1; j < middle.length; j++) {
 			this.getMinGapData(middle[j], middle[j - 1], gaps);

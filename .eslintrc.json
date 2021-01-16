@@ -1,0 +1,53 @@
+{
+	"env": {
+		"node": true,
+		"commonjs": true,
+		"es6": true
+	},
+	"parser": "@typescript-eslint/parser",
+	"ignorePatterns": ["node_modules", "packages/*/lib", "*.d.ts"],
+	"plugins": ["prettier", "@typescript-eslint", "import"],
+	"extends": [
+		"eslint:recommended",
+		"prettier",
+		"prettier/@typescript-eslint",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:import/errors",
+		"plugin:import/warnings",
+		"plugin:import/typescript"
+	],
+	"rules": {
+		"semi": ["error", "always"],
+		"no-var": "error",
+		"no-console": 0,
+		"no-constant-condition": ["error", { "checkLoops": false }],
+		"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+		"no-unused-vars": ["off"],
+		"complexity": ["warn", 16],
+		"no-inner-declarations": "off",
+		"prettier/prettier": "error",
+
+		"@typescript-eslint/no-use-before-define": "off",
+		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/explicit-member-accessibility": "off",
+		"@typescript-eslint/no-inferrable-types": "off",
+		"@typescript-eslint/no-unused-vars": "off",
+		"@typescript-eslint/no-namespace": "off",
+		"@typescript-eslint/no-inner-declarations": "off",
+		"@typescript-eslint/no-empty-function": "off",
+		"@typescript-eslint/no-empty-interface": "off",
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+
+		"import/newline-after-import": ["error", { "count": 1 }],
+		"import/order": [
+			"error",
+			{
+				"groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+				"newlines-between": "always",
+				"alphabetize": { "order": "asc", "caseInsensitive": true }
+			}
+		]
+	}
+}

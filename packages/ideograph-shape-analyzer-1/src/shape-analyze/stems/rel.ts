@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Geometry } from "@chlorophytum/arch";
 import { AdjPoint, CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
@@ -120,7 +121,7 @@ function FoldAbove(
 	sameRadical: boolean
 ) {
 	if (point.prev && point.prev.prev && point.prev.prev.prev) {
-		let z1 = point,
+		const z1 = point,
 			z2 = point.prev,
 			z3 = point.prev.prev,
 			z4 = point.prev.prev.prev;
@@ -343,8 +344,8 @@ function analyzePointToStemSpatialRelationships(
 	strategy: HintingStrategy
 ) {
 	for (let rad = 0; rad < radicals.length; rad++) {
-		let radical = radicals[rad];
-		let sameRadical = radical === radicals[stem.belongRadical];
+		const radical = radicals[rad];
+		const sameRadical = radical === radicals[stem.belongRadical];
 		analyzeRadicalPointsToStemRelationships(radical, stem, sameRadical, strategy);
 	}
 	calculateMinMax(stem, radicals, strategy);
@@ -379,8 +380,8 @@ export function analyzeStemSpatialRelationships(
 			const sR = stems[j],
 				sL = stems[k];
 			if (!(sR.rid && sR.rid === sL.rid && sR.atRight && sL.atLeft)) continue;
-			for (let p of StemSharedBoolKeys) sR[p] = sL[p] = !!sR[p] || !!sL[p];
-			for (let p of StemSharedNumberKeys) sR[p] = sL[p] = Math.max(sR[p] || 0, sL[p] || 0);
+			for (const p of StemSharedBoolKeys) sR[p] = sL[p] = !!sR[p] || !!sL[p];
+			for (const p of StemSharedNumberKeys) sR[p] = sL[p] = Math.max(sR[p] || 0, sL[p] || 0);
 			sR.xMinP = sL.xMinP = Math.min(sR.xMin, sL.xMin);
 			sR.xMaxP = sL.xMaxP = Math.max(sR.xMax, sL.xMax);
 			sR.xMinExP = sL.xMinExP = Math.min(sR.xMinEx, sL.xMinEx);
@@ -395,7 +396,7 @@ function analyzePBS(u: Stem, v: Stem, radical: Radical, strategy: HintingStrateg
 	let ans = 0;
 	for (let j = 0; j < radicalParts.length; j++) {
 		for (let k = 0; k < radicalParts[j].points.length; k++) {
-			let point = radicalParts[j].points[k];
+			const point = radicalParts[j].points[k];
 			if (
 				(!u.hasGlyphPointAbove ||
 					!v.hasGlyphPointBelow ||
@@ -423,7 +424,7 @@ export function analyzePointBetweenStems(
 	radicals: Radical[],
 	strategy: HintingStrategy
 ) {
-	let res: number[][] = [];
+	const res: number[][] = [];
 	for (let sj = 0; sj < stems.length; sj++) {
 		res[sj] = [];
 		for (let sk = 0; sk < sj; sk++) {
@@ -438,9 +439,9 @@ export function analyzePointBetweenStems(
 
 export function analyzeEntireContourAboveBelow(glyph: CGlyph, stems: Stem[]) {
 	for (let j = 0; j < stems.length; j++) {
-		let sj = stems[j];
+		const sj = stems[j];
 		for (let c = 0; c < glyph.contours.length; c++) {
-			let cr = glyph.contours[c];
+			const cr = glyph.contours[c];
 			if (cr.stats.xMin >= sj.xMin && cr.stats.xMax <= sj.xMax && cr.stats.yMin >= sj.y) {
 				sj.hasEntireContourAbove = true;
 			}

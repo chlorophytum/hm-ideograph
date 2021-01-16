@@ -39,6 +39,7 @@ export namespace EmBoxShared {
 
 	export class HintFactory implements IHintFactory {
 		public readonly type = TAG;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public readJson(json: any) {
 			if (json && json.type === TAG) {
 				return new Hint(json.props);
@@ -61,37 +62,37 @@ export namespace EmBoxShared {
 			this.sink.setDefaultControlValue(cvStrokeBottom, props.strokeBottom);
 			this.sink.setDefaultControlValue(cvStrokeTop, props.strokeTop);
 
-			this.sink.addSegment(function*($) {
-				const spurBottom = $.symbol(Twilights.SpurBottom(props.name));
-				const spurTop = $.symbol(Twilights.SpurTop(props.name));
-				const strokeBottom = $.symbol(Twilights.StrokeBottom(props.name));
-				const strokeTop = $.symbol(Twilights.StrokeTop(props.name));
+			this.sink.addSegment(function* ($) {
+				const spurBottom = $.Linkable(Twilights.SpurBottom(props.name));
+				const spurTop = $.Linkable(Twilights.SpurTop(props.name));
+				const strokeBottom = $.Linkable(Twilights.StrokeBottom(props.name));
+				const strokeTop = $.Linkable(Twilights.StrokeTop(props.name));
 
-				const spurBottomOrig = $.symbol(Twilights.SpurBottomOrig(props.name));
-				const spurTopOrig = $.symbol(Twilights.SpurTopOrig(props.name));
-				const strokeBottomOrig = $.symbol(Twilights.StrokeBottomOrig(props.name));
-				const strokeTopOrig = $.symbol(Twilights.StrokeTopOrig(props.name));
+				const spurBottomOrig = $.Linkable(Twilights.SpurBottomOrig(props.name));
+				const spurTopOrig = $.Linkable(Twilights.SpurTopOrig(props.name));
+				const strokeBottomOrig = $.Linkable(Twilights.StrokeBottomOrig(props.name));
+				const strokeTopOrig = $.Linkable(Twilights.StrokeTopOrig(props.name));
 
-				yield $.miap($.symbol(strokeBottom), $.symbol(cvStrokeBottom).ptr);
-				yield $.miap($.symbol(strokeTop), $.symbol(cvStrokeTop).ptr);
-				yield $.miap($.symbol(spurBottom), $.symbol(cvSpurBottom).ptr);
-				yield $.miap($.symbol(spurTop), $.symbol(cvSpurTop).ptr);
+				yield $.miap($.Linkable(strokeBottom), $.Linkable(cvStrokeBottom).ptr);
+				yield $.miap($.Linkable(strokeTop), $.Linkable(cvStrokeTop).ptr);
+				yield $.miap($.Linkable(spurBottom), $.Linkable(cvSpurBottom).ptr);
+				yield $.miap($.Linkable(spurTop), $.Linkable(cvSpurTop).ptr);
 
-				yield $.miap($.symbol(strokeBottomOrig), $.symbol(cvStrokeBottom).ptr);
-				yield $.miap($.symbol(strokeTopOrig), $.symbol(cvStrokeTop).ptr);
-				yield $.miap($.symbol(spurBottomOrig), $.symbol(cvSpurBottom).ptr);
-				yield $.miap($.symbol(spurTopOrig), $.symbol(cvSpurTop).ptr);
+				yield $.miap($.Linkable(strokeBottomOrig), $.Linkable(cvStrokeBottom).ptr);
+				yield $.miap($.Linkable(strokeTopOrig), $.Linkable(cvStrokeTop).ptr);
+				yield $.miap($.Linkable(spurBottomOrig), $.Linkable(cvSpurBottom).ptr);
+				yield $.miap($.Linkable(spurTopOrig), $.Linkable(cvSpurTop).ptr);
 
 				yield $.call(
 					TInitEmBoxTwilightPoints(props.smallSizeExpansionRate),
-					$.symbol(strokeBottom),
-					$.symbol(strokeTop),
-					$.symbol(spurBottom),
-					$.symbol(spurTop),
-					$.symbol(strokeBottomOrig),
-					$.symbol(strokeTopOrig),
-					$.symbol(spurBottomOrig),
-					$.symbol(spurTopOrig)
+					$.Linkable(strokeBottom),
+					$.Linkable(strokeTop),
+					$.Linkable(spurBottom),
+					$.Linkable(spurTop),
+					$.Linkable(strokeBottomOrig),
+					$.Linkable(strokeTopOrig),
+					$.Linkable(spurBottomOrig),
+					$.Linkable(spurTopOrig)
 				);
 			});
 		}

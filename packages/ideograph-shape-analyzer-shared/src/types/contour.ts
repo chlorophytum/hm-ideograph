@@ -1,4 +1,5 @@
 import { Geometry } from "@chlorophytum/arch";
+
 import { CPoint } from "./point";
 import { createStat } from "./stat";
 
@@ -71,12 +72,12 @@ export class Contour {
 		for (let j = 0; j < this.points.length; j++) this.checkExtrema(j);
 		for (let j = 0; j < this.points.length; j++) this.amendExtrema(j);
 
-		let xs = this.points.map(p => p.x);
-		let ys = this.points.map(p => p.y);
-		this.stats.xMax = Math.max.apply(Math, xs);
-		this.stats.yMax = Math.max.apply(Math, ys);
-		this.stats.xMin = Math.min.apply(Math, xs);
-		this.stats.yMin = Math.min.apply(Math, ys);
+		const xs = this.points.map(p => p.x);
+		const ys = this.points.map(p => p.y);
+		this.stats.xMax = Math.max(...xs);
+		this.stats.yMax = Math.max(...ys);
+		this.stats.xMin = Math.min(...xs);
+		this.stats.yMin = Math.min(...ys);
 		this.orient();
 	}
 
@@ -110,10 +111,10 @@ export class Contour {
 				ym = this.points[j].y;
 			}
 		}
-		let p0 = this.points[this.cyc(jm - 1)],
+		const p0 = this.points[this.cyc(jm - 1)],
 			p1 = this.points[jm],
 			p2 = this.points[this.cyc(jm + 1)];
-		let x = (p0.x - p1.x) * (p2.y - p1.y) - (p0.y - p1.y) * (p2.x - p1.x);
+		const x = (p0.x - p1.x) * (p2.y - p1.y) - (p0.y - p1.y) * (p2.x - p1.x);
 		if (x < 0) {
 			this.ccw = true;
 		} else if (x === 0) {
@@ -136,17 +137,17 @@ function inPoly(point: Geometry.Point, vs: Geometry.Point[]) {
 	// ray-casting algorithm based on
 	// http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 
-	let x = point.x,
+	const x = point.x,
 		y = point.y;
 
 	let inside = 0;
 	for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-		let xi = vs[i].x,
+		const xi = vs[i].x,
 			yi = vs[i].y;
-		let xj = vs[j].x,
+		const xj = vs[j].x,
 			yj = vs[j].y;
 		if (xi === x && yi === y) return true;
-		let intersect =
+		const intersect =
 			yi > y !== yj > y &&
 			(yj > yi
 				? (x - xi) * (yj - yi) < (xj - xi) * (y - yi)
@@ -169,7 +170,7 @@ export class ContourMaker {
 		const st = new ContourMaker();
 		const jStart = this.findCornerIndex(contour);
 		if (jStart < 0) return null;
-		let zStart: CPoint = CPoint.from(contour[jStart]);
+		const zStart: CPoint = CPoint.from(contour[jStart]);
 		st.zPending.push(zStart);
 
 		for (let k = 1; k < contour.length; k++) {

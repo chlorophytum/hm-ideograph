@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import {
 	CGlyph,
 	combineHash,
@@ -5,8 +8,6 @@ import {
 	hashGlyphContours,
 	IShapeAnalyzer
 } from "@chlorophytum/ideograph-shape-analyzer-shared";
-import * as fs from "fs";
-import * as path from "path";
 
 import analyzeGlyph from "./hint-analyze";
 import { HintAnalysis } from "./hint-analyze/type";

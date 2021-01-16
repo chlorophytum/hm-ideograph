@@ -1,5 +1,7 @@
 import { OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
+
 import { splitNArgs } from "../util";
+
 import { Lib } from "./commons";
 import { midBot, midTop } from "./macros";
 import { MapArrIntToPx, TInitArr, TInitZMids } from "./middle-array";

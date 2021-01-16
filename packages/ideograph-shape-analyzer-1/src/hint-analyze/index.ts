@@ -1,5 +1,6 @@
 import { CGlyph } from "@chlorophytum/ideograph-shape-analyzer-shared";
 import * as _ from "lodash";
+
 import { ShapeAnalysisResult } from "../shape-analyze/analysis";
 import analyzePostStemHints from "../shape-analyze/post-stem";
 import analyzeRadicals from "../shape-analyze/radicals";
@@ -13,6 +14,7 @@ import {
 } from "../si-common/stem-spatial";
 import { HintingStrategy } from "../strategy";
 import Stem from "../types/stem";
+
 import { MergeCalculator } from "./calc-annex";
 import { DisjointSet } from "./disjoint-set";
 import { HintAnalysis } from "./type";
@@ -30,7 +32,7 @@ function LP(
 	cache: (LpRec | null)[]
 ): LpRec {
 	if (cache[j]) return cache[j]!;
-	let c: LpRec = { weight: 0, next: -1 };
+	const c: LpRec = { weight: 0, next: -1 };
 	for (let k = j; k-- > 0; ) {
 		if (!g[j][k]) continue;
 
@@ -206,7 +208,7 @@ class HintAnalyzer {
 			ixBot--;
 		}
 
-		let sidPile: number[] = [];
+		const sidPile: number[] = [];
 		for (let s = ixTop; s <= ixBot; s++) {
 			if (this.stemIsValid(sidPath[s]) && this.stemIsNotAnalyzed(sidPath[s])) {
 				sidPile.push(sidPath[s]);
@@ -230,7 +232,7 @@ class HintAnalyzer {
 	}
 
 	private computeLpCache() {
-		let lpCache: (LpRec | null)[] = [];
+		const lpCache: (LpRec | null)[] = [];
 		for (let j = 0; j < this.sa.stems.length; j++) {
 			LP(
 				this.sa.directOverlaps,
@@ -254,7 +256,7 @@ class HintAnalyzer {
 			}
 		}
 
-		let path: number[] = [];
+		const path: number[] = [];
 		while (pathStart >= 0) {
 			path.push(pathStart);
 			if (path.length > 1 && this.stemMask[pathStart]) break;
@@ -295,7 +297,7 @@ class HintAnalyzer {
 	}
 
 	private findRepeatPatterns(sidPile: number[]) {
-		let repeatPatterns: [number, number][] = [];
+		const repeatPatterns: [number, number][] = [];
 		let patternStart = -1,
 			patternEnd = -1;
 		for (let sid = 0; sid < sidPile.length; sid++) {
@@ -336,14 +338,14 @@ class HintAnalyzer {
 		sidPile: readonly number[],
 		repeatPatterns: readonly [number, number][]
 	) {
-		let mask: number[] = [];
+		const mask: number[] = [];
 		for (const [s, e] of repeatPatterns)
 			for (let j = s; j <= e; j++) mask[sidPile[j]] = j === s || j === e ? 1 : 2;
 		return { sidPileMiddle: sidPile, sidIsRepeat: mask };
 	}
 
 	private getDependents(path: number[]) {
-		let dependents: DependentHint[] = [];
+		const dependents: DependentHint[] = [];
 
 		for (const j of path) {
 			if (this.stemMask[j]) continue;
@@ -442,7 +444,7 @@ class HintAnalyzer {
 	}
 
 	private collectIpSaCalls() {
-		let a: HintAnalysis.InterpolationOrLink[] = [
+		const a: HintAnalysis.InterpolationOrLink[] = [
 			...this.sa.interpolations,
 			...this.sa.shortAbsorptions
 		];

@@ -1,5 +1,7 @@
+/* eslint-disable complexity */
 import { Support } from "@chlorophytum/arch";
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { overlapInfo, overlapRatio } from "../../si-common/overlap";
 import {
 	expandZ,
@@ -13,6 +15,7 @@ import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import { Seg, SegSpan } from "../../types/seg";
 import Stem from "../../types/stem";
+
 import { calculateExp, calculateMinMax, calculateYW } from "./calc";
 import findHorizontalSegments from "./segments";
 import { splitDiagonalStems } from "./split";
@@ -162,14 +165,14 @@ function identifyStem(
 	j: number,
 	strategy: HintingStrategy
 ) {
-	let candidate = { high: [] as number[], low: [] as number[] };
+	const candidate = { high: [] as number[], low: [] as number[] };
 	const maxStemWidth = strategy.UPM * strategy.CANONICAL_STEM_WIDTH * strategy.MAX_STEM_WDTH_X;
 	if (up[j]) {
 		candidate.high.push(j);
 	} else {
 		candidate.low.push(j);
 	}
-	let used = [..._used];
+	const used = [..._used];
 	used[j] = 1;
 	let rounds = 0;
 	while (rounds < 3) {
@@ -201,20 +204,20 @@ function identifyStem(
 				let matchD = true;
 				let matchU = !sameSide.length;
 				for (let s = 0; s < sameSide.length; s++) {
-					let hj = sameSide[s];
+					const hj = sameSide[s];
 					if (graph[k][hj] === MATCH_SAME_SIDE || graph[hj][k] === MATCH_SAME_SIDE) {
 						matchU = true;
 					}
 				}
 				for (let s = 0; s < otherSide.length; s++) {
-					let hj = otherSide[s];
+					const hj = otherSide[s];
 					if (graph[k][hj] !== MATCH_OPPOSITE && graph[hj][k] !== MATCH_OPPOSITE) {
 						matchD = false;
 					}
 				}
 				if (matchU && matchD) {
 					let oveK = 0;
-					for (let j of otherSide) oveK = Math.max(oveK, ove[j][k]);
+					for (const j of otherSide) oveK = Math.max(oveK, ove[j][k]);
 
 					if (oveK > maxOve) {
 						sk = { sid: k, ove: oveK, sameSide, otherSide };
@@ -247,8 +250,8 @@ function identifyStem(
 			if (!segOverlapIsValid(highEdge, lowEdge, strategy, radical)) continue;
 			if (stemShapeIsIncorrect(radical, strategy, highEdge, lowEdge, maxStemWidth)) continue;
 
-			for (let s of candidate.high) _used[s] = 1;
-			for (let s of candidate.low) _used[s] = 1;
+			for (const s of candidate.high) _used[s] = 1;
+			for (const s of candidate.low) _used[s] = 1;
 			return { high: highEdge, low: lowEdge };
 		}
 	}
@@ -257,10 +260,10 @@ function identifyStem(
 
 function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: HintingStrategy) {
 	const radical = radicals[r];
-	let graph: number[][] = [],
+	const graph: number[][] = [],
 		ove: number[][] = [],
 		up: boolean[] = [];
-	let segments = radical.segments.sort(byPointY);
+	const segments = radical.segments.sort(byPointY);
 	for (let j = 0; j < segments.length; j++) {
 		graph[j] = [];
 		ove[j] = [];
@@ -270,12 +273,12 @@ function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: Hintin
 		}
 	}
 	for (let j = 0; j < segments.length; j++) {
-		let sj = segments[j];
-		let upperEdgeJ = radical.outline.ccw !== sj[0].x < sj[sj.length - 1].x;
+		const sj = segments[j];
+		const upperEdgeJ = radical.outline.ccw !== sj[0].x < sj[sj.length - 1].x;
 		up[j] = upperEdgeJ;
 		for (let k = 0; k < j; k++) {
-			let sk = segments[k];
-			let upperEdgeK = radical.outline.ccw !== sk[0].x < sk[sk.length - 1].x;
+			const sk = segments[k];
+			const upperEdgeK = radical.outline.ccw !== sk[0].x < sk[sk.length - 1].x;
 			if (upperEdgeJ === upperEdgeK) {
 				// Both upper
 				graph[j][k] = graph[k][j] = uuMatchable(sj, sk, radical, strategy)
@@ -289,8 +292,8 @@ function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: Hintin
 			ove[j][k] = ove[k][j] = overlapRatio([sj], [sk], Math.min);
 		}
 	}
-	let candidates = [];
-	let used: number[] = [];
+	const candidates = [];
+	const used: number[] = [];
 	for (let j = 0; j < segments.length; j++) {
 		if (used[j]) continue;
 		const stroke = identifyStem(radical, used, segments, graph, ove, up, j, strategy);
@@ -306,7 +309,7 @@ function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: Hintin
 function pairSegments(radicals: Radical[], strategy: HintingStrategy) {
 	let stems: Stem[] = [];
 	for (let r = 0; r < radicals.length; r++) {
-		let radicalStems = pairSegmentsForRadical(radicals, r, strategy);
+		const radicalStems = pairSegmentsForRadical(radicals, r, strategy);
 		stems = stems.concat(radicalStems);
 		radicals[r].stems = radicalStems;
 	}
@@ -325,7 +328,7 @@ export default function findStems(radicals: Radical[], strategy: HintingStrategy
 	findHorizontalSegments(radicals, strategy);
 	let ss = pairSegments(radicals, strategy).sort(byY);
 	ss = splitDiagonalStems(ss, strategy);
-	for (let s of ss) {
+	for (const s of ss) {
 		calculateYW(s);
 		calculateMinMax(s, radicals, strategy);
 		calculateExp(s, radicals[s.belongRadical]);

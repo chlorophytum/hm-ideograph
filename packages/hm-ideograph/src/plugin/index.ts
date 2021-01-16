@@ -9,6 +9,7 @@ import {
 import { IdeographHintGenerator1 } from "@chlorophytum/ideograph-hint-generator-1";
 import { IdeographShapeAnalyzer1 } from "@chlorophytum/ideograph-shape-analyzer-1";
 import { IdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { IdeographHintingTask } from "../model";
 import { HintModelPrefix, ParallelTaskType } from "../model/constants";
 import { DummyTask } from "../model/dummy";
@@ -43,6 +44,7 @@ export class CIdeographHintingPass1 implements IHintingPass {
 		return new IdeographHintingModel1<GID>(font, this.parameters);
 	}
 	public readonly factoriesOfUsedHints = IdeographHintGenerator1.factoriesOfUsedHints;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public createParallelTask(type: string, _rep: any) {
 		if (type === ParallelTaskType) {
 			const rep = _rep as GlyphHintParallelArgRep<IdeographHintingParams>;
@@ -60,6 +62,7 @@ export class CIdeographHintingPass1 implements IHintingPass {
 }
 
 export class CIdeographHintingPlugin1 implements Plugins.IHintingModelPlugin {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public async load(loader: Plugins.IAsyncModuleLoader, parameters: any) {
 		return new CIdeographHintingPass1(parameters);
 	}

@@ -1,4 +1,6 @@
+/* eslint-disable complexity */
 import { AdjPoint, Contour } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { HintingStrategy } from "../../strategy";
 import Radical from "../../types/radical";
 import { SegSpan } from "../../types/seg";
@@ -6,7 +8,7 @@ import { SegSpan } from "../../types/seg";
 export default function findHorizontalSegments(radicals: Radical[], strategy: HintingStrategy) {
 	for (const radical of radicals) {
 		const radicalParts = [radical.outline].concat(radical.holes);
-		let segments: SegSpan[] = [];
+		const segments: SegSpan[] = [];
 		for (let j = 0; j < radicalParts.length; j++) {
 			const coupled = new Set<AdjPoint>();
 			findHSegInContour2(segments, radicalParts[j], strategy, coupled);
@@ -66,9 +68,9 @@ function tryPushSegment(
 ) {
 	while (s.length > 1) {
 		if (approSlopeSegmentT(s, approSlopeA, strategy)) {
-			let s1 = [s[0]];
+			const s1 = [s[0]];
 			for (let k = 1; k < s.length; k++) linkSegment(s1, s[k]);
-			for (let z of s1) coupled.add(z);
+			for (const z of s1) coupled.add(z);
 			ss.push(s1);
 			return;
 		} else {
@@ -108,7 +110,7 @@ function findHSegInContour2(
 	strategy: HintingStrategy,
 	coupled: Set<AdjPoint>
 ) {
-	let zStart = findStart(contour);
+	const zStart = findStart(contour);
 	if (!zStart) return;
 
 	let zLast: AdjPoint = zStart;
@@ -119,7 +121,7 @@ function findHSegInContour2(
 		segment = [zLast];
 	}
 
-	for (let [as1, as1t, as2] of SEGMENT_STRATEGIES) {
+	for (const [as1, as1t, as2] of SEGMENT_STRATEGIES) {
 		let tores = false;
 		restart(zStart);
 		let z = zLast.next;

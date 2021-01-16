@@ -22,7 +22,7 @@ export interface MultipleAlignZoneProps extends MultipleAlignZoneMetaPropShared 
 }
 
 function drop<A>(a: A[], index: number) {
-	let a1: A[] = [];
+	const a1: A[] = [];
 	for (let j = 0; j < a.length; j++) if (j !== index) a1.push(a[j]);
 	return a1;
 }
@@ -37,7 +37,7 @@ function decideMerge(allowMerge: number[], N: number) {
 			mergePri = a;
 		}
 	}
-	let mergeDown = mergePri < 0 ? 1 : 0;
+	const mergeDown = mergePri < 0 ? 1 : 0;
 	return { mergeIndex, mergeDown };
 }
 
@@ -57,7 +57,7 @@ function getRecPathImpl(a: number[], b: number[], N: number): number[] {
 }
 
 export function getRecPath(a: number[], b: number[], N: number) {
-	let path = getRecPathImpl(a, b, N);
+	const path = getRecPathImpl(a, b, N);
 	while (path.length < N) path.push(0);
 	path.length = N;
 	return path;

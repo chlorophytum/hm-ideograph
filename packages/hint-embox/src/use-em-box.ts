@@ -46,6 +46,7 @@ export namespace UseEmBox {
 
 	export class HintFactory implements IHintFactory {
 		public readonly type = TAG;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		public readJson(json: any, general: IHintFactory) {
 			if (json && json.type === TAG && json.inner) {
 				const inner = general.readJson(json.inner, general);

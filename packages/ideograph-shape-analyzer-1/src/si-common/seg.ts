@@ -31,33 +31,35 @@ export function segmentsProximity(s1: Seg, s2: Seg) {
 
 export function leftmostZ_S(seg: SegSpan): AdjPoint {
 	let m = seg[0];
-	for (let z of seg) if (!m || (z && z.x < m.x)) m = z;
+	for (const z of seg) if (!m || (z && z.x < m.x)) m = z;
 	return m;
 }
 export function rightmostZ_S(seg: SegSpan): AdjPoint {
 	let m = seg[0];
-	for (let z of seg) if (!m || (z && z.x > m.x)) m = z;
+	for (const z of seg) if (!m || (z && z.x > m.x)) m = z;
 	return m;
 }
 
 export function leftmostZ_SS(s: Seg): AdjPoint {
 	let m = s[0][0];
-	for (let seg of s) for (let z of seg) if (!m || (z && z.x < m.x)) m = z;
+	for (const seg of s) for (const z of seg) if (!m || (z && z.x < m.x)) m = z;
 	return m;
 }
 export function rightmostZ_SS(s: Seg): AdjPoint {
 	let m = s[0][0];
-	for (let seg of s) for (let z of seg) if (!m || (z && z.x > m.x)) m = z;
+	for (const seg of s) for (const z of seg) if (!m || (z && z.x > m.x)) m = z;
 	return m;
 }
 export function leftmostZ_SS_Ref(s: Seg): null | AdjPoint {
 	let m: AdjPoint | null = null;
-	for (let seg of s) for (let z of seg) if (z.queryReference() && (!m || (z && z.x < m.x))) m = z;
+	for (const seg of s)
+		for (const z of seg) if (z.queryReference() && (!m || (z && z.x < m.x))) m = z;
 	return m;
 }
 export function rightmostZ_SS_Ref(s: Seg): null | AdjPoint {
 	let m: AdjPoint | null = null;
-	for (let seg of s) for (let z of seg) if (z.queryReference() && (!m || (z && z.x > m.x))) m = z;
+	for (const seg of s)
+		for (const z of seg) if (z.queryReference() && (!m || (z && z.x > m.x))) m = z;
 	return m;
 }
 
@@ -68,8 +70,8 @@ export function expandZ(
 	dy: number,
 	maxTicks: number
 ): AdjPoint {
-	let z1 = { x: z.x + dx, y: z.y + dy },
-		steps = 0;
+	const z1 = { x: z.x + dx, y: z.y + dy };
+	let steps = 0;
 	while (radical.includesEdge(z1, 0, 2) && steps < maxTicks) {
 		z1.x += dx;
 		z1.y += dy;
@@ -86,8 +88,8 @@ export function expandZ0(
 	dy: number,
 	maxTicks: number
 ): AdjPoint {
-	let z1 = { x: z.x + dx, y: z.y + dy },
-		steps = 0;
+	const z1 = { x: z.x + dx, y: z.y + dy };
+	let steps = 0;
 	while (radical.includes(z1) && steps < maxTicks) {
 		z1.x += dx;
 		z1.y += dy;
@@ -109,7 +111,7 @@ export function slopeOf(s: Seg) {
 			n += 1;
 		}
 	}
-	let ax = sx / n,
+	const ax = sx / n,
 		ay = sy / n;
 	let b1num = 0,
 		b1den = 0;

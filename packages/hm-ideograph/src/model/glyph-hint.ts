@@ -16,6 +16,7 @@ import {
 	IHintGen,
 	IShapeAnalyzer
 } from "@chlorophytum/ideograph-shape-analyzer-shared";
+
 import { ParallelTaskType } from "./constants";
 
 export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implements ITask<void> {
@@ -84,6 +85,7 @@ export type GlyphHintParallelArgRep<S> = {
 	readonly glyphRep: Glyph.Rep;
 };
 export type GlyphHintParallelResultRep = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly hints: any;
 };
 
