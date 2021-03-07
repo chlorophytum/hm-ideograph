@@ -34,7 +34,7 @@ export const InitMSDGapEntries = Lib.Func(function* ($) {
 			);
 		yield $.call(
 			InitMSDistEntry,
-			$.mul($.coerce.toF26D6(2), j),
+			$.imul(2, j),
 			vpTotalDist,
 			vpA,
 			vpC,
@@ -58,7 +58,7 @@ export const InitMSDInkEntries = Lib.Func(function* ($) {
 	yield $.while($.lt(j, N), function* () {
 		yield $.call(
 			InitMSDistEntry,
-			$.add(1, $.mul($.coerce.toF26D6(2), j)),
+			$.add(1, $.imul(2, j)),
 			vpTotalDist,
 			vpA,
 			vpC,

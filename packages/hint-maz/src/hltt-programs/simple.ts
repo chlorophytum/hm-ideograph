@@ -37,8 +37,8 @@ export const HintMultipleStrokesGiveUp = Lib.Func(function* ($) {
 			giveUpMode,
 			zBot,
 			zTop,
-			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),
-			$.part(pZMids, $.add(1, $.mul($.coerce.toF26D6(2), j))),
+			$.part(pZMids, $.imul(2, j)),
+			$.part(pZMids, $.add(1, $.imul(2, j))),
 			$.min($.coerce.toF26D6(1), $.mul($.coerce.toF26D6(4), $.mppem()))
 		);
 		yield $.addSet(j, 1);
@@ -81,8 +81,8 @@ export const HintMultipleStrokesSimple = Lib.Func(function* ($) {
 			forceRoundTop,
 			zBot,
 			zTop,
-			$.part(pZMids, $.mul($.coerce.toF26D6(2), j)),
-			$.part(pZMids, $.add(1, $.mul($.coerce.toF26D6(2), j)))
+			$.part(pZMids, $.imul(2, j)),
+			$.part(pZMids, $.add(1, $.imul(2, j)))
 		);
 
 		yield $.addSet(j, 1);

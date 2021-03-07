@@ -138,9 +138,9 @@ const splitGapInkArrayData = Lib.Func(function* ($) {
 	const j = $.local();
 	yield $.set(j, 0);
 	yield $.while($.lt(j, N), function* () {
-		yield $.set($.part(pGap, j), $.part(p, $.mul($.coerce.toF26D6(2), j)));
-		yield $.set($.part(pInk, j), $.part(p, $.add(1, $.mul($.coerce.toF26D6(2), j))));
+		yield $.set($.part(pGap, j), $.part(p, $.imul(2, j)));
+		yield $.set($.part(pInk, j), $.part(p, $.add(1, $.imul(2, j))));
 		yield $.addSet(j, 1);
 	});
-	yield $.set($.part(pGap, N), $.part(p, $.mul($.coerce.toF26D6(2), N)));
+	yield $.set($.part(pGap, N), $.part(p, $.imul(2, N)));
 });

@@ -11,8 +11,8 @@
 	"author": "Renzhi Li (aka. Belleve Invis)",
 	"license": "MIT",
 	"dependencies": {
-		"@chlorophytum/arch": "^0.21.0",
-		"@chlorophytum/hltt": "^0.21.0",
+		"@chlorophytum/arch": "^0.21.2",
+		"@chlorophytum/hltt": "^0.21.2",
 		"tslib": "^2.0.1"
 	},
 	"publishConfig": {
