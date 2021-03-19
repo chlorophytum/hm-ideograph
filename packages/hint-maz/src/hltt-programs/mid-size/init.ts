@@ -1,98 +1,104 @@
-import { AdjustStrokeDistT, OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
+import { AdjustStrokeDistT, OctDistOrigT } from "@chlorophytum/hint-programs-stoke-adjust";
+import {
+	add,
+	div,
+	Frac,
+	Func,
+	GlyphPoint,
+	Int,
+	lt,
+	lteq,
+	max,
+	mul,
+	Store,
+	Template,
+	THandle,
+	While
+} from "@chlorophytum/hltt-next";
 
-import { Lib } from "../commons";
+import { FetchOrigGap } from "../commons";
 import { midBot, midTop } from "../macros";
 
 import { MaxAverageDivisorIncreaseStep } from "./loop";
 
-export const InitMSDGapEntries = Lib.Func(function* ($) {
-	const [N, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, zBot, zTop, vpZMids, vpGapMD] = $.args(10);
-
-	const pZMids = $.coerce.fromIndex.variable(vpZMids);
-	const pGapMD = $.coerce.fromIndex.variable(vpGapMD);
-
-	const j = $.local();
-	const gapDist = $.local();
-	yield $.set(j, 0);
-	yield $.set(gapDist, 0);
-	yield $.while($.lteq(j, N), function* () {
-		yield $.if($.eq(j, 0))
-			.then($.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j))))
-			.else(
-				$.if($.eq(j, N))
-					.then($.set(gapDist, $.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)))
-					.else(
-						$.set(
-							gapDist,
-							$.call(
-								OctDistOrig,
-								midTop($, pZMids, $.sub(j, 1)),
-								midBot($, pZMids, j)
-							)
-						)
-					)
+export const InitMSDGapEntries = Template((Tb: THandle, Tt: THandle) =>
+	Func(
+		Int,
+		Store(Frac),
+		Store(Frac),
+		Store(Frac),
+		Store(Frac),
+		Store(Frac),
+		Tb,
+		Tt,
+		Store(GlyphPoint),
+		Store(Frac)
+	).def(function* ($, N, pTotalDist, pA, pC, pDiv, pAlloc, zBot, zTop, pZMids, pGapMD) {
+		const j = $.Local(Int);
+		const gapDist = $.Local(Frac);
+		yield j.set(0);
+		yield gapDist.set(0);
+		yield While(lteq(j, N), function* () {
+			yield gapDist.set(FetchOrigGap(Tb, Tt)(N, j, zBot, zTop, pZMids));
+			yield InitMSDistEntry(
+				mul(2, j),
+				pTotalDist,
+				pA,
+				pC,
+				pDiv,
+				pAlloc,
+				gapDist,
+				pGapMD.part(j)
 			);
-		yield $.call(
-			InitMSDistEntry,
-			$.imul(2, j),
-			vpTotalDist,
-			vpA,
-			vpC,
-			vpDiv,
-			vpAlloc,
-			gapDist,
-			$.part(pGapMD, j)
-		);
-		yield $.addSet(j, 1);
-	});
-});
+			yield j.set(add(j, 1));
+		});
+	})
+);
 
-export const InitMSDInkEntries = Lib.Func(function* ($) {
-	const [N, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, vpZMids, vpStrokeMD] = $.args(8);
-
-	const pZMids = $.coerce.fromIndex.variable(vpZMids);
-	const pStrokeMD = $.coerce.fromIndex.variable(vpStrokeMD);
-
-	const j = $.local();
-	yield $.set(j, 0);
-	yield $.while($.lt(j, N), function* () {
-		yield $.call(
-			InitMSDistEntry,
-			$.add(1, $.imul(2, j)),
-			vpTotalDist,
-			vpA,
-			vpC,
-			vpDiv,
-			vpAlloc,
-			$.call(
-				AdjustStrokeDistT(2),
-				$.call(OctDistOrig, midBot($, pZMids, j), midTop($, pZMids, j))
+export const InitMSDInkEntries = Func(
+	Int,
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(GlyphPoint),
+	Store(Frac)
+).def(function* ($, N, pTotalDist, pA, pC, pDiv, pAlloc, pZMids, pInkMD) {
+	const j = $.Local(Int);
+	yield j.set(0);
+	yield While(lt(j, N), function* () {
+		yield InitMSDistEntry(
+			add(1, mul(2, j)),
+			pTotalDist,
+			pA,
+			pC,
+			pDiv,
+			pAlloc,
+			AdjustStrokeDistT(2)(
+				OctDistOrigT(GlyphPoint, GlyphPoint)(midBot(pZMids, j), midTop(pZMids, j))
 			),
-			$.part(pStrokeMD, j)
+			pInkMD.part(j)
 		);
-		yield $.addSet(j, 1);
+		yield j.set(add(j, 1));
 	});
 });
 
-const InitMSDistEntry = Lib.Func(function* ($) {
-	const [j, vpTotalDist, vpA, vpC, vpDiv, vpAlloc, origDist, pixelsAllocated] = $.args(8);
-	const pTotalDist = $.coerce.fromIndex.variable(vpTotalDist);
-	const pA = $.coerce.fromIndex.variable(vpA);
-	const pC = $.coerce.fromIndex.variable(vpC);
-	const pDiv = $.coerce.fromIndex.variable(vpDiv);
-	const pAlloc = $.coerce.fromIndex.variable(vpAlloc);
-
-	const divisor = $.local();
-	yield $.set(
-		divisor,
-		$.add(
-			$.coerce.toF26D6(1),
-			$.mul($.coerce.toF26D6(MaxAverageDivisorIncreaseStep), pixelsAllocated)
-		)
-	);
-	yield $.set($.part(pA, j), $.max(0, origDist));
-	yield $.set($.part(pC, j), $.div($.part(pA, j), divisor));
-	yield $.set($.part(pDiv, j), divisor);
-	yield $.set($.part(pAlloc, j), pixelsAllocated);
-	yield $.set(pTotalDist, $.add(pTotalDist, $.part(pA, j)));
+const InitMSDistEntry = Func(
+	Int,
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Frac,
+	Frac
+).def(function* ($, j, pTotalDist, pA, pC, pDiv, pAlloc, origDist, pixelsAllocated) {
+	const divisor = $.Local(Frac);
+	yield divisor.set(add(1, mul(MaxAverageDivisorIncreaseStep, pixelsAllocated)));
+	yield pA.part(j).set(max(0, origDist));
+	yield pC.part(j).set(div(pA.part(j), divisor));
+	yield pDiv.part(j).set(divisor);
+	yield pAlloc.part(j).set(pixelsAllocated);
+	yield pTotalDist.deRef.set(add(pTotalDist.deRef, pA.part(j)));
 });

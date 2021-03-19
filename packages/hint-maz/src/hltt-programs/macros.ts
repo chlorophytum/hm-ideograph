@@ -1,16 +1,10 @@
-import { Edsl } from "@chlorophytum/hltt";
+import { add, Expr, Int, mul, Store, TT } from "@chlorophytum/hltt-next";
 
-export function midBot(
-	e: Edsl.ProgramDsl,
-	zMids: Edsl.Variable<Edsl.VkStorage>,
-	index: Edsl.Expression
-) {
-	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
+export const ConsideredDark = 3 / 4;
+
+export function midBot<T extends TT>(zMids: Expr<Store<T>>, index: number | Expr<Int>) {
+	return zMids.part(mul(index, 2));
 }
-export function midTop(
-	e: Edsl.ProgramDsl,
-	zMids: Edsl.Variable<Edsl.VkStorage>,
-	index: Edsl.Expression
-) {
-	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
+export function midTop<T extends TT>(zMids: Expr<Store<T>>, index: number | Expr<Int>) {
+	return zMids.part(add(mul(index, 2), 1));
 }

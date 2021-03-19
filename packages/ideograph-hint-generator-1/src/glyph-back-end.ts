@@ -46,7 +46,7 @@ export class GlyphHintGenBackEnd {
 			WithDirection.Y(
 				new Sequence.Hint([
 					new UseEmBox.Hint(
-						this.params.emboxSystemName,
+						this.params.groupName,
 						new Sequence.Hint([
 							...this.blueHints,
 							...this.convertBoundaryStemHints(),
@@ -61,9 +61,7 @@ export class GlyphHintGenBackEnd {
 	}
 
 	private addBlue(blue: HintAnalysis.BluePoint) {
-		this.blueHints.push(
-			new EmBoxEdge.Hint(this.params.emboxSystemName, blue.top, ref(blue.point))
-		);
+		this.blueHints.push(new EmBoxEdge.Hint(this.params.groupName, blue.top, ref(blue.point)));
 	}
 
 	private addInterpolateOrLink(fn: HintAnalysis.InterpolationOrLink) {
@@ -81,7 +79,7 @@ export class GlyphHintGenBackEnd {
 			this.boundaryStemsTop.push(boundary.stem);
 		} else {
 			this.boundaryHintsFree.push(
-				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+				new EmBoxStroke.Hint(this.params.groupName, {
 					atTop: boundary.locTop,
 					spur: true,
 					zsBot: ref(boundary.stem.lowKey),
@@ -96,7 +94,7 @@ export class GlyphHintGenBackEnd {
 	private addTopSemiBoundaryStem(boundary: HintAnalysis.TopSemiBoundaryStem) {
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.params.emboxSystemName,
+				emBoxName: this.params.groupName,
 				gapMinDist: [1, boundary.stem.turnsAbove > 1 ? 2 : 1],
 				inkMinDist: [1],
 				mergePriority: [0, 0],
@@ -110,7 +108,7 @@ export class GlyphHintGenBackEnd {
 	private addBottomSemiBoundaryStem(boundary: HintAnalysis.BottomSemiBoundaryStem) {
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.params.emboxSystemName,
+				emBoxName: this.params.groupName,
 				gapMinDist: [boundary.stem.turnsBelow > 1 ? 2 : 1, 1],
 				inkMinDist: [1],
 				mergePriority: [0, 0],
@@ -155,7 +153,7 @@ export class GlyphHintGenBackEnd {
 
 		this.subHints.push(
 			new MultipleAlignZone.Hint({
-				emBoxName: this.params.emboxSystemName,
+				emBoxName: this.params.groupName,
 				gapMinDist: gapMD,
 				inkMinDist: inkMD,
 				mergePriority: pile.annex,
@@ -172,7 +170,7 @@ export class GlyphHintGenBackEnd {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
 					giveUpMode: +1, // high to low
-					emBoxName: this.params.emboxSystemName,
+					emBoxName: this.params.groupName,
 					gapMinDist: [1, 3 / 4],
 					inkMinDist: [1],
 					mergePriority: [0, 1],
@@ -186,7 +184,7 @@ export class GlyphHintGenBackEnd {
 			this.subHints.push(
 				new MultipleAlignZone.Hint({
 					giveUpMode: -1, // low to high
-					emBoxName: this.params.emboxSystemName,
+					emBoxName: this.params.groupName,
 					gapMinDist: [3 / 4, 1],
 					inkMinDist: [1],
 					mergePriority: [-1, 0],
@@ -225,7 +223,7 @@ export class GlyphHintGenBackEnd {
 		const top = this.boundaryStemsTop.sort((a, b) => b.lowKey.y - a.lowKey.y);
 		if (bot.length) {
 			hints.push(
-				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+				new EmBoxStroke.Hint(this.params.groupName, {
 					atTop: false,
 					spur: false,
 					zsBot: ref(bot[0].lowKey),
@@ -237,7 +235,7 @@ export class GlyphHintGenBackEnd {
 			for (let k = 1; k < bot.length; k++) {
 				hints.push(
 					new MultipleAlignZone.Hint({
-						emBoxName: this.params.emboxSystemName,
+						emBoxName: this.params.groupName,
 						gapMinDist: [3 / 4, 1],
 						inkMinDist: [1],
 						bottomBalanceForbidden: true,
@@ -252,7 +250,7 @@ export class GlyphHintGenBackEnd {
 		}
 		if (top.length) {
 			hints.push(
-				new EmBoxStroke.Hint(this.params.emboxSystemName, {
+				new EmBoxStroke.Hint(this.params.groupName, {
 					atTop: true,
 					spur: false,
 					zsBot: ref(top[0].lowKey),
@@ -264,7 +262,7 @@ export class GlyphHintGenBackEnd {
 			for (let k = 1; k < top.length; k++) {
 				hints.push(
 					new MultipleAlignZone.Hint({
-						emBoxName: this.params.emboxSystemName,
+						emBoxName: this.params.groupName,
 						gapMinDist: [1, 3 / 4],
 						inkMinDist: [1],
 						topBalanceForbidden: true,

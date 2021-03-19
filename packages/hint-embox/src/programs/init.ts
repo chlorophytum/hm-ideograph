@@ -1,65 +1,92 @@
-import { ProgramLib } from "./twilight";
+import {
+	abs,
+	add,
+	div,
+	Frac,
+	Func,
+	gc,
+	i2f,
+	If,
+	lt,
+	max,
+	Mdap,
+	min,
+	mppem,
+	roundGray,
+	Scfs,
+	sub,
+	Template,
+	TwilightPoint
+} from "@chlorophytum/hltt-next";
 
-const BiRound = ProgramLib.Template(function* ($, rate: number) {
-	const [a, b, aOrig, bOrig] = $.args(4);
+const BiRound = Template((rate: number) =>
+	Func(TwilightPoint, TwilightPoint, TwilightPoint, TwilightPoint).def(function* (
+		$,
+		a,
+		b,
+		aOrig,
+		bOrig
+	) {
+		const widthExpander = $.Local(Frac);
+		yield widthExpander.set(min(0.5, div(1, max(1, i2f(mppem())))));
 
-	const widthExpander = $.local();
-	yield $.set(
-		widthExpander,
-		$.min(
-			$.coerce.toF26D6(0.5),
-			$.div(
-				$.coerce.toF26D6(1),
-				$.max($.coerce.toF26D6(1), $.mul($.coerce.toF26D6(64), $.mppem()))
+		const roundedDist = $.Local(Frac);
+		yield roundedDist.set(roundGray(add(widthExpander, sub(gc.cur(bOrig), gc.cur(aOrig)))));
+
+		const roundYBottom = $.Local(Frac);
+		yield roundYBottom.set(roundGray(gc.cur(aOrig)));
+		const roundBottomTotalMove = $.Local(Frac);
+		yield roundBottomTotalMove.set(
+			add(
+				abs(sub(gc.cur(aOrig), roundYBottom)),
+				abs(sub(gc.cur(bOrig), add(roundYBottom, roundedDist)))
 			)
-		)
-	);
-	const roundedDist = $.local();
-	yield $.set(
-		roundedDist,
-		$.round.gray($.add(widthExpander, $.sub($.gc.cur(bOrig), $.gc.cur(aOrig))))
-	);
+		);
 
-	const roundYBottom = $.local();
-	yield $.set(roundYBottom, $.round.gray($.gc.cur(aOrig)));
-	const roundBottomTotalMove = $.local();
-	yield $.set(
-		roundBottomTotalMove,
-		$.add(
-			$.abs($.sub($.gc.cur(aOrig), roundYBottom)),
-			$.abs($.sub($.gc.cur(bOrig), $.add(roundYBottom, roundedDist)))
-		)
-	);
+		const roundYTop = $.Local(Frac);
+		yield roundYTop.set(roundGray(gc.cur(bOrig)));
+		const roundTopTotalMove = $.Local(Frac);
+		yield roundTopTotalMove.set(
+			add(
+				abs(sub(gc.cur(bOrig), roundYTop)),
+				abs(sub(gc.cur(aOrig), sub(roundYTop, roundedDist)))
+			)
+		);
 
-	const roundYTop = $.local();
-	yield $.set(roundYTop, $.round.gray($.gc.cur(bOrig)));
-	const roundTopTotalMove = $.local();
-	yield $.set(
-		roundTopTotalMove,
-		$.add(
-			$.abs($.sub($.gc.cur(bOrig), roundYTop)),
-			$.abs($.sub($.gc.cur(aOrig), $.sub(roundYTop, roundedDist)))
-		)
-	);
+		yield If(lt(roundTopTotalMove, roundBottomTotalMove))
+			.Then(function* () {
+				yield Scfs(b, roundYTop);
+				yield Scfs(a, sub(roundYTop, roundedDist));
+			})
+			.Else(function* () {
+				yield Scfs(a, roundYBottom);
+				yield Scfs(b, add(roundYBottom, roundedDist));
+			});
+	})
+);
 
-	yield $.if($.lt(roundTopTotalMove, roundBottomTotalMove))
-		.then(function* () {
-			yield $.scfs(b, roundYTop);
-			yield $.scfs(a, $.sub(roundYTop, roundedDist));
-		})
-		.else(function* () {
-			yield $.scfs(a, roundYBottom);
-			yield $.scfs(b, $.add(roundYBottom, roundedDist));
-		});
+const ULink = Func(TwilightPoint, TwilightPoint, TwilightPoint, TwilightPoint).def(function* (
+	$,
+	a,
+	b,
+	aOrig,
+	bOrig
+) {
+	yield Scfs(b, add(gc.cur(a), sub(gc.cur(bOrig), gc.cur(aOrig))));
 });
 
-const ULink = ProgramLib.Func(function* ($) {
-	const [a, b, aOrig, bOrig] = $.args(4);
-	yield $.scfs(b, $.add($.gc.cur(a), $.sub($.gc.cur(bOrig), $.gc.cur(aOrig))));
-});
-
-export const TInitEmBoxTwilightPoints = ProgramLib.Template(function* ($, rate: number) {
-	const [
+export const TInitEmBoxTwilightPoints = Template((rate: number) =>
+	Func(
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint,
+		TwilightPoint
+	).def(function* (
+		$,
 		strokeBottom,
 		strokeTop,
 		spurBottom,
@@ -68,14 +95,14 @@ export const TInitEmBoxTwilightPoints = ProgramLib.Template(function* ($, rate: 
 		strokeTopOrig,
 		spurBottomOrig,
 		spurTopOrig
-	] = $.args(8);
+	) {
+		yield Mdap(strokeBottom);
+		yield Mdap(strokeTop);
+		yield Mdap(spurBottom);
+		yield Mdap(spurTop);
 
-	yield $.mdap(strokeBottom);
-	yield $.mdap(strokeTop);
-	yield $.mdap(spurBottom);
-	yield $.mdap(spurTop);
-
-	yield $.call(BiRound(rate), strokeBottom, strokeTop, strokeBottomOrig, strokeTopOrig);
-	yield $.call(ULink, strokeBottom, spurBottom, strokeBottomOrig, spurBottomOrig);
-	yield $.call(ULink, strokeTop, spurTop, strokeTopOrig, spurTopOrig);
-});
+		yield BiRound(rate)(strokeBottom, strokeTop, strokeBottomOrig, strokeTopOrig);
+		yield ULink(strokeBottom, spurBottom, strokeBottomOrig, spurBottomOrig);
+		yield ULink(strokeTop, spurTop, strokeTopOrig, spurTopOrig);
+	})
+);

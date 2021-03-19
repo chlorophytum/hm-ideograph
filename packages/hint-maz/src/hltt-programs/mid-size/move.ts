@@ -1,42 +1,61 @@
-import { Lib } from "../commons";
+import {
+	add,
+	Frac,
+	Func,
+	gc,
+	GlyphPoint,
+	Int,
+	lt,
+	Mdap,
+	Scfs,
+	Store,
+	Template,
+	THandle,
+	While
+} from "@chlorophytum/hltt-next";
+
 import { midBot, midTop } from "../macros";
 
-const PlaceStrokeDist2 = Lib.Func(function* ($) {
-	const [vpY, zBot, zTop, gap, ink] = $.args(5);
-	const pY = $.coerce.fromIndex.variable(vpY);
-	yield $.set(pY, $.add(pY, gap));
-	yield $.mdap(zBot);
-	yield $.scfs(zBot, pY);
-	yield $.set(pY, $.add(pY, ink));
-	yield $.scfs(zTop, pY);
+const PlaceStrokeDist2 = Func(Store(Frac), GlyphPoint, GlyphPoint, Frac, Frac);
+PlaceStrokeDist2.def(function* ($, pY, zBot, zTop, gap, ink) {
+	yield pY.deRef.set(add(pY.deRef, gap));
+	yield Mdap(zBot);
+	yield Scfs(zBot, pY.deRef);
+	yield pY.deRef.set(add(pY.deRef, ink));
+	yield Scfs(zTop, pY.deRef);
 });
 
-export const MovePointsForMiddleHint = Lib.Func(function* ($) {
-	const [N, zBot, zTop, y0, vpGaps, vpInks, vpZMids] = $.args(7);
-	const pGaps = $.coerce.fromIndex.variable(vpGaps);
-	const pInks = $.coerce.fromIndex.variable(vpInks);
-	const pZMids = $.coerce.fromIndex.variable(vpZMids);
+export const MovePointsForMiddleHintT = Template((Tb: THandle, Tt: THandle) =>
+	Func(Int, Tb, Tt, Frac, Store(Frac), Store(Frac), Store(GlyphPoint)).def(function* (
+		$,
+		N,
+		zBot,
+		zTop,
+		y0,
+		pGaps,
+		pInks,
+		pZMids
+	) {
+		const j = $.Local(Int);
+		const y = $.Local(Frac);
+		const yBot = $.Local(Frac);
+		const yTop = $.Local(Frac);
 
-	const j = $.local();
-	const y = $.local();
-	const yBot = $.local();
-	const yTop = $.local();
-
-	yield $.set(j, 0);
-	yield $.set(y, y0);
-	yield $.set(yBot, $.gc.cur(zBot));
-	yield $.set(yTop, $.gc.cur(zTop));
-	yield $.while($.lt(j, N), function* () {
-		yield $.call(
-			PlaceStrokeDist2,
-			y.ptr,
-			midBot($, pZMids, j),
-			midTop($, pZMids, j),
-			$.part(pGaps, j),
-			$.part(pInks, j)
-		);
-		yield $.addSet(j, 1);
-	});
-	yield $.scfs(zBot, yBot);
-	yield $.scfs(zTop, yTop);
-});
+		yield j.set(0);
+		yield y.set(y0);
+		yield yBot.set(gc.cur(zBot));
+		yield yTop.set(gc.cur(zTop));
+		yield While(lt(j, N), function* () {
+			yield PlaceStrokeDist2(
+				y.ptr,
+				midBot(pZMids, j),
+				midTop(pZMids, j),
+				pGaps.part(j),
+				pInks.part(j)
+			);
+			yield j.set(add(j, 1));
+		});
+		yield Scfs(zBot, yBot);
+		yield Scfs(zTop, yTop);
+	})
+);

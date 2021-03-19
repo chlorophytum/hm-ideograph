@@ -1,4 +1,27 @@
-import { Lib } from "../commons";
+import {
+	add,
+	and,
+	Bool,
+	div,
+	eq,
+	Frac,
+	Func,
+	gt,
+	gteq,
+	If,
+	Int,
+	lt,
+	lteq,
+	max,
+	min,
+	mul,
+	neg,
+	not,
+	or,
+	Store,
+	sub,
+	While
+} from "@chlorophytum/hltt-next";
 
 enum GapOcc {
 	OneClear,
@@ -20,509 +43,427 @@ enum InkOcc {
 
 const DARKNESS_ADJUST_PIXELS_MAX = 1 / 4;
 
-const DecideGapOcc = Lib.Func(function* ($) {
-	const [N, strokeIndex, gap, bottomSeize, topSeize] = $.args(5);
-	yield $.if($.eq(0, strokeIndex)).then($.return($.call(DecideGapOccBottom, gap, bottomSeize)));
-	yield $.if($.eq(N, strokeIndex)).then($.return($.call(DecideGapOccTop, gap, topSeize)));
-	yield $.return($.call(DecideGapOccMiddle, gap));
-});
-const DecideGapOccBottom = Lib.Func(function* ($) {
-	const [gap, bottomSeize] = $.args(2);
-	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5))).then(
-		$.if($.lt(bottomSeize, $.coerce.toF26D6(1 / 5)))
-			.then($.return(GapOcc.OneClear))
-			.else($.return(GapOcc.OneBlur))
-	);
-	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5))).then(
-		$.if($.lt(bottomSeize, $.coerce.toF26D6(1 / 5)))
-			.then($.return(GapOcc.TwoClear))
-			.else($.return(GapOcc.TwoDown))
-	);
-	yield $.if($.lt(bottomSeize, $.coerce.toF26D6(1 / 5)))
-		.then($.return(GapOcc.MoreClear))
-		.else($.return(GapOcc.MoreDown));
-});
-const DecideGapOccTop = Lib.Func(function* ($) {
-	const [gap, topSeize] = $.args(2);
-	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5))).then(
-		$.if($.lt(topSeize, $.coerce.toF26D6(1 / 5)))
-			.then($.return(GapOcc.OneClear))
-			.else($.return(GapOcc.OneBlur))
-	);
-	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5))).then(
-		$.if($.lt(topSeize, $.coerce.toF26D6(1 / 5)))
-			.then($.return(GapOcc.TwoClear))
-			.else($.return(GapOcc.TwoUp))
-	);
-	yield $.if($.lt(topSeize, $.coerce.toF26D6(1 / 5)))
-		.then($.return(GapOcc.MoreClear))
-		.else($.return(GapOcc.MoreUp));
-});
-const DecideGapOccMiddle = Lib.Func(function* ($) {
-	const [gap] = $.args(1);
-	yield $.if($.lt(gap, $.coerce.toF26D6(1 + 1 / 5)), $.return(GapOcc.OneClear));
-	yield $.if($.lt(gap, $.coerce.toF26D6(2 + 1 / 5)), $.return(GapOcc.TwoClear));
-	yield $.return(GapOcc.MoreClear);
+const DecideGapOcc = Func(Int, Int, Frac, Frac, Frac).returns(Int);
+DecideGapOcc.def(function* ($, N, strokeIndex, gap, bottomSeize, topSeize) {
+	yield If(eq(0, strokeIndex)).Then($.Return(DecideGapOccBottom(gap, bottomSeize)));
+	yield If(eq(N, strokeIndex)).Then($.Return(DecideGapOccTop(gap, topSeize)));
+	yield $.Return(DecideGapOccMiddle(gap));
 });
 
-const InitBalanceMultiStrokeHints = Lib.Func(function* (e) {
-	const [N, bottomSeize, topSeize, vpGapOcc, vpInkOcc, vpGaps, vpfStrokeBalanced] = e.args(7);
-	const pGapOcc = e.coerce.fromIndex.variable(vpGapOcc);
-	const pInkOcc = e.coerce.fromIndex.variable(vpInkOcc);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pfStrokeBalanced = e.coerce.fromIndex.variable(vpfStrokeBalanced);
-	const j = e.local();
-	yield e.set(j, 0);
-	yield e.while(e.lt(j, N), function* () {
-		yield e.set(e.part(pInkOcc, j), InkOcc.Clear);
-		yield e.set(e.part(pfStrokeBalanced, j), 0);
-		yield e.set(j, e.add(j, 1));
+const DecideGapOccBottom = Func(Frac, Frac).returns(Int);
+DecideGapOccBottom.def(function* ($, gap, bottomSeize) {
+	yield If(lt(gap, 1 + 1 / 5)).Then(
+		If(lt(bottomSeize, 1 / 5))
+			.Then($.Return(GapOcc.OneClear))
+			.Else($.Return(GapOcc.OneBlur))
+	);
+	yield If(lt(gap, 2 + 1 / 5)).Then(
+		If(lt(bottomSeize, 1 / 5))
+			.Then($.Return(GapOcc.TwoClear))
+			.Else($.Return(GapOcc.TwoDown))
+	);
+	yield If(lt(bottomSeize, 1 / 5))
+		.Then($.Return(GapOcc.MoreClear))
+		.Else($.Return(GapOcc.MoreDown));
+});
+
+const DecideGapOccTop = Func(Frac, Frac).returns(Int);
+DecideGapOccTop.def(function* ($, gap, topSeize) {
+	yield If(lt(gap, 1 + 1 / 5)).Then(
+		If(lt(topSeize, 1 / 5))
+			.Then($.Return(GapOcc.OneClear))
+			.Else($.Return(GapOcc.OneBlur))
+	);
+	yield If(lt(gap, 2 + 1 / 5)).Then(
+		If(lt(topSeize, 1 / 5))
+			.Then($.Return(GapOcc.TwoClear))
+			.Else($.Return(GapOcc.TwoUp))
+	);
+	yield If(lt(topSeize, 1 / 5))
+		.Then($.Return(GapOcc.MoreClear))
+		.Else($.Return(GapOcc.MoreUp));
+});
+
+const DecideGapOccMiddle = Func(Frac).returns(Int);
+DecideGapOccMiddle.def(function* ($, gap) {
+	yield If(lt(gap, 1 + 1 / 5)).Then($.Return(GapOcc.OneClear));
+	yield If(lt(gap, 2 + 1 / 5)).Then($.Return(GapOcc.TwoClear));
+	yield $.Return(GapOcc.MoreClear);
+});
+
+const InitBalanceMultiStrokeHints = Func(
+	Int,
+	Frac,
+	Frac,
+	Store(Int),
+	Store(Int),
+	Store(Frac),
+	Store(Bool)
+).def(function* (e, N, bottomSeize, topSeize, pGapOcc, pInkOcc, pGaps, pfStrokeBalanced) {
+	const j = e.Local(Int);
+	yield j.set(0);
+	yield While(lt(j, N), function* () {
+		yield pInkOcc.part(j).set(InkOcc.Clear);
+		yield pfStrokeBalanced.part(j).set(false);
+		yield j.set(add(j, 1));
 	});
-	yield e.set(j, 0);
-	yield e.while(e.lteq(j, N), function* () {
-		yield e.set(
-			e.part(pGapOcc, j),
-			e.call(DecideGapOcc, N, j, e.part(pGaps, j), bottomSeize, topSeize)
+	yield j.set(0);
+	yield While(lteq(j, N), function* () {
+		yield pGapOcc.part(j).set(DecideGapOcc(N, j, pGaps.part(j), bottomSeize, topSeize));
+		yield j.set(add(j, 1));
+	});
+});
+
+const BalanceOneStrokeExtDown = Func(
+	Int,
+	Frac,
+	Frac,
+	Store(Int),
+	Store(Int),
+	Store(Frac),
+	Store(Frac)
+)
+	.returns(Bool)
+	.def(function* ($, j, desired, current, pGapOcc, pInkOcc, pGaps, pInks) {
+		const occBelow = pGapOcc.part(j),
+			occInk = pInkOcc.part(j);
+		const delta = $.Local(Frac);
+
+		yield If(
+			not(
+				and(
+					or(eq(InkOcc.Clear, occInk), eq(InkOcc.Up, occInk)),
+					or(
+						or(eq(GapOcc.OneClear, occBelow), eq(GapOcc.TwoClear, occBelow)),
+						or(eq(GapOcc.MoreClear, occBelow), eq(GapOcc.MoreDown, occBelow))
+					)
+				)
+			)
+		).Then($.Return(false));
+
+		yield If(eq(GapOcc.OneClear, occBelow))
+			.Then(delta.set(min(1 / 5, sub(desired, current))))
+			.Else(delta.set(min(4 / 5, sub(desired, current))));
+
+		yield pInks.part(j).set(add(pInks.part(j), delta));
+		yield pGaps.part(j).set(sub(pGaps.part(j), delta));
+		yield If(eq(InkOcc.Clear, occInk)).Then(occInk.set(InkOcc.Down));
+		yield If(eq(InkOcc.Up, occInk)).Then(occInk.set(InkOcc.Both));
+		yield If(eq(GapOcc.OneClear, occBelow)).Then(occBelow.set(GapOcc.OneBlur));
+		yield If(eq(GapOcc.TwoClear, occBelow)).Then(occBelow.set(GapOcc.TwoUp));
+		yield If(eq(GapOcc.MoreClear, occBelow)).Then(occBelow.set(GapOcc.MoreUp));
+		yield If(eq(GapOcc.MoreDown, occBelow)).Then(occBelow.set(GapOcc.MoreBoth));
+
+		yield $.Return(true);
+	});
+
+const BalanceOneStrokeExtUp = Func(
+	Int,
+	Frac,
+	Frac,
+	Store(Int),
+	Store(Int),
+	Store(Frac),
+	Store(Frac)
+)
+	.returns(Bool)
+	.def(function* ($, j, desired, current, pGapOcc, pInkOcc, pGaps, pInks) {
+		const occInk = pInkOcc.part(j),
+			occAbove = pGapOcc.part(add(j, 1));
+		const delta = $.Local(Frac);
+
+		yield If(
+			not(
+				and(
+					or(eq(InkOcc.Clear, occInk), eq(InkOcc.Down, occInk)),
+					or(
+						or(eq(GapOcc.OneClear, occAbove), eq(GapOcc.TwoClear, occAbove)),
+						or(eq(GapOcc.MoreClear, occAbove), eq(GapOcc.MoreUp, occAbove))
+					)
+				)
+			)
+		).Then($.Return(false));
+
+		yield If(eq(GapOcc.OneClear, occAbove))
+			.Then(delta.set(min(1 / 5, sub(desired, current))))
+			.Else(delta.set(min(4 / 5, sub(desired, current))));
+
+		yield pInks.part(j).set(add(pInks.part(j), delta));
+		yield pGaps.part(add(1, j)).set(sub(pGaps.part(add(1, j)), delta));
+
+		yield If(eq(InkOcc.Clear, occInk)).Then(occInk.set(InkOcc.Up));
+		yield If(eq(InkOcc.Down, occInk)).Then(occInk.set(InkOcc.Both));
+		yield If(eq(GapOcc.OneClear, occAbove)).Then(occAbove.set(GapOcc.OneBlur));
+		yield If(eq(GapOcc.TwoClear, occAbove)).Then(occAbove.set(GapOcc.TwoDown));
+		yield If(eq(GapOcc.MoreClear, occAbove)).Then(occAbove.set(GapOcc.MoreDown));
+		yield If(eq(GapOcc.MoreUp, occAbove)).Then(occAbove.set(GapOcc.MoreBoth));
+
+		yield $.Return(true);
+	});
+
+const ShrinkDelta = Func(Frac, Frac)
+	.returns(Frac)
+	.def(function* ($, aInk, cInk) {
+		yield $.Return(neg(sub(cInk, max(3 / 5, aInk))));
+	});
+
+const BalanceShrinkOneStrokeDown = Func(Int, Frac, Frac, Store(Frac), Store(Frac))
+	.returns(Bool)
+	.def(function* ($, j, aInk, cInk, pInks, pGaps) {
+		const delta = $.Local(Frac);
+		yield delta.set(ShrinkDelta(aInk, cInk));
+		yield pInks.part(j).set(add(pInks.part(j), delta));
+		yield pGaps.part(j).set(sub(pGaps.part(j), delta));
+		yield $.Return(true);
+	});
+
+const BalanceShrinkOneStrokeUp = Func(Int, Frac, Frac, Store(Frac), Store(Frac))
+	.returns(Bool)
+	.def(function* ($, j, aInk, cInk, pInks, pGaps) {
+		const delta = $.Local(Frac);
+		yield delta.set(ShrinkDelta(aInk, cInk));
+		yield pInks.part(j).set(add(pInks.part(j), delta));
+		yield pGaps.part(add(1, j)).set(sub(pGaps.part(add(1, j)), delta));
+		yield $.Return(true);
+	});
+
+const ComputeDarknessAdjustedStrokeWidth = Func(Frac, Frac)
+	.returns(Frac)
+	.def(function* ($, aInk, adjInk) {
+		yield $.Return(
+			min(add(aInk, div(DARKNESS_ADJUST_PIXELS_MAX, max(1, aInk))), max(aInk, adjInk))
 		);
-		yield e.set(j, e.add(j, 1));
 	});
-});
 
-const BalanceOneStrokeExtDown = Lib.Func(function* (e) {
-	const [j, desired, current, vpGapOcc, vpInkOcc, vpGaps, vpInks] = e.args(7);
+const BalanceOneStroke = Func(
+	Int,
+	Bool,
+	Bool,
+	Store(Int),
+	Store(Int),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac)
+).def(function* (
+	e,
+	j,
+	forceRoundBottom,
+	forceRoundTop,
+	pGapOcc,
+	pInkOcc,
+	pCGaps,
+	pCInks,
+	pAGap,
+	pAInk
+) {
+	const aInk = e.Local(Frac),
+		cInk = e.Local(Frac),
+		aGapBelow = e.Local(Frac),
+		cGapBelow = e.Local(Frac),
+		aGapAbove = e.Local(Frac),
+		cGapAbove = e.Local(Frac);
 
-	const pGapOcc = e.coerce.fromIndex.variable(vpGapOcc);
-	const pInkOcc = e.coerce.fromIndex.variable(vpInkOcc);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pInks = e.coerce.fromIndex.variable(vpInks);
+	yield cInk.set(pCInks.part(j));
+	yield aInk.set(pAInk.part(j));
+	yield cGapBelow.set(pCGaps.part(j));
+	yield aGapBelow.set(pAGap.part(j));
+	yield cGapAbove.set(pCGaps.part(add(1, j)));
+	yield aGapAbove.set(pAGap.part(add(1, j)));
 
-	const occBelow = e.part(pGapOcc, j),
-		occInk = e.part(pInkOcc, j);
-	const delta = e.local();
+	yield If(lt(aInk, 1 / 8)).Then(e.Exit());
 
-	yield e.if(
-		e.not(
-			e.and(
-				e.or(e.eq(InkOcc.Clear, occInk), e.eq(InkOcc.Up, occInk)),
-				e.or(
-					e.or(e.eq(GapOcc.OneClear, occBelow), e.eq(GapOcc.TwoClear, occBelow)),
-					e.or(e.eq(GapOcc.MoreClear, occBelow), e.eq(GapOcc.MoreDown, occBelow))
-				)
-			)
-		),
-		function* () {
-			yield e.return(0);
-		}
+	const hasMoreSpaceBelow = e.Local(Bool),
+		canExtendDown = e.Local(Bool),
+		canExtendUp = e.Local(Bool),
+		canShrinkDown = e.Local(Bool),
+		canShrinkUp = e.Local(Bool),
+		inkDownDesired = e.Local(Frac),
+		inkUpDesired = e.Local(Frac);
+
+	yield hasMoreSpaceBelow.set(
+		or(gt(cGapBelow, cGapAbove), and(eq(cGapBelow, cGapAbove), gteq(aGapBelow, aGapAbove)))
 	);
 
-	yield e.if(
-		e.eq(GapOcc.OneClear, occBelow),
-		() => [e.set(delta, e.min(e.coerce.toF26D6(1 / 4), e.sub(desired, current)))],
-		() => [e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(desired, current)))]
-	);
-	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
-	yield e.set(e.part(pGaps, j), e.sub(e.part(pGaps, j), delta));
-	yield e.if(e.eq(InkOcc.Clear, occInk), function* () {
-		yield e.set(occInk, InkOcc.Down);
-	});
-	yield e.if(e.eq(InkOcc.Up, occInk), function* () {
-		yield e.set(occInk, InkOcc.Both);
-	});
-	yield e.if(e.eq(GapOcc.OneClear, occBelow), function* () {
-		yield e.set(occBelow, GapOcc.OneBlur);
-	});
-	yield e.if(e.eq(GapOcc.TwoClear, occBelow), function* () {
-		yield e.set(occBelow, GapOcc.TwoUp);
-	});
-	yield e.if(e.eq(GapOcc.MoreClear, occBelow), function* () {
-		yield e.set(occBelow, GapOcc.MoreUp);
-	});
-	yield e.if(e.eq(GapOcc.MoreDown, occBelow), function* () {
-		yield e.set(occBelow, GapOcc.MoreBoth);
-	});
-
-	yield e.return(1);
-});
-
-const BalanceOneStrokeExtUp = Lib.Func(function* (e) {
-	const [j, desired, current, vpGapOcc, vpInkOcc, vpGaps, vpInks] = e.args(7);
-
-	const pGapOcc = e.coerce.fromIndex.variable(vpGapOcc);
-	const pInkOcc = e.coerce.fromIndex.variable(vpInkOcc);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pInks = e.coerce.fromIndex.variable(vpInks);
-
-	const occInk = e.part(pInkOcc, j),
-		occAbove = e.part(pGapOcc, e.add(1, j));
-	const delta = e.local();
-
-	yield e.if(
-		e.not(
-			e.and(
-				e.or(e.eq(InkOcc.Clear, occInk), e.eq(InkOcc.Up, occInk)),
-				e.or(
-					e.or(e.eq(GapOcc.OneClear, occAbove), e.eq(GapOcc.TwoClear, occAbove)),
-					e.or(e.eq(GapOcc.MoreClear, occAbove), e.eq(GapOcc.MoreUp, occAbove))
-				)
-			)
-		),
-		function* () {
-			yield e.return(0);
-		}
-	);
-
-	yield e.if(
-		e.eq(GapOcc.OneClear, occAbove),
-		() => [e.set(delta, e.min(e.coerce.toF26D6(1 / 5), e.sub(desired, current)))],
-		() => [e.set(delta, e.min(e.coerce.toF26D6(4 / 5), e.sub(desired, current)))]
-	);
-	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
-	yield e.set(e.part(pGaps, e.add(1, j)), e.sub(e.part(pGaps, e.add(1, j)), delta));
-	yield e.if(e.eq(InkOcc.Clear, occInk), function* () {
-		yield e.set(occInk, InkOcc.Up);
-	});
-	yield e.if(e.eq(InkOcc.Up, occInk), function* () {
-		yield e.set(occInk, InkOcc.Both);
-	});
-	yield e.if(e.eq(GapOcc.OneClear, occAbove), function* () {
-		yield e.set(occAbove, GapOcc.OneBlur);
-	});
-	yield e.if(e.eq(GapOcc.TwoClear, occAbove), function* () {
-		yield e.set(occAbove, GapOcc.TwoDown);
-	});
-	yield e.if(e.eq(GapOcc.MoreClear, occAbove), function* () {
-		yield e.set(occAbove, GapOcc.MoreDown);
-	});
-	yield e.if(e.eq(GapOcc.MoreUp, occAbove), function* () {
-		yield e.set(occAbove, GapOcc.MoreBoth);
-	});
-
-	yield e.return(1);
-});
-
-const ShrinkDelta = Lib.Func(function* (e) {
-	const [aInk, cInk] = e.args(2);
-	yield e.return(e.neg(e.sub(cInk, e.max(e.coerce.toF26D6(3 / 5), aInk))));
-});
-
-const BalanceShrinkOneStrokeDown = Lib.Func(function* (e) {
-	const [j, aInk, cInk, vpInks, vpGaps] = e.args(5);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pInks = e.coerce.fromIndex.variable(vpInks);
-	const delta = e.local();
-	yield e.set(delta, e.call(ShrinkDelta, aInk, cInk));
-	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
-	yield e.set(e.part(pGaps, j), e.sub(e.part(pGaps, j), delta));
-	yield e.return(1);
-});
-
-const BalanceShrinkOneStrokeUp = Lib.Func(function* (e) {
-	const [j, aInk, cInk, vpInks, vpGaps] = e.args(5);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pInks = e.coerce.fromIndex.variable(vpInks);
-	const delta = e.local();
-	yield e.set(delta, e.call(ShrinkDelta, aInk, cInk));
-	yield e.set(e.part(pInks, j), e.add(e.part(pInks, j), delta));
-	yield e.set(e.part(pGaps, e.add(1, j)), e.sub(e.part(pGaps, e.add(1, j)), delta));
-	yield e.return(1);
-});
-
-const ComputeDarknessAdjustedStrokeWidth = Lib.Func(function* ($) {
-	const [aInk, adjInk] = $.args(2);
-	yield $.return(
-		$.min(
-			$.add(
-				aInk,
-				$.div(
-					$.coerce.toF26D6(DARKNESS_ADJUST_PIXELS_MAX),
-					$.max($.coerce.toF26D6(1), aInk)
-				)
-			),
-			$.max(aInk, adjInk)
-		)
-	);
-});
-
-const BalanceOneStroke = Lib.Func(function* (e) {
-	const [
-		j,
-		scalar,
-		forceRoundBottom,
-		forceRoundTop,
-		vpGapOcc,
-		vpInkOcc,
-		vpGaps,
-		vpInks,
-		vpaGap,
-		vpaInk
-	] = e.args(10);
-	const pGaps = e.coerce.fromIndex.variable(vpGaps);
-	const pInks = e.coerce.fromIndex.variable(vpInks);
-	const pAInk = e.coerce.fromIndex.variable(vpaInk);
-	const pAGap = e.coerce.fromIndex.variable(vpaGap);
-
-	const aInk = e.local(),
-		cInk = e.local(),
-		aGapBelow = e.local(),
-		cGapBelow = e.local(),
-		aGapAbove = e.local(),
-		cGapAbove = e.local();
-
-	yield e.set(cInk, e.part(pInks, j));
-	yield e.set(aInk, e.part(pAInk, j));
-	yield e.set(cGapBelow, e.part(pGaps, j));
-	yield e.set(aGapBelow, e.part(pAGap, j));
-	yield e.set(cGapAbove, e.part(pGaps, e.add(1, j)));
-	yield e.set(aGapAbove, e.part(pAGap, e.add(1, j)));
-
-	yield e.if(e.lt(aInk, e.coerce.toF26D6(1 / 8)), function* () {
-		yield e.return();
-	});
-
-	const hasMoreSpaceBelow = e.local(),
-		canExtendDown = e.local(),
-		canExtendUp = e.local(),
-		canShrinkDown = e.local(),
-		canShrinkUp = e.local(),
-		inkDownDesired = e.local(),
-		inkUpDesired = e.local();
-
-	yield e.set(
-		hasMoreSpaceBelow,
-		e.or(
-			e.gt(cGapBelow, cGapAbove),
-			e.and(e.eq(cGapBelow, cGapAbove), e.gteq(aGapBelow, aGapAbove))
-		)
-	);
-
-	yield e.set(
-		inkDownDesired,
-		e.call(
-			ComputeDarknessAdjustedStrokeWidth,
+	yield inkDownDesired.set(
+		ComputeDarknessAdjustedStrokeWidth(
 			aInk,
-			e.div(e.mul(aInk, e.add(cInk, cGapBelow)), e.add(aInk, aGapBelow))
+			div(mul(aInk, add(cInk, cGapBelow)), add(aInk, aGapBelow))
 		)
 	);
-	yield e.set(
-		inkUpDesired,
-		e.call(
-			ComputeDarknessAdjustedStrokeWidth,
+	yield inkUpDesired.set(
+		ComputeDarknessAdjustedStrokeWidth(
 			aInk,
-			e.div(e.mul(aInk, e.add(cInk, cGapAbove)), e.add(aInk, aGapAbove))
+			div(mul(aInk, add(cInk, cGapAbove)), add(aInk, aGapAbove))
 		)
 	);
 
-	yield e.set(canExtendDown, e.and(e.not(forceRoundBottom), e.lt(cInk, inkDownDesired)));
-	yield e.set(canExtendUp, e.and(e.not(forceRoundTop), e.lt(cInk, inkUpDesired)));
-	yield e.set(
-		canShrinkDown,
-		e.and(
-			e.not(forceRoundBottom),
-			e.and(e.gt(aGapBelow, e.coerce.toF26D6(1 / 8)), e.gt(cInk, inkDownDesired))
-		)
+	yield canExtendDown.set(and(not(forceRoundBottom), lt(cInk, inkDownDesired)));
+	yield canExtendUp.set(and(not(forceRoundTop), lt(cInk, inkUpDesired)));
+	yield canShrinkDown.set(
+		and(not(forceRoundBottom), and(gt(aGapBelow, 1 / 8), gt(cInk, inkDownDesired)))
 	);
-	yield e.set(
-		canShrinkUp,
-		e.and(
-			e.not(forceRoundTop),
-			e.and(e.gt(aGapAbove, e.coerce.toF26D6(1 / 8)), e.gt(cInk, inkUpDesired))
-		)
+	yield canShrinkUp.set(
+		and(not(forceRoundTop), and(gt(aGapAbove, 1 / 8), gt(cInk, inkUpDesired)))
 	);
 
-	const progress = e.local();
-	yield e.set(progress, 0);
+	const progress = e.Local(Bool);
+	yield progress.set(false);
 
-	yield e.if(
-		hasMoreSpaceBelow,
-		function* () {
-			yield e.if(e.and(e.not(progress), canExtendDown), () => [
-				e.set(
-					progress,
-					e.call(
-						BalanceOneStrokeExtDown,
+	yield If(hasMoreSpaceBelow)
+		.Then(function* () {
+			yield If(and(not(progress), canExtendDown)).Then(
+				progress.set(
+					BalanceOneStrokeExtDown(
 						j,
 						inkDownDesired,
 						cInk,
-						vpGapOcc,
-						vpInkOcc,
-						vpGaps,
-						vpInks
+						pGapOcc,
+						pInkOcc,
+						pCGaps,
+						pCInks
 					)
 				)
-			]);
-			yield e.if(e.and(e.not(progress), canExtendUp), () => [
-				e.set(
-					progress,
-					e.call(
-						BalanceOneStrokeExtUp,
-						j,
-						inkUpDesired,
-						cInk,
-						vpGapOcc,
-						vpInkOcc,
-						vpGaps,
-						vpInks
-					)
+			);
+			yield If(and(not(progress), canExtendUp)).Then(
+				progress.set(
+					BalanceOneStrokeExtUp(j, inkUpDesired, cInk, pGapOcc, pInkOcc, pCGaps, pCInks)
 				)
-			]);
-			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
-				e.set(
-					progress,
-					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
+			);
+			yield If(and(not(progress), canShrinkUp)).Then(
+				progress.set(BalanceShrinkOneStrokeUp(j, inkUpDesired, cInk, pCInks, pCGaps))
+			);
+			yield If(and(not(progress), canShrinkDown)).Then(
+				progress.set(BalanceShrinkOneStrokeDown(j, inkDownDesired, cInk, pCInks, pCGaps))
+			);
+		})
+		.Else(function* () {
+			yield If(and(not(progress), canExtendUp)).Then(
+				progress.set(
+					BalanceOneStrokeExtUp(j, inkUpDesired, cInk, pGapOcc, pInkOcc, pCGaps, pCInks)
 				)
-			]);
-			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
-				e.set(
-					progress,
-					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
-				)
-			]);
-		},
-		function* () {
-			yield e.if(e.and(e.not(progress), canExtendUp), () => [
-				e.set(
-					progress,
-					e.call(
-						BalanceOneStrokeExtUp,
-						j,
-						inkUpDesired,
-						cInk,
-						vpGapOcc,
-						vpInkOcc,
-						vpGaps,
-						vpInks
-					)
-				)
-			]);
-			yield e.if(e.and(e.not(progress), canExtendDown), () => [
-				e.set(
-					progress,
-					e.call(
-						BalanceOneStrokeExtDown,
+			);
+			yield If(and(not(progress), canExtendDown)).Then(
+				progress.set(
+					BalanceOneStrokeExtDown(
 						j,
 						inkDownDesired,
 						cInk,
-						vpGapOcc,
-						vpInkOcc,
-						vpGaps,
-						vpInks
+						pGapOcc,
+						pInkOcc,
+						pCGaps,
+						pCInks
 					)
 				)
-			]);
-			yield e.if(e.and(e.not(progress), canShrinkDown), () => [
-				e.set(
-					progress,
-					e.call(BalanceShrinkOneStrokeDown, j, inkDownDesired, cInk, vpInks, vpGaps)
-				)
-			]);
-			yield e.if(e.and(e.not(progress), canShrinkUp), () => [
-				e.set(
-					progress,
-					e.call(BalanceShrinkOneStrokeUp, j, inkUpDesired, cInk, vpInks, vpGaps)
-				)
-			]);
-		}
-	);
-});
-
-export const BalanceStrokes = Lib.Func(function* ($) {
-	const [
-		N,
-		scalar,
-		bottomSeize,
-		topSeize,
-		forceRoundBottom,
-		forceRoundTop,
-		vpGapOcc,
-		vpInkOcc,
-		vpGaps,
-		vpInks,
-		vpaGap,
-		vpaInk,
-		vpfStrokeBalanced
-	] = $.args(13);
-
-	const pfStrokeBalanced = $.coerce.fromIndex.variable(vpfStrokeBalanced);
-	const paInk = $.coerce.fromIndex.variable(vpaInk);
-
-	yield $.call(
-		InitBalanceMultiStrokeHints,
-		N,
-		bottomSeize,
-		topSeize,
-		vpGapOcc,
-		vpInkOcc,
-		vpGaps,
-		vpfStrokeBalanced
-	);
-
-	yield $.if($.gt(N, 0)).then(function* () {
-		yield $.call(
-			BalanceOneStroke,
-			0,
-			scalar,
-			forceRoundBottom,
-			forceRoundTop,
-			vpGapOcc,
-			vpInkOcc,
-			vpGaps,
-			vpInks,
-			vpaGap,
-			vpaInk
-		);
-	});
-	yield $.if($.gt(N, 1)).then(function* () {
-		yield $.call(
-			BalanceOneStroke,
-			$.sub(N, 1),
-			scalar,
-			forceRoundBottom,
-			forceRoundTop,
-			vpGapOcc,
-			vpInkOcc,
-			vpGaps,
-			vpInks,
-			vpaGap,
-			vpaInk
-		);
-	});
-
-	const jj = $.local();
-	const find = $.local();
-	const processStrokeIndex = $.local();
-	const maxStrokeWidth = $.local();
-
-	yield $.set(find, 1);
-	yield $.set(processStrokeIndex, 0);
-	yield $.while(find, function* () {
-		yield $.set(find, 0);
-		yield $.set(jj, 1);
-		yield $.set(maxStrokeWidth, 0);
-		yield $.while($.lt($.add(1, jj), N), function* () {
-			yield $.if(
-				$.and($.not($.part(pfStrokeBalanced, jj)), $.gt($.part(paInk, jj), maxStrokeWidth))
-			).then(function* () {
-				yield $.set(find, 1);
-				yield $.set(processStrokeIndex, jj);
-				yield $.set(maxStrokeWidth, $.part(paInk, jj));
-			});
-			yield $.addSet(jj, 1);
+			);
+			yield If(and(not(progress), canShrinkDown)).Then(
+				progress.set(BalanceShrinkOneStrokeDown(j, inkDownDesired, cInk, pCInks, pCGaps))
+			);
+			yield If(and(not(progress), canShrinkUp)).Then(
+				progress.set(BalanceShrinkOneStrokeUp(j, inkUpDesired, cInk, pCInks, pCGaps))
+			);
 		});
-		yield $.if(find).then(function* () {
-			yield $.call(
-				BalanceOneStroke,
+});
+
+export const BalanceStrokes = Func(
+	Int,
+	Frac,
+	Frac,
+	Bool,
+	Bool,
+	Store(Int),
+	Store(Int),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Frac),
+	Store(Bool)
+).def(function* (
+	$,
+	N,
+	bottomSeize,
+	topSeize,
+	forceRoundBottom,
+	forceRoundTop,
+	pGapOcc,
+	pInkOcc,
+	pCGaps,
+	pCInks,
+	pAGaps,
+	pAInks,
+	pfStrokeBalanced
+) {
+	yield InitBalanceMultiStrokeHints(
+		N,
+		bottomSeize,
+		topSeize,
+		pGapOcc,
+		pInkOcc,
+		pCGaps,
+		pfStrokeBalanced
+	);
+
+	yield If(gt(N, 0)).Then(
+		BalanceOneStroke(
+			0,
+			forceRoundBottom,
+			forceRoundTop,
+			pGapOcc,
+			pInkOcc,
+			pCGaps,
+			pCInks,
+			pAGaps,
+			pAInks
+		)
+	);
+	yield If(gt(N, 1)).Then(
+		BalanceOneStroke(
+			sub(N, 1),
+			forceRoundBottom,
+			forceRoundTop,
+			pGapOcc,
+			pInkOcc,
+			pCGaps,
+			pCInks,
+			pAGaps,
+			pAInks
+		)
+	);
+
+	const jj = $.Local(Int);
+	const find = $.Local(Bool);
+	const processStrokeIndex = $.Local(Int);
+	const maxStrokeWidth = $.Local(Frac);
+
+	yield find.set(true);
+	yield processStrokeIndex.set(0);
+	yield While(find, function* () {
+		yield find.set(false);
+		yield jj.set(1);
+		yield maxStrokeWidth.set(0);
+		yield While(lt(add(1, jj), N), function* () {
+			yield If(and(not(pfStrokeBalanced.part(jj)), gt(pAInks.part(jj), maxStrokeWidth))).Then(
+				function* () {
+					yield find.set(true);
+					yield processStrokeIndex.set(jj);
+					yield maxStrokeWidth.set(pAInks.part(jj));
+				}
+			);
+			yield jj.set(add(jj, 1));
+		});
+		yield If(find).Then(function* () {
+			yield BalanceOneStroke(
 				processStrokeIndex,
-				scalar,
 				forceRoundBottom,
 				forceRoundTop,
-				vpGapOcc,
-				vpInkOcc,
-				vpGaps,
-				vpInks,
-				vpaGap,
-				vpaInk
+				pGapOcc,
+				pInkOcc,
+				pCGaps,
+				pCInks,
+				pAGaps,
+				pAInks
 			);
-			yield $.set($.part(pfStrokeBalanced, processStrokeIndex), 1);
+			yield pfStrokeBalanced.part(processStrokeIndex).set(true);
 		});
 	});
 });

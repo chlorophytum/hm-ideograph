@@ -1,45 +1,75 @@
-import { Edsl } from "@chlorophytum/hltt";
+import {
+	add,
+	ceiling,
+	div,
+	floor,
+	Frac,
+	Func,
+	gc,
+	gteq,
+	i2f,
+	If,
+	max,
+	mppem,
+	mul,
+	sub,
+	Template,
+	THandle
+} from "@chlorophytum/hltt-next";
 
-const Lib = new Edsl.Library(`@chlorophytum/hint-programs-stroke-adjust`);
+export const AdjustStrokeDistT = Template((rate: number) =>
+	Func(Frac)
+		.returns(Frac)
+		.def(function* ($, d) {
+			yield $.Return(
+				add(
+					max(1, floor(d)),
+					mul(
+						sub(d, max(1, floor(d))),
+						sub(1, div(1, max(1, mul(1 / rate, i2f(mppem())))))
+					)
+				)
+			);
+		})
+);
 
-export const AdjustStrokeDistT = Lib.Template(function* ($, rate: number) {
-	const [d] = $.args(1);
-	const One = $.coerce.toF26D6(1);
-	yield $.return(
-		$.add(
-			$.max(One, $.floor(d)),
-			$.mul(
-				$.sub(d, $.max(One, $.floor(d))),
-				$.sub(One, $.div(One, $.max(One, $.mul($.coerce.toF26D6(64 / rate), $.mppem()))))
-			)
-		)
-	);
-});
+export const VisFloorT = Template((consideredDark: number) =>
+	Func(Frac, Frac)
+		.returns(Frac)
+		.def(function* ($, x, fillRate) {
+			yield If(gteq(sub(x, floor(x)), consideredDark))
+				.Then($.Return(floor(add(1, floor(x)))))
+				.Else($.Return(floor(x)));
+		})
+);
 
-export const VisFloorT = Lib.Template(function* ($, ConsideredDark: number) {
-	const [x, fillRate] = $.args(2);
-	yield $.if($.gteq($.sub(x, $.floor(x)), $.coerce.toF26D6(ConsideredDark)))
-		.then($.return($.floor($.add($.coerce.toF26D6(1), $.floor(x)))))
-		.else($.return($.floor($.floor(x))));
-});
-export const VisCeilT = Lib.Template(function* ($, ConsideredDark: number) {
-	const [x, fillRate] = $.args(2);
-	yield $.if($.gteq($.sub($.ceiling(x), x), $.coerce.toF26D6(ConsideredDark)))
-		.then($.return($.ceiling($.sub($.ceiling(x), $.coerce.toF26D6(1)))))
-		.else($.return($.ceiling($.ceiling(x))));
-});
+export const VisCeilT = Template((consideredDark: number) =>
+	Func(Frac, Frac)
+		.returns(Frac)
+		.def(function* ($, x, fillRate) {
+			yield If(gteq(sub(x, ceiling(x)), consideredDark))
+				.Then($.Return(ceiling(sub(ceiling(x), 1))))
+				.Else($.Return(ceiling(x)));
+		})
+);
 
-export const VisDistT = Lib.Template(function* (e, ConsideredDark: number) {
-	const [zBot, zTop, frBot, frTop] = e.args(4);
-	yield e.return(
-		e.sub(
-			e.call(VisFloorT(ConsideredDark), e.gc.cur(zTop), frTop),
-			e.call(VisCeilT(ConsideredDark), e.gc.cur(zBot), frBot)
-		)
-	);
-});
+export const VisDistT = Template((ConsideredDark: number, Tb: THandle, Tt: THandle) =>
+	Func(Tb, Tt, Frac, Frac)
+		.returns(Frac)
+		.def(function* ($, zBot, zTop, frBot, frTop) {
+			yield $.Return(
+				sub(
+					VisFloorT(ConsideredDark)(gc.cur(zTop), frTop),
+					VisCeilT(ConsideredDark)(gc.cur(zBot), frBot)
+				)
+			);
+		})
+);
 
-export const OctDistOrig = Lib.Func(function* (e) {
-	const [zBot, zTop] = e.args(2);
-	yield e.return(e.sub(e.gc.orig(zTop), e.gc.orig(zBot)));
-});
+export const OctDistOrigT = Template((Tb: THandle, Tt: THandle) =>
+	Func(Tb, Tt)
+		.returns(Frac)
+		.def(function* ($, zBot, zTop) {
+			yield $.Return(sub(gc.orig(zTop), gc.orig(zBot)));
+		})
+);

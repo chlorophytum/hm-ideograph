@@ -1,81 +1,101 @@
 import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
+import {
+	add,
+	div,
+	floor,
+	Frac,
+	Func,
+	gc,
+	GlyphPoint,
+	gteq,
+	If,
+	max,
+	mul,
+	Scfs,
+	sub,
+	TwilightPoint
+} from "@chlorophytum/hltt-next";
 
-import { ProgramLib } from "./twilight";
-
-const ComputeYAvgEmboxShift = ProgramLib.Func(function* ($) {
-	const [zBot, zTop, zBotOrig, zTopOrig] = $.args(4);
-	yield $.return(
-		$.mul(
-			$.add(
-				$.sub($.gc.cur(zBot), $.gc.cur(zBotOrig)),
-				$.sub($.gc.cur(zTop), $.gc.cur(zTopOrig))
-			),
-			$.coerce.toF26D6(1 / 2)
-		)
-	);
-});
-
-export const THintBottomStroke = ProgramLib.Func(function* ($) {
-	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
-	const dBelowOrig = $.local();
-	const dAboveOrig = $.local();
-	const wOrig = $.local();
-	const wCur = $.local();
-	const spaceCur = $.local();
-	yield $.set(dBelowOrig, $.sub($.gc.orig(zsBot), $.gc.cur(zBotOrig)));
-	yield $.set(dAboveOrig, $.sub($.gc.cur(zTopOrig), $.gc.orig(zsTop)));
-	yield $.set(wOrig, $.sub($.gc.orig(zsTop), $.gc.orig(zsBot)));
-	yield $.set(wCur, $.max($.coerce.toF26D6(3 / 5), $.call(AdjustStrokeDistT(2), wOrig)));
-	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
-
-	const yInterpolated = $.local();
-	yield $.set(
-		yInterpolated,
-		$.add(
-			$.gc.cur(zBot),
-			$.max(0, $.floor($.mul(spaceCur, $.div(dBelowOrig, $.add(dBelowOrig, dAboveOrig)))))
-		)
-	);
-	yield $.scfs(zsBot, yInterpolated);
-	yield $.scfs(zsTop, $.add(yInterpolated, wCur));
-});
-
-export const THintTopStroke = ProgramLib.Func(function* ($) {
-	const [zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(6);
-	const dBelowOrig = $.local();
-	const dAboveOrig = $.local();
-	const wOrig = $.local();
-	const wCur = $.local();
-	const spaceCur = $.local();
-
-	yield $.set(dBelowOrig, $.sub($.gc.orig(zsBot), $.gc.cur(zBotOrig)));
-	yield $.set(dAboveOrig, $.sub($.gc.cur(zTopOrig), $.gc.orig(zsTop)));
-	yield $.set(wOrig, $.sub($.gc.orig(zsTop), $.gc.orig(zsBot)));
-	yield $.set(wCur, $.max($.coerce.toF26D6(3 / 5), $.call(AdjustStrokeDistT(2), wOrig)));
-	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
-
-	const yInterpolated = $.local();
-	yield $.set(
-		yInterpolated,
-		$.sub(
-			$.gc.cur(zTop),
-			$.max(0, $.floor($.mul(spaceCur, $.div(dAboveOrig, $.add(dBelowOrig, dAboveOrig)))))
-		)
-	);
-
-	yield $.if(
-		$.gteq(
-			yInterpolated,
-			$.add(
-				$.gc.orig(zsTop),
-				$.add(
-					$.call(ComputeYAvgEmboxShift, zBot, zTop, zBotOrig, zTopOrig),
-					$.coerce.toF26D6(1)
-				)
+const ComputeYAvgEmboxShift = Func(TwilightPoint, TwilightPoint, TwilightPoint, TwilightPoint)
+	.returns(Frac)
+	.def(function* ($, zBot, zTop, zBotOrig, zTopOrig) {
+		yield $.Return(
+			mul(
+				1 / 2,
+				add(sub(gc.cur(zBot), gc.cur(zBotOrig)), sub(gc.cur(zTop), gc.cur(zTopOrig)))
 			)
-		)
-	).then($.set(yInterpolated, $.sub(yInterpolated, $.coerce.toF26D6(1))));
+		);
+	});
 
-	yield $.scfs(zsTop, yInterpolated);
-	yield $.scfs(zsBot, $.sub(yInterpolated, wCur));
+export const HintBottomStroke = Func(
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	GlyphPoint,
+	GlyphPoint
+).def(function* ($, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop) {
+	const dBelowOrig = $.Local(Frac);
+	const dAboveOrig = $.Local(Frac);
+	const wOrig = $.Local(Frac);
+	const wCur = $.Local(Frac);
+	const spaceCur = $.Local(Frac);
+
+	yield dBelowOrig.set(sub(gc.orig(zsBot), gc.cur(zBotOrig)));
+	yield dAboveOrig.set(sub(gc.cur(zTopOrig), gc.orig(zsTop)));
+	yield wOrig.set(sub(gc.orig(zsTop), gc.orig(zsBot)));
+	yield wCur.set(max(3 / 5, AdjustStrokeDistT(2)(wOrig)));
+	yield spaceCur.set(sub(sub(gc.cur(zTop), gc.cur(zBot)), wCur));
+
+	const yInterpolated = $.Local(Frac);
+	yield yInterpolated.set(
+		add(
+			gc.cur(zBot),
+			max(0, floor(mul(spaceCur, div(dBelowOrig, add(dBelowOrig, dAboveOrig)))))
+		)
+	);
+
+	yield Scfs(zsBot, yInterpolated);
+	yield Scfs(zsTop, add(yInterpolated, wCur));
+});
+
+export const HintTopStroke = Func(
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	GlyphPoint,
+	GlyphPoint
+).def(function* ($, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop) {
+	const dBelowOrig = $.Local(Frac);
+	const dAboveOrig = $.Local(Frac);
+	const wOrig = $.Local(Frac);
+	const wCur = $.Local(Frac);
+	const spaceCur = $.Local(Frac);
+
+	yield dBelowOrig.set(sub(gc.orig(zsBot), gc.cur(zBotOrig)));
+	yield dAboveOrig.set(sub(gc.cur(zTopOrig), gc.orig(zsTop)));
+	yield wOrig.set(sub(gc.orig(zsTop), gc.orig(zsBot)));
+	yield wCur.set(max(3 / 5, AdjustStrokeDistT(2)(wOrig)));
+	yield spaceCur.set(sub(sub(gc.cur(zTop), gc.cur(zBot)), wCur));
+
+	const yInterpolated = $.Local(Frac);
+	yield yInterpolated.set(
+		sub(
+			gc.cur(zTop),
+			max(0, floor(mul(spaceCur, div(dAboveOrig, add(dBelowOrig, dAboveOrig)))))
+		)
+	);
+
+	yield If(
+		gteq(
+			yInterpolated,
+			add(gc.orig(zsTop), add(ComputeYAvgEmboxShift(zBot, zTop, zBotOrig, zTopOrig), 1))
+		)
+	).Then(function* () {
+		yield yInterpolated.set(sub(yInterpolated, 1));
+	});
+
+	yield Scfs(zsTop, yInterpolated);
+	yield Scfs(zsBot, sub(yInterpolated, wCur));
 });

@@ -24,7 +24,7 @@ export const DefaultEmBoxProps: EmBoxProps = {
 
 const DefaultStrategy = {
 	// Coverage
-	emboxSystemName: "Ideographs",
+	groupName: "Ideographs",
 
 	...DefaultIdeographHintingParams,
 
