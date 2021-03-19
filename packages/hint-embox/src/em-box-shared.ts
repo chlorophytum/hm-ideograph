@@ -53,7 +53,6 @@ export namespace EmBoxShared {
 		constructor(private readonly sink: HlttProgramSink, private readonly props: EmBoxProps) {}
 		public doCompile() {
 			const props = this.props;
-			console.log(props);
 			const cvSpurBottom = ControlValues.SpurBottom(props.name);
 			const cvSpurTop = ControlValues.SpurTop(props.name);
 			const cvStrokeBottom = ControlValues.StrokeBottom(props.name);
