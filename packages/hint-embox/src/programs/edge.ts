@@ -1,15 +1,23 @@
-import { ProgramLib } from "./twilight";
+import { add, Func, gc, GlyphPoint, Mdap, Scfs, sub, TwilightPoint } from "@chlorophytum/hltt-next";
 
-export const THintBottomEdge = ProgramLib.Func(function* ($) {
-	const [zBot, zoBot, zsBot] = $.args(3);
-	const adjustedDist = $.sub($.gc.cur(zBot), $.gc.cur(zoBot));
-	yield $.mdap(zsBot);
-	yield $.scfs(zsBot, $.add($.gc.orig(zsBot), adjustedDist));
+export const THintBottomEdge = Func(TwilightPoint, TwilightPoint, GlyphPoint).def(function* (
+	$,
+	zBot,
+	zoBot,
+	zsBot
+) {
+	const adjustedDist = sub(gc.cur(zBot), gc.cur(zoBot));
+	yield Mdap(zsBot);
+	yield Scfs(zsBot, add(gc.orig(zsBot), adjustedDist));
 });
 
-export const THintTopEdge = ProgramLib.Func(function* ($) {
-	const [zTop, zoTop, zsTop] = $.args(3);
-	const adjustedDist = $.sub($.gc.cur(zTop), $.gc.cur(zoTop));
-	yield $.mdap(zsTop);
-	yield $.scfs(zsTop, $.add($.gc.orig(zsTop), adjustedDist));
+export const THintTopEdge = Func(TwilightPoint, TwilightPoint, GlyphPoint).def(function* (
+	$,
+	zTop,
+	zoTop,
+	zsTop
+) {
+	const adjustedDist = sub(gc.cur(zTop), gc.cur(zoTop));
+	yield Mdap(zsTop);
+	yield Scfs(zsTop, add(gc.orig(zsTop), adjustedDist));
 });

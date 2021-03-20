@@ -9,8 +9,8 @@ import {
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 
 import { PREFIX } from "./constants";
-import { THintBottomStroke, THintTopStroke } from "./programs/boundary";
-import { THintStrokeFreeAuto } from "./programs/free";
+import { HintBottomStroke, HintTopStroke } from "./programs/boundary";
+import { HintStrokeFreeAuto } from "./programs/free";
 import { Twilights } from "./programs/twilight";
 import { UseEmBox } from "./use-em-box";
 
@@ -71,21 +71,20 @@ export namespace EmBoxStroke {
 			const zsBot = this.sink.resolveGlyphPoint(this.props.zsBot);
 			const zsTop = this.sink.resolveGlyphPoint(this.props.zsTop);
 			this.sink.addSegment(function* ($) {
-				const spurBottom = $.Linkable(Twilights.SpurBottom(boxName));
-				const spurTop = $.Linkable(Twilights.SpurTop(boxName));
-				const strokeBottom = $.Linkable(Twilights.StrokeBottom(boxName));
-				const strokeTop = $.Linkable(Twilights.StrokeTop(boxName));
+				const spurBottom = Twilights.SpurBottom(boxName);
+				const spurTop = Twilights.SpurTop(boxName);
+				const strokeBottom = Twilights.StrokeBottom(boxName);
+				const strokeTop = Twilights.StrokeTop(boxName);
 
-				const spurBottomOrig = $.Linkable(Twilights.SpurBottomOrig(boxName));
-				const spurTopOrig = $.Linkable(Twilights.SpurTopOrig(boxName));
-				const strokeBottomOrig = $.Linkable(Twilights.StrokeBottomOrig(boxName));
-				const strokeTopOrig = $.Linkable(Twilights.StrokeTopOrig(boxName));
+				const spurBottomOrig = Twilights.SpurBottomOrig(boxName);
+				const spurTopOrig = Twilights.SpurTopOrig(boxName);
+				const strokeBottomOrig = Twilights.StrokeBottomOrig(boxName);
+				const strokeTopOrig = Twilights.StrokeTopOrig(boxName);
 
 				if (props.spur) {
-					yield $.call(
-						THintStrokeFreeAuto,
-						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsBelow)),
-						$.coerce.toF26D6(DistinguishDist + Math.max(0, props.leavePixelsAbove)),
+					yield HintStrokeFreeAuto(
+						DistinguishDist + Math.max(0, props.leavePixelsBelow),
+						DistinguishDist + Math.max(0, props.leavePixelsAbove),
 						spurBottom,
 						spurTop,
 						spurBottomOrig,
@@ -94,8 +93,7 @@ export namespace EmBoxStroke {
 						zsTop
 					);
 				} else if (props.atTop) {
-					yield $.call(
-						THintTopStroke,
+					yield HintTopStroke(
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,
@@ -104,8 +102,7 @@ export namespace EmBoxStroke {
 						zsTop
 					);
 				} else {
-					yield $.call(
-						THintBottomStroke,
+					yield HintBottomStroke(
 						strokeBottom,
 						strokeTop,
 						strokeBottomOrig,

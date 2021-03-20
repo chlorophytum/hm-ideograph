@@ -6,6 +6,7 @@ import {
 	PropertyBag
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
+import { Miap } from "@chlorophytum/hltt-next";
 
 import { PREFIX } from "./constants";
 import { TInitEmBoxTwilightPoints } from "./programs/init";
@@ -63,36 +64,35 @@ export namespace EmBoxShared {
 			this.sink.setDefaultControlValue(cvStrokeTop, props.strokeTop);
 
 			this.sink.addSegment(function* ($) {
-				const spurBottom = $.Linkable(Twilights.SpurBottom(props.name));
-				const spurTop = $.Linkable(Twilights.SpurTop(props.name));
-				const strokeBottom = $.Linkable(Twilights.StrokeBottom(props.name));
-				const strokeTop = $.Linkable(Twilights.StrokeTop(props.name));
+				const spurBottom = Twilights.SpurBottom(props.name);
+				const spurTop = Twilights.SpurTop(props.name);
+				const strokeBottom = Twilights.StrokeBottom(props.name);
+				const strokeTop = Twilights.StrokeTop(props.name);
 
-				const spurBottomOrig = $.Linkable(Twilights.SpurBottomOrig(props.name));
-				const spurTopOrig = $.Linkable(Twilights.SpurTopOrig(props.name));
-				const strokeBottomOrig = $.Linkable(Twilights.StrokeBottomOrig(props.name));
-				const strokeTopOrig = $.Linkable(Twilights.StrokeTopOrig(props.name));
+				const spurBottomOrig = Twilights.SpurBottomOrig(props.name);
+				const spurTopOrig = Twilights.SpurTopOrig(props.name);
+				const strokeBottomOrig = Twilights.StrokeBottomOrig(props.name);
+				const strokeTopOrig = Twilights.StrokeTopOrig(props.name);
 
-				yield $.miap($.Linkable(strokeBottom), $.Linkable(cvStrokeBottom).ptr);
-				yield $.miap($.Linkable(strokeTop), $.Linkable(cvStrokeTop).ptr);
-				yield $.miap($.Linkable(spurBottom), $.Linkable(cvSpurBottom).ptr);
-				yield $.miap($.Linkable(spurTop), $.Linkable(cvSpurTop).ptr);
+				yield Miap(strokeBottom, cvStrokeBottom.ptr);
+				yield Miap(strokeTop, cvStrokeTop.ptr);
+				yield Miap(spurBottom, cvSpurBottom.ptr);
+				yield Miap(spurTop, cvSpurTop.ptr);
 
-				yield $.miap($.Linkable(strokeBottomOrig), $.Linkable(cvStrokeBottom).ptr);
-				yield $.miap($.Linkable(strokeTopOrig), $.Linkable(cvStrokeTop).ptr);
-				yield $.miap($.Linkable(spurBottomOrig), $.Linkable(cvSpurBottom).ptr);
-				yield $.miap($.Linkable(spurTopOrig), $.Linkable(cvSpurTop).ptr);
+				yield Miap(strokeBottomOrig, cvStrokeBottom.ptr);
+				yield Miap(strokeTopOrig, cvStrokeTop.ptr);
+				yield Miap(spurBottomOrig, cvSpurBottom.ptr);
+				yield Miap(spurTopOrig, cvSpurTop.ptr);
 
-				yield $.call(
-					TInitEmBoxTwilightPoints(props.smallSizeExpansionRate),
-					$.Linkable(strokeBottom),
-					$.Linkable(strokeTop),
-					$.Linkable(spurBottom),
-					$.Linkable(spurTop),
-					$.Linkable(strokeBottomOrig),
-					$.Linkable(strokeTopOrig),
-					$.Linkable(spurBottomOrig),
-					$.Linkable(spurTopOrig)
+				yield TInitEmBoxTwilightPoints(props.smallSizeExpansionRate)(
+					strokeBottom,
+					strokeTop,
+					spurBottom,
+					spurTop,
+					strokeBottomOrig,
+					strokeTopOrig,
+					spurBottomOrig,
+					spurTopOrig
 				);
 			});
 		}

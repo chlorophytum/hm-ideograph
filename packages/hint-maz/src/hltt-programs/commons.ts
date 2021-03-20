@@ -1,58 +1,72 @@
-import { OctDistOrig } from "@chlorophytum/hint-programs-stoke-adjust";
-import { Edsl } from "@chlorophytum/hltt";
+import { OctDistOrigT } from "@chlorophytum/hint-programs-stoke-adjust";
+import {
+	add,
+	div,
+	eq,
+	Frac,
+	Func,
+	GlyphPoint,
+	If,
+	Int,
+	lt,
+	lteq,
+	Store,
+	sub,
+	Template,
+	THandle,
+	While
+} from "@chlorophytum/hltt-next";
 
-import { PREFIX } from "../constants";
-
-export const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttPrograms`);
+import { midBot, midTop } from "./macros";
 
 export const ConsideredDark = 3 / 4;
 
-function midBot(e: Edsl.ProgramDsl, zMids: Edsl.Variable<Edsl.VkStorage>, index: Edsl.Expression) {
-	return e.part(zMids, e.mul(e.coerce.toF26D6(2), index));
-}
-function midTop(e: Edsl.ProgramDsl, zMids: Edsl.Variable<Edsl.VkStorage>, index: Edsl.Expression) {
-	return e.part(zMids, e.add(1, e.mul(e.coerce.toF26D6(2), index)));
-}
-export const GetFillRate = Lib.Func(function* ($) {
-	const [N, zBot, zTop, vpZMids] = $.args(4);
-	const ink = $.local();
-	const gap = $.local();
+export const GetFillRateT = Template((Tb: THandle, Tt: THandle) =>
+	Func(Int, Tb, Tt, Store(GlyphPoint))
+		.returns(Frac)
+		.def(function* ($, N, zBot, zTop, pZMids) {
+			const ink = $.Local(Frac);
+			const gap = $.Local(Frac);
+			yield ink.set(0);
+			yield gap.set(0);
 
-	const pZMids = $.coerce.fromIndex.variable(vpZMids);
+			const j = $.Local(Int);
+			const gapDist = $.Local(Frac);
+			yield j.set(0);
+			yield gapDist.set(0);
+			yield While(lteq(j, N), function* () {
+				yield gapDist.set(FetchOrigGap(Tb, Tt)(N, j, zBot, zTop, pZMids));
+				yield gap.set(add(gap, gapDist));
+				yield j.set(add(j, 1));
+			});
 
-	yield $.set(ink, 0);
-	yield $.set(gap, 0);
-
-	const j = $.local();
-	const gapDist = $.local();
-	yield $.set(j, 0);
-	yield $.set(gapDist, 0);
-	yield $.while($.lteq(j, N), function* () {
-		yield $.if($.eq(j, 0))
-			.then($.set(gapDist, $.call(OctDistOrig, zBot, midBot($, pZMids, j))))
-			.else(
-				$.if($.eq(j, N))
-					.then($.set(gapDist, $.call(OctDistOrig, midTop($, pZMids, $.sub(j, 1)), zTop)))
-					.else(
-						$.set(
-							gapDist,
-							$.call(
-								OctDistOrig,
-								midTop($, pZMids, $.sub(j, 1)),
-								midBot($, pZMids, j)
-							)
-						)
+			yield j.set(0);
+			yield While(lt(j, N), function* () {
+				yield ink.set(
+					add(
+						ink,
+						OctDistOrigT(GlyphPoint, GlyphPoint)(midBot(pZMids, j), midTop(pZMids, j))
 					)
+				);
+				yield j.set(add(j, 1));
+			});
+
+			yield $.Return(div(gap, add(gap, ink)));
+		})
+);
+
+export const FetchOrigGap = Template((Tb: THandle, Tt: THandle) =>
+	Func(Int, Int, Tb, Tt, Store(GlyphPoint))
+		.returns(Frac)
+		.def(function* ($, N, j, zBot, zTop, pZMids) {
+			yield If(eq(j, 0)).Then(
+				$.Return(OctDistOrigT(Tb, GlyphPoint)(zBot, midBot(pZMids, j)))
 			);
-		yield $.set(gap, $.add(gap, gapDist));
-		yield $.addSet(j, 1);
-	});
-
-	yield $.set(j, 0);
-	yield $.while($.lt(j, N), function* () {
-		yield $.addSet(ink, $.call(OctDistOrig, midBot($, pZMids, j), midTop($, pZMids, j)));
-		yield $.addSet(j, 1);
-	});
-
-	yield $.return($.div(gap, $.add(gap, ink)));
-});
+			yield If(eq(j, N)).Then(
+				$.Return(OctDistOrigT(GlyphPoint, Tt)(midTop(pZMids, sub(j, 1)), zTop))
+			);
+			yield $.Return(
+				OctDistOrigT(GlyphPoint, GlyphPoint)(midTop(pZMids, sub(j, 1)), midBot(pZMids, j))
+			);
+		})
+);

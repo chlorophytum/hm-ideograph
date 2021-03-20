@@ -7,6 +7,7 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import * as EmBox from "@chlorophytum/hint-embox";
+import { GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next";
 import * as _ from "lodash";
 
 import { PREFIX } from "./constants";
@@ -68,22 +69,25 @@ export namespace MultipleAlignZone {
 			const recPathCollide = getRecPath(props.mergePriority, collidePriority, N);
 			const sink = this.sink;
 			this.sink.addSegment(function* ($) {
-				const spurBottom = $.Linkable(EmBox.Twilights.SpurBottom(props.emBoxName));
-				const spurTop = $.Linkable(EmBox.Twilights.SpurTop(props.emBoxName));
+				const spurBottom = EmBox.Twilights.SpurBottom(props.emBoxName);
+				const spurTop = EmBox.Twilights.SpurTop(props.emBoxName);
 
 				const bottomPoint = !props.bottomPoint
 					? spurBottom
 					: sink.resolveGlyphPoint(props.bottomPoint);
 				const topPoint = !props.topPoint ? spurTop : sink.resolveGlyphPoint(props.topPoint);
 
-				yield $.call(
-					THintMultipleStrokesExplicit(N),
+				yield THintMultipleStrokesExplicit(
+					N,
+					!props.bottomPoint ? TwilightPoint : GlyphPoint,
+					!props.topPoint ? TwilightPoint : GlyphPoint
+				)(
 					...props.gapMinDist,
 					...props.inkMinDist,
 					...recPath,
 					...recPathCollide,
-					props.bottomBalanceForbidden ? 1 : 0,
-					props.topBalanceForbidden ? 1 : 0,
+					!!props.bottomBalanceForbidden,
+					!!props.topBalanceForbidden,
 					bottomPoint,
 					topPoint,
 					..._.flatten(props.middleStrokes).map(z => sink.resolveGlyphPoint(z)),

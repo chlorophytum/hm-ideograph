@@ -1,25 +1,20 @@
-import { Edsl } from "@chlorophytum/hltt";
-
-import { PREFIX } from "../constants";
-
-export const ProgramLib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportPrograms`);
+import { ControlValue, Template, Twilight } from "@chlorophytum/hltt-next";
+import { Frac } from "@chlorophytum/hltt-next/lib/edsl/type-system";
 
 export namespace Twilights {
-	const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportTwilights`);
-	export const StrokeBottom = Lib.TwilightTemplate<[string]>();
-	export const StrokeTop = Lib.TwilightTemplate<[string]>();
-	export const SpurBottom = Lib.TwilightTemplate<[string]>();
-	export const SpurTop = Lib.TwilightTemplate<[string]>();
-	export const StrokeBottomOrig = Lib.TwilightTemplate<[string]>();
-	export const StrokeTopOrig = Lib.TwilightTemplate<[string]>();
-	export const SpurBottomOrig = Lib.TwilightTemplate<[string]>();
-	export const SpurTopOrig = Lib.TwilightTemplate<[string]>();
+	export const StrokeBottom = Template((group: string) => Twilight());
+	export const StrokeTop = Template((group: string) => Twilight());
+	export const SpurBottom = Template((group: string) => Twilight());
+	export const SpurTop = Template((group: string) => Twilight());
+	export const StrokeBottomOrig = Template((group: string) => Twilight());
+	export const StrokeTopOrig = Template((group: string) => Twilight());
+	export const SpurBottomOrig = Template((group: string) => Twilight());
+	export const SpurTopOrig = Template((group: string) => Twilight());
 }
 
 export namespace ControlValues {
-	const Lib = new Edsl.Library(`${PREFIX}::TtLib::HlttSupportControlValues`);
-	export const StrokeBottom = Lib.ControlValueTemplate<[string]>();
-	export const StrokeTop = Lib.ControlValueTemplate<[string]>();
-	export const SpurBottom = Lib.ControlValueTemplate<[string]>();
-	export const SpurTop = Lib.ControlValueTemplate<[string]>();
+	export const StrokeBottom = Template((group: string) => ControlValue(Frac));
+	export const StrokeTop = Template((group: string) => ControlValue(Frac));
+	export const SpurBottom = Template((group: string) => ControlValue(Frac));
+	export const SpurTop = Template((group: string) => ControlValue(Frac));
 }

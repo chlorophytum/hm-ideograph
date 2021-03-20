@@ -1,27 +1,58 @@
 import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stoke-adjust";
+import {
+	add,
+	Bool,
+	div,
+	Frac,
+	Func,
+	gc,
+	GlyphPoint,
+	Int,
+	lt,
+	mul,
+	Store,
+	sub,
+	Template,
+	THandle,
+	While
+} from "@chlorophytum/hltt-next";
 
-import { ConsideredDark, Lib } from "./commons";
+import { ConsideredDark } from "./commons";
+import { midBot, midTop } from "./macros";
 import { BalanceStrokes } from "./mid-size/balance";
 import { InitMSDGapEntries, InitMSDInkEntries } from "./mid-size/init";
 import { HighestAverageLoop } from "./mid-size/loop";
-import { MovePointsForMiddleHint } from "./mid-size/move";
+import { MovePointsForMiddleHintT } from "./mid-size/move";
 
-export const DecideRequiredGap = Lib.Func(function* (e) {
-	const [N, vpGapMD] = e.args(2);
-	const pGapMD = e.coerce.fromIndex.variable(vpGapMD);
-	const j = e.local();
-	const s = e.local();
-	yield e.set(j, 0);
-	yield e.set(s, 0);
-	yield e.while(e.lt(j, N), function* () {
-		yield e.set(s, e.add(s, e.part(pGapMD, j)));
-		yield e.set(j, e.add(j, 1));
+export const DecideRequiredGap = Func(Int, Store(Frac))
+	.returns(Frac)
+	.def(function* (e, N, pGapMD) {
+		const j = e.Local(Int);
+		const s = e.Local(Frac);
+		yield j.set(0);
+		yield s.set(0);
+		yield While(lt(j, N), function* () {
+			yield s.set(add(s, pGapMD.part(j)));
+			yield j.set(add(j, 1));
+		});
+		yield e.Return(s);
 	});
-	yield e.return(s);
-});
 
-export const THintMultipleStrokesMidSize = Lib.Template(function* (e, NMax: number) {
-	const [
+export const THintMultipleStrokesMidSize = Template((NMax: number, Tb: THandle, Tt: THandle) =>
+	Func(
+		Int,
+		Frac,
+		Bool,
+		Bool,
+		Frac,
+		Frac,
+		Tb,
+		Tt,
+		Store(GlyphPoint),
+		Store(Frac),
+		Store(Frac)
+	).def(function* (
+		e,
 		N,
 		dist,
 		forceRoundBottom,
@@ -30,117 +61,105 @@ export const THintMultipleStrokesMidSize = Lib.Template(function* (e, NMax: numb
 		frTop,
 		zBot,
 		zTop,
-		vpZMids,
-		vpGapMD,
-		vpInkMD
-	] = e.args(11);
+		pZMids,
+		pGapMD,
+		pInkMD
+	) {
+		const pxReqGap = e.Local(Frac);
+		const pxReqInk = e.Local(Frac);
+		yield pxReqGap.set(DecideRequiredGap(add(1, N), pGapMD));
+		yield pxReqInk.set(DecideRequiredGap(N, pInkMD));
 
-	const pxReqGap = e.local();
-	const pxReqInk = e.local();
-	yield e.set(pxReqGap, e.call(DecideRequiredGap, e.add(1, N), vpGapMD));
-	yield e.set(pxReqInk, e.call(DecideRequiredGap, N, vpInkMD));
+		const totalInk = e.Local(Frac);
+		const totalGap = e.Local(Frac);
+		const aDist = e.LocalArray(Frac, 2 * NMax + 1);
+		const cDist = e.LocalArray(Frac, 2 * NMax + 1);
+		const divisor = e.LocalArray(Frac, 2 * NMax + 1);
+		const alloc = e.LocalArray(Frac, 2 * NMax + 1);
 
-	const totalInk = e.local();
-	const totalGap = e.local();
-	const aDist = e.local(2 * NMax + 1);
-	const cDist = e.local(2 * NMax + 1);
-	const divisor = e.local(2 * NMax + 1);
-	const alloc = e.local(2 * NMax + 1);
+		const scalar = e.Local(Frac);
+		yield scalar.set(div(dist, sub(gc.orig(zTop), gc.orig(zBot))));
 
-	const scalar = e.local();
-	yield e.set(scalar, e.div(dist, e.sub(e.gc.orig(zTop), e.gc.orig(zBot))));
+		yield totalInk.set(0);
+		yield totalGap.set(0);
 
-	yield e.set(totalInk, 0);
-	yield e.set(totalGap, 0);
+		yield InitMSDGapEntries(Tb, Tt)(
+			N,
+			totalGap.ptr,
+			aDist,
+			cDist,
+			divisor,
+			alloc,
+			zBot,
+			zTop,
+			pZMids,
+			pGapMD
+		);
+		yield InitMSDInkEntries(N, totalInk.ptr, aDist, cDist, divisor, alloc, pZMids, pInkMD);
 
-	yield e.call(
-		InitMSDGapEntries,
-		N,
-		totalGap.ptr,
-		aDist.ptr,
-		cDist.ptr,
-		divisor.ptr,
-		alloc.ptr,
-		zBot,
-		zTop,
-		vpZMids,
-		vpGapMD
-	);
-	yield e.call(
-		InitMSDInkEntries,
-		N,
-		totalInk.ptr,
-		aDist.ptr,
-		cDist.ptr,
-		divisor.ptr,
-		alloc.ptr,
-		vpZMids,
-		vpInkMD
-	);
+		yield HighestAverageLoop(
+			add(1, mul(2, N)),
+			aDist,
+			cDist,
+			divisor,
+			alloc,
+			scalar,
+			sub(sub(dist, pxReqInk), pxReqGap)
+		);
 
-	yield e.call(
-		HighestAverageLoop,
-		e.add(1, e.mul(e.coerce.toF26D6(2), N)),
-		aDist.ptr,
-		cDist.ptr,
-		divisor.ptr,
-		alloc.ptr,
-		scalar,
-		e.sub(e.sub(dist, pxReqInk), pxReqGap)
-	);
+		const aGapDist = e.LocalArray(Frac, NMax + 1);
+		const gaps = e.LocalArray(Frac, NMax + 1);
+		const gapOcc = e.LocalArray(Int, NMax + 1);
+		const aInkDist = e.LocalArray(Frac, NMax);
+		const inks = e.LocalArray(Frac, NMax);
+		const inkOcc = e.LocalArray(Int, NMax);
+		const fStrokeBalanced = e.LocalArray(Bool, NMax);
 
-	const aGapDist = e.local(NMax + 1);
-	const gaps = e.local(NMax + 1);
-	const gapOcc = e.local(NMax + 1);
-	const aInkDist = e.local(NMax);
-	const inks = e.local(NMax);
-	const inkOcc = e.local(NMax);
-	const fStrokeBalanced = e.local(NMax);
+		yield splitGapInkArrayData(N, aDist, aGapDist, aInkDist);
+		yield splitGapInkArrayData(N, alloc, gaps, inks);
 
-	yield e.call(splitGapInkArrayData, N, aDist.ptr, aGapDist.ptr, aInkDist.ptr);
-	yield e.call(splitGapInkArrayData, N, alloc.ptr, gaps.ptr, inks.ptr);
+		// Balance
+		const visPosBottom = e.Local(Frac);
+		const visPosTop = e.Local(Frac);
+		const bottomSeize = e.Local(Frac);
+		const topSeize = e.Local(Frac);
+		yield visPosBottom.set(VisCeilT(ConsideredDark)(gc.cur(zBot), frBot));
+		yield visPosTop.set(VisFloorT(ConsideredDark)(gc.cur(zTop), frTop));
+		yield bottomSeize.set(sub(gc.cur(zBot), visPosBottom));
+		yield topSeize.set(sub(visPosTop, gc.cur(zTop)));
 
-	// Balance
-	const visPosBottom = e.local();
-	const visPosTop = e.local();
-	const bottomSeize = e.local();
-	const topSeize = e.local();
-	yield e.set(visPosBottom, e.call(VisCeilT(ConsideredDark), e.gc.cur(zBot), frBot));
-	yield e.set(visPosTop, e.call(VisFloorT(ConsideredDark), e.gc.cur(zTop), frTop));
-	yield e.set(bottomSeize, e.sub(e.gc.cur(zBot), visPosBottom));
-	yield e.set(topSeize, e.sub(visPosTop, e.gc.cur(zTop)));
+		yield BalanceStrokes(
+			N,
+			bottomSeize,
+			topSeize,
+			forceRoundBottom,
+			forceRoundTop,
+			gapOcc,
+			inkOcc,
+			gaps,
+			inks,
+			aGapDist,
+			aInkDist,
+			fStrokeBalanced
+		);
 
-	yield e.call(
-		BalanceStrokes,
-		N,
-		scalar,
-		bottomSeize,
-		topSeize,
-		forceRoundBottom,
-		forceRoundTop,
-		gapOcc.ptr,
-		inkOcc.ptr,
-		gaps.ptr,
-		inks.ptr,
-		aGapDist.ptr,
-		aInkDist.ptr,
-		fStrokeBalanced.ptr
-	);
+		yield MovePointsForMiddleHintT(Tb, Tt)(N, zBot, zTop, visPosBottom, gaps, inks, pZMids);
+	})
+);
 
-	yield e.call(MovePointsForMiddleHint, N, zBot, zTop, visPosBottom, gaps.ptr, inks.ptr, vpZMids);
-});
-
-const splitGapInkArrayData = Lib.Func(function* ($) {
-	const [N, vp, vpGap, vpInk] = $.args(4);
-	const p = $.coerce.fromIndex.variable(vp);
-	const pGap = $.coerce.fromIndex.variable(vpGap);
-	const pInk = $.coerce.fromIndex.variable(vpInk);
-	const j = $.local();
-	yield $.set(j, 0);
-	yield $.while($.lt(j, N), function* () {
-		yield $.set($.part(pGap, j), $.part(p, $.imul(2, j)));
-		yield $.set($.part(pInk, j), $.part(p, $.add(1, $.imul(2, j))));
-		yield $.addSet(j, 1);
+const splitGapInkArrayData = Func(Int, Store(Frac), Store(Frac), Store(Frac)).def(function* (
+	$,
+	N,
+	p,
+	pGap,
+	pInk
+) {
+	const j = $.Local(Int);
+	yield j.set(0);
+	yield While(lt(j, N), function* () {
+		yield pGap.part(j).set(midBot(p, j));
+		yield pInk.part(j).set(midTop(p, j));
+		yield j.set(add(j, 1));
 	});
-	yield $.set($.part(pGap, N), $.part(p, $.imul(2, N)));
+	yield pGap.part(N).set(midBot(p, N));
 });

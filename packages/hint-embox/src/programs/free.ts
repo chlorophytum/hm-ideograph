@@ -1,49 +1,69 @@
 import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
+import {
+	abs,
+	add,
+	div,
+	Frac,
+	Func,
+	gc,
+	GlyphPoint,
+	gt,
+	If,
+	lt,
+	max,
+	mul,
+	roundWhite,
+	Scfs,
+	sub,
+	TwilightPoint
+} from "@chlorophytum/hltt-next";
 
-import { ProgramLib } from "./twilight";
+export const HintStrokeFreeAuto = Func(
+	Frac,
+	Frac,
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	TwilightPoint,
+	GlyphPoint,
+	GlyphPoint
+).def(function* ($, mdBot, mdTop, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop) {
+	const dBelowOrig = $.Local(Frac);
+	const dAboveOrig = $.Local(Frac);
+	const wOrig = $.Local(Frac);
+	const wCur = $.Local(Frac);
+	const spaceCur = $.Local(Frac);
+	const urTop = $.Local(Frac);
+	const rTop = $.Local(Frac);
+	const urBot = $.Local(Frac);
+	const rBot = $.Local(Frac);
 
-export const THintStrokeFreeAuto = ProgramLib.Func(function* ($) {
-	const [mdBot, mdTop, zBot, zTop, zBotOrig, zTopOrig, zsBot, zsTop] = $.args(8);
-	const dBelowOrig = $.local();
-	const dAboveOrig = $.local();
-	const wOrig = $.local();
-	const wCur = $.local();
-	const spaceCur = $.local();
-	const urTop = $.local();
-	const rTop = $.local();
-	const urBot = $.local();
-	const rBot = $.local();
-	yield $.set(dBelowOrig, $.sub($.gc.orig(zsBot), $.gc.cur(zBotOrig)));
-	yield $.set(dAboveOrig, $.sub($.gc.cur(zTopOrig), $.gc.orig(zsTop)));
-	yield $.set(wOrig, $.sub($.gc.orig(zsTop), $.gc.orig(zsBot)));
-	yield $.set(wCur, $.max($.coerce.toF26D6(3 / 5), $.call(AdjustStrokeDistT(2), wOrig)));
-	yield $.set(spaceCur, $.sub($.sub($.gc.cur(zTop), $.gc.cur(zBot)), wCur));
-	yield $.set(
-		urTop,
-		$.sub($.gc.cur(zTop), $.mul(spaceCur, $.div(dAboveOrig, $.add(dBelowOrig, dAboveOrig))))
-	);
-	yield $.set(
-		urBot,
-		$.add($.gc.cur(zBot), $.mul(spaceCur, $.div(dBelowOrig, $.add(dBelowOrig, dAboveOrig))))
-	);
-	yield $.set(rTop, $.round.white(urTop));
-	yield $.set(rBot, $.round.white(urBot));
-	yield $.if($.gt($.abs($.sub(rTop, urTop)), $.abs($.sub(rBot, urBot))))
-		.then(function* () {
-			yield $.scfs(zsBot, rBot);
-			yield $.scfs(zsTop, $.add(rBot, wCur));
+	yield dBelowOrig.set(sub(gc.orig(zsBot), gc.cur(zBotOrig)));
+	yield dAboveOrig.set(sub(gc.cur(zTopOrig), gc.orig(zsTop)));
+	yield wOrig.set(sub(gc.orig(zsTop), gc.orig(zsBot)));
+	yield wCur.set(max(3 / 5, AdjustStrokeDistT(2)(wOrig)));
+	yield spaceCur.set(sub(sub(gc.cur(zTop), gc.cur(zBot)), wCur));
+	yield urTop.set(sub(gc.cur(zTop), mul(spaceCur, div(dAboveOrig, add(dBelowOrig, dAboveOrig)))));
+	yield urBot.set(add(gc.cur(zBot), mul(spaceCur, div(dBelowOrig, add(dBelowOrig, dAboveOrig)))));
+	yield rTop.set(roundWhite(urTop));
+	yield rBot.set(roundWhite(urBot));
+
+	yield If(gt(abs(sub(rTop, urTop)), abs(sub(rBot, urBot))))
+		.Then(function* () {
+			yield Scfs(zsBot, rBot);
+			yield Scfs(zsTop, add(rBot, wCur));
 		})
-		.else(function* () {
-			yield $.scfs(zsTop, rTop);
-			yield $.scfs(zsBot, $.sub(rTop, wCur));
+		.Else(function* () {
+			yield Scfs(zsTop, rTop);
+			yield Scfs(zsBot, sub(rTop, wCur));
 		});
-	// Leave space for distinguishing
-	yield $.if($.lt($.gc.cur(zsTop), $.add($.gc.cur(zBot), mdBot))).then(function* () {
-		yield $.scfs(zsBot, $.add($.gc.cur(zsBot), $.coerce.toF26D6(1)));
-		yield $.scfs(zsTop, $.add($.gc.cur(zsTop), $.coerce.toF26D6(1)));
+
+	yield If(lt(gc.cur(zsTop), add(gc.cur(zBot), mdBot))).Then(function* () {
+		yield Scfs(zsBot, add(gc.cur(zsBot), 1));
+		yield Scfs(zsTop, add(gc.cur(zsTop), 1));
 	});
-	yield $.if($.gt($.gc.cur(zsBot), $.sub($.gc.cur(zTop), mdTop))).then(function* () {
-		yield $.scfs(zsBot, $.sub($.gc.cur(zsBot), $.coerce.toF26D6(1)));
-		yield $.scfs(zsTop, $.sub($.gc.cur(zsTop), $.coerce.toF26D6(1)));
+	yield If(gt(gc.cur(zsBot), sub(gc.cur(zTop), mdTop))).Then(function* () {
+		yield Scfs(zsBot, sub(gc.cur(zsBot), 1));
+		yield Scfs(zsTop, sub(gc.cur(zsTop), 1));
 	});
 });

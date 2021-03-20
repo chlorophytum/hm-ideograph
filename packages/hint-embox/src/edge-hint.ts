@@ -62,17 +62,15 @@ export namespace EmBoxEdge {
 			const zidEdge = this.sink.resolveGlyphPoint(zEdge);
 			this.sink.addSegment(function* ($) {
 				if (top) {
-					yield $.call(
-						THintTopEdge,
-						$.Linkable(Twilights.SpurTop(boxName)),
-						$.Linkable(Twilights.SpurTopOrig(boxName)),
+					yield THintTopEdge(
+						Twilights.SpurTop(boxName),
+						Twilights.SpurTopOrig(boxName),
 						zidEdge
 					);
 				} else {
-					yield $.call(
-						THintBottomEdge,
-						$.Linkable(Twilights.SpurBottom(boxName)),
-						$.Linkable(Twilights.SpurBottomOrig(boxName)),
+					yield THintBottomEdge(
+						Twilights.SpurBottom(boxName),
+						Twilights.SpurBottomOrig(boxName),
 						zidEdge
 					);
 				}
