@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-programs-stoke-adjust",
-	"version": "0.30.1",
+	"version": "0.32.1",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -13,9 +13,9 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.32.1",
 		"@chlorophytum/hltt-next": "^0.32.1",
-    "@chlorophytum/hltt-next-expr": "^0.32.1",
+		"@chlorophytum/hltt-next-expr": "^0.32.1",
 		"@chlorophytum/hltt-next-stmt": "^0.32.1",
-    "@chlorophytum/hltt-next-type-system": "^0.32.1",
+		"@chlorophytum/hltt-next-type-system": "^0.32.1",
 		"tslib": "^2.0.1"
 	},
 	"publishConfig": {
