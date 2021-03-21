@@ -1,17 +1,7 @@
-import {
-	add,
-	Frac,
-	Func,
-	gc,
-	GlyphPoint,
-	max,
-	mul,
-	roundGray,
-	Scfs,
-	sub,
-	Template,
-	THandle
-} from "@chlorophytum/hltt-next";
+import { Func, Template } from "@chlorophytum/hltt-next";
+import { add, gc, max, mul, round, sub } from "@chlorophytum/hltt-next-expr";
+import { Scfs } from "@chlorophytum/hltt-next-stmt";
+import { Frac, GlyphPoint, THandle } from "@chlorophytum/hltt-next-type-system";
 
 export const ProcessCollidedStrokeWidth = Func(Frac)
 	.returns(Frac)
@@ -25,7 +15,7 @@ export const CollideHangBottom = Template((Tb: THandle) =>
 		yield Scfs(
 			topCur,
 			add(
-				roundGray(gc.cur(botLim)),
+				round.gray(gc.cur(botLim)),
 				ProcessCollidedStrokeWidth(sub(gc.orig(topCur), gc.orig(botCur)))
 			)
 		);
@@ -38,7 +28,7 @@ export const CollideHangTop = Template((Tb: THandle) =>
 		yield Scfs(
 			botCur,
 			sub(
-				roundGray(gc.cur(topLim)),
+				round.gray(gc.cur(topLim)),
 				ProcessCollidedStrokeWidth(sub(gc.orig(topCur), gc.orig(botCur)))
 			)
 		);

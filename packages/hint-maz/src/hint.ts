@@ -7,7 +7,7 @@ import {
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
 import * as EmBox from "@chlorophytum/hint-embox";
-import { GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next";
+import { GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next-type-system";
 import * as _ from "lodash";
 
 import { PREFIX } from "./constants";

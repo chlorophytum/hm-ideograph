@@ -1,4 +1,6 @@
-import { arrayInit, Func, Store, Template, TT } from "@chlorophytum/hltt-next";
+import { Func, Template } from "@chlorophytum/hltt-next";
+import { arrayInit } from "@chlorophytum/hltt-next-stmt";
+import { Store, TT } from "@chlorophytum/hltt-next-type-system";
 
 export function repeatN<T>(n: number, x: T): T[] {
 	const a = [];

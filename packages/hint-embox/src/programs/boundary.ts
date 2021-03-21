@@ -1,20 +1,8 @@
 import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
-import {
-	add,
-	div,
-	floor,
-	Frac,
-	Func,
-	gc,
-	GlyphPoint,
-	gteq,
-	If,
-	max,
-	mul,
-	Scfs,
-	sub,
-	TwilightPoint
-} from "@chlorophytum/hltt-next";
+import { Func } from "@chlorophytum/hltt-next";
+import { add, div, floor, gc, gteq, max, mul, sub } from "@chlorophytum/hltt-next-expr";
+import { If, Scfs } from "@chlorophytum/hltt-next-stmt";
+import { Frac, GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next-type-system";
 
 const ComputeYAvgEmboxShift = Func(TwilightPoint, TwilightPoint, TwilightPoint, TwilightPoint)
 	.returns(Frac)

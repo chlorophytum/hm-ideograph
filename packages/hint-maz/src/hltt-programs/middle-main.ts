@@ -1,19 +1,13 @@
 import { VisDistT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { CallableFunc, Func, Template } from "@chlorophytum/hltt-next";
 import {
 	abs,
 	add,
 	and,
-	Bool,
-	CallableFunc,
 	eq,
-	Frac,
-	Func,
 	gc,
-	GlyphPoint,
 	gt,
 	gteq,
-	If,
-	Int,
 	lt,
 	lteq,
 	max,
@@ -21,18 +15,23 @@ import {
 	neq,
 	not,
 	or,
-	Scfs,
+	sub
+} from "@chlorophytum/hltt-next-expr";
+import { If, Scfs, While } from "@chlorophytum/hltt-next-stmt";
+import {
+	Bool,
+	Frac,
+	GlyphPoint,
+	Int,
 	Store,
-	sub,
-	Template,
 	THandle,
-	TT,
-	While
-} from "@chlorophytum/hltt-next";
+	TT
+} from "@chlorophytum/hltt-next-type-system";
 
 import { ConsideredDark, GetFillRateT } from "./commons";
+import { HintMultipleStrokesGiveUp } from "./give-up";
 import { DecideRequiredGap, THintMultipleStrokesMidSize } from "./middle-midsize";
-import { HintMultipleStrokesGiveUp, HintMultipleStrokesSimple } from "./simple";
+import { HintMultipleStrokesSimple } from "./simple";
 import {
 	AlignTwoStrokes,
 	CollideDownTwoStrokes,

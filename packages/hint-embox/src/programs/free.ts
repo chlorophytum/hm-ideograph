@@ -1,22 +1,8 @@
 import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
-import {
-	abs,
-	add,
-	div,
-	Frac,
-	Func,
-	gc,
-	GlyphPoint,
-	gt,
-	If,
-	lt,
-	max,
-	mul,
-	roundWhite,
-	Scfs,
-	sub,
-	TwilightPoint
-} from "@chlorophytum/hltt-next";
+import { Func } from "@chlorophytum/hltt-next";
+import { abs, add, div, gc, gt, lt, max, mul, round, sub } from "@chlorophytum/hltt-next-expr";
+import { If, Scfs } from "@chlorophytum/hltt-next-stmt";
+import { Frac, GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next-type-system";
 
 export const HintStrokeFreeAuto = Func(
 	Frac,
@@ -45,8 +31,8 @@ export const HintStrokeFreeAuto = Func(
 	yield spaceCur.set(sub(sub(gc.cur(zTop), gc.cur(zBot)), wCur));
 	yield urTop.set(sub(gc.cur(zTop), mul(spaceCur, div(dAboveOrig, add(dBelowOrig, dAboveOrig)))));
 	yield urBot.set(add(gc.cur(zBot), mul(spaceCur, div(dBelowOrig, add(dBelowOrig, dAboveOrig)))));
-	yield rTop.set(roundWhite(urTop));
-	yield rBot.set(roundWhite(urBot));
+	yield rTop.set(round.white(urTop));
+	yield rBot.set(round.white(urBot));
 
 	yield If(gt(abs(sub(rTop, urTop)), abs(sub(rBot, urBot))))
 		.Then(function* () {

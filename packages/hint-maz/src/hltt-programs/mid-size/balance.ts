@@ -1,15 +1,11 @@
+import { Func } from "@chlorophytum/hltt-next";
 import {
 	add,
 	and,
-	Bool,
 	div,
 	eq,
-	Frac,
-	Func,
 	gt,
 	gteq,
-	If,
-	Int,
 	lt,
 	lteq,
 	max,
@@ -18,10 +14,10 @@ import {
 	neg,
 	not,
 	or,
-	Store,
-	sub,
-	While
-} from "@chlorophytum/hltt-next";
+	sub
+} from "@chlorophytum/hltt-next-expr";
+import { If, While } from "@chlorophytum/hltt-next-stmt";
+import { Bool, Frac, Int, Store } from "@chlorophytum/hltt-next-type-system";
 
 enum GapOcc {
 	OneClear,

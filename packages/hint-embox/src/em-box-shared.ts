@@ -6,7 +6,7 @@ import {
 	PropertyBag
 } from "@chlorophytum/arch";
 import { HlttProgramSink } from "@chlorophytum/final-hint-format-hltt";
-import { Miap } from "@chlorophytum/hltt-next";
+import { Miap } from "@chlorophytum/hltt-next-stmt";
 
 import { PREFIX } from "./constants";
 import { TInitEmBoxTwilightPoints } from "./programs/init";

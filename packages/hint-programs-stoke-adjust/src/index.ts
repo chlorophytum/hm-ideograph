@@ -1,21 +1,19 @@
+import { Func, Template } from "@chlorophytum/hltt-next";
 import {
 	add,
 	ceiling,
 	div,
 	floor,
-	Frac,
-	Func,
 	gc,
 	gteq,
 	i2f,
-	If,
 	max,
 	mppem,
 	mul,
-	sub,
-	Template,
-	THandle
-} from "@chlorophytum/hltt-next";
+	sub
+} from "@chlorophytum/hltt-next-expr";
+import { If } from "@chlorophytum/hltt-next-stmt";
+import { Frac, THandle } from "@chlorophytum/hltt-next-type-system";
 
 export const AdjustStrokeDistT = Template((rate: number) =>
 	Func(Frac)

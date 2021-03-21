@@ -1,5 +1,6 @@
 import { ControlValue, Template, Twilight } from "@chlorophytum/hltt-next";
-import { Frac } from "@chlorophytum/hltt-next/lib/edsl/type-system";
+import "@chlorophytum/hltt-next-expr";
+import { Frac } from "@chlorophytum/hltt-next-type-system";
 
 export namespace Twilights {
 	export const StrokeBottom = Template((group: string) => Twilight());

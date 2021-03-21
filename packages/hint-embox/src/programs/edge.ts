@@ -1,4 +1,7 @@
-import { add, Func, gc, GlyphPoint, Mdap, Scfs, sub, TwilightPoint } from "@chlorophytum/hltt-next";
+import { Func } from "@chlorophytum/hltt-next";
+import { add, gc, sub } from "@chlorophytum/hltt-next-expr";
+import { Mdap, Scfs } from "@chlorophytum/hltt-next-stmt";
+import { GlyphPoint, TwilightPoint } from "@chlorophytum/hltt-next-type-system";
 
 export const THintBottomEdge = Func(TwilightPoint, TwilightPoint, GlyphPoint).def(function* (
 	$,

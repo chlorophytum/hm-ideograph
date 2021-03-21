@@ -1,18 +1,7 @@
-import {
-	add,
-	Frac,
-	Func,
-	gc,
-	GlyphPoint,
-	Int,
-	lt,
-	Mdap,
-	Scfs,
-	Store,
-	Template,
-	THandle,
-	While
-} from "@chlorophytum/hltt-next";
+import { Func, Template } from "@chlorophytum/hltt-next";
+import { add, gc, lt } from "@chlorophytum/hltt-next-expr";
+import { Mdap, Scfs, While } from "@chlorophytum/hltt-next-stmt";
+import { Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-type-system";
 
 import { midBot, midTop } from "../macros";
 

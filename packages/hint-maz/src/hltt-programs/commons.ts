@@ -1,21 +1,8 @@
 import { OctDistOrigT } from "@chlorophytum/hint-programs-stoke-adjust";
-import {
-	add,
-	div,
-	eq,
-	Frac,
-	Func,
-	GlyphPoint,
-	If,
-	Int,
-	lt,
-	lteq,
-	Store,
-	sub,
-	Template,
-	THandle,
-	While
-} from "@chlorophytum/hltt-next";
+import { Func, Template } from "@chlorophytum/hltt-next";
+import { add, div, eq, lt, lteq, sub } from "@chlorophytum/hltt-next-expr";
+import { If, While } from "@chlorophytum/hltt-next-stmt";
+import { Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-type-system";
 
 import { midBot, midTop } from "./macros";
 

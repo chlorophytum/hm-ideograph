@@ -1,24 +1,21 @@
+import { Func } from "@chlorophytum/hltt-next";
 import {
 	add,
 	and,
 	div,
-	Frac,
-	Func,
 	gt,
 	gteq,
 	i2f,
-	If,
-	Int,
 	lt,
 	min,
 	mul,
 	not,
 	odd,
 	or,
-	Store,
-	sub,
-	While
-} from "@chlorophytum/hltt-next";
+	sub
+} from "@chlorophytum/hltt-next-expr";
+import { If, While } from "@chlorophytum/hltt-next-stmt";
+import { Frac, Int, Store } from "@chlorophytum/hltt-next-type-system";
 
 export const MaxAverageDivisorIncreaseStep = 2;
 

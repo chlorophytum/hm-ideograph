@@ -1,26 +1,19 @@
+import { Func, Template } from "@chlorophytum/hltt-next";
 import {
 	add,
-	Bool,
 	floor,
-	Frac,
-	Func,
-	GlyphPoint,
 	i2f,
-	Int,
 	lteq,
 	max,
 	min,
 	mppem,
 	mul,
-	roundWhite,
-	Store,
+	round,
 	sub,
-	Template,
-	THandle,
-	unsafeCoerce,
-	VarArgs,
-	While
-} from "@chlorophytum/hltt-next";
+	unsafeCoerce
+} from "@chlorophytum/hltt-next-expr";
+import { VarArgs, While } from "@chlorophytum/hltt-next-stmt";
+import { Bool, Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-type-system";
 
 import { FetchOrigGap } from "./commons";
 import { repeatN, TInitArr, TInitZMids } from "./middle-array";
@@ -53,7 +46,7 @@ const AmendMinGapDistT = Template((Tb: THandle, Tt: THandle) =>
 						floor(gapMinDistOld),
 						mul(
 							min(1, floor(gapMinDistOld)),
-							max(0, roundWhite(sub(gapDist, add(1, mul(1 / 32, i2f(mppem()))))))
+							max(0, round.white(sub(gapDist, add(1, mul(1 / 32, i2f(mppem()))))))
 						)
 					)
 				);

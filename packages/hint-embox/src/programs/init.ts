@@ -1,23 +1,19 @@
+import { Func, Template } from "@chlorophytum/hltt-next";
 import {
 	abs,
 	add,
 	div,
-	Frac,
-	Func,
 	gc,
 	i2f,
-	If,
 	lt,
 	max,
-	Mdap,
 	min,
 	mppem,
-	roundGray,
-	Scfs,
-	sub,
-	Template,
-	TwilightPoint
-} from "@chlorophytum/hltt-next";
+	round,
+	sub
+} from "@chlorophytum/hltt-next-expr";
+import { If, Mdap, Scfs } from "@chlorophytum/hltt-next-stmt";
+import { Frac, TwilightPoint } from "@chlorophytum/hltt-next-type-system";
 
 const BiRound = Template((rate: number) =>
 	Func(TwilightPoint, TwilightPoint, TwilightPoint, TwilightPoint).def(function* (
@@ -31,10 +27,10 @@ const BiRound = Template((rate: number) =>
 		yield widthExpander.set(min(0.5, div(1, max(1, i2f(mppem())))));
 
 		const roundedDist = $.Local(Frac);
-		yield roundedDist.set(roundGray(add(widthExpander, sub(gc.cur(bOrig), gc.cur(aOrig)))));
+		yield roundedDist.set(round.gray(add(widthExpander, sub(gc.cur(bOrig), gc.cur(aOrig)))));
 
 		const roundYBottom = $.Local(Frac);
-		yield roundYBottom.set(roundGray(gc.cur(aOrig)));
+		yield roundYBottom.set(round.gray(gc.cur(aOrig)));
 		const roundBottomTotalMove = $.Local(Frac);
 		yield roundBottomTotalMove.set(
 			add(
@@ -44,7 +40,7 @@ const BiRound = Template((rate: number) =>
 		);
 
 		const roundYTop = $.Local(Frac);
-		yield roundYTop.set(roundGray(gc.cur(bOrig)));
+		yield roundYTop.set(round.gray(gc.cur(bOrig)));
 		const roundTopTotalMove = $.Local(Frac);
 		yield roundTopTotalMove.set(
 			add(

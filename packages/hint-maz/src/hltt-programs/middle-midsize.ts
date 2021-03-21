@@ -1,21 +1,8 @@
 import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stoke-adjust";
-import {
-	add,
-	Bool,
-	div,
-	Frac,
-	Func,
-	gc,
-	GlyphPoint,
-	Int,
-	lt,
-	mul,
-	Store,
-	sub,
-	Template,
-	THandle,
-	While
-} from "@chlorophytum/hltt-next";
+import { Func, Template } from "@chlorophytum/hltt-next";
+import { add, div, gc, lt, mul, sub } from "@chlorophytum/hltt-next-expr";
+import { While } from "@chlorophytum/hltt-next-stmt";
+import { Bool, Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-type-system";
 
 import { ConsideredDark } from "./commons";
 import { midBot, midTop } from "./macros";
