@@ -20,8 +20,11 @@ export function hashGlyphContours(glyph: CGlyph) {
 		const c = input[j];
 		for (let k = 0; k < c.points.length; k++) {
 			buf += "z" + c.points[k].type + " ";
-			buf += c.points[k].x + " " + c.points[k].y;
+			buf += roundC(c.points[k].x) + " " + roundC(c.points[k].y);
 		}
 	}
 	return combineHash(buf);
+}
+function roundC(x: number) {
+	return Math.round(x * 256);
 }

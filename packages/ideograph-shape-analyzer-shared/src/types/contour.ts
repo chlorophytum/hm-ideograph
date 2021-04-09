@@ -1,4 +1,4 @@
-import { Geometry } from "@chlorophytum/arch";
+import { Geometry, Support } from "@chlorophytum/arch";
 
 import { CPoint } from "./point";
 import { createStat } from "./stat";
@@ -161,20 +161,21 @@ function inPoly(point: Geometry.Point, vs: Geometry.Point[]) {
 	return !!inside;
 }
 
+export type ContourMakingOptions = { dicingLength: number };
 export class ContourMaker {
-	constructor(private readonly phantomStops = 4) {}
+	private constructor(private readonly options: ContourMakingOptions) {}
 	private cResult: CPoint[] = [];
 	private zPending: CPoint[] = [];
 
-	public static processPoints(contour: Geometry.GlyphPoint[]) {
-		const st = new ContourMaker();
+	public static processPoints(contour: Geometry.GlyphPoint[], options: ContourMakingOptions) {
+		const st = new ContourMaker(options);
 		const jStart = this.findCornerIndex(contour);
 		if (jStart < 0) return null;
 		const zStart: CPoint = CPoint.from(contour[jStart]);
 		st.zPending.push(zStart);
 
 		for (let k = 1; k < contour.length; k++) {
-			const z = contour[(jStart + k) % contour.length];
+			const z = CPoint.from(contour[(jStart + k) % contour.length]);
 			switch (z.type) {
 				case Geometry.GlyphPointType.Quadratic:
 					st.introduceQuadratic(z);
@@ -184,7 +185,7 @@ export class ContourMaker {
 					break;
 			}
 		}
-		st.flush(CPoint.cornerFrom(zStart));
+		st.flush(zStart);
 
 		const ret = new Contour();
 		ret.points = st.cResult;
@@ -198,7 +199,16 @@ export class ContourMaker {
 		return -1;
 	}
 
-	private introduceQuadratic(z: Geometry.GlyphPoint) {
+	private isPendingLine() {
+		return this.zPending.length === 1;
+	}
+	private isPendingQuadratic() {
+		return (
+			this.zPending.length === 2 &&
+			this.zPending[1].type === Geometry.GlyphPointType.Quadratic
+		);
+	}
+	private introduceQuadratic(z: CPoint) {
 		if (this.isPendingQuadratic()) {
 			const mid = new CPoint(
 				(this.zPending[1].x + z.x) / 2,
@@ -206,22 +216,29 @@ export class ContourMaker {
 				Geometry.GlyphPointType.OnCurvePhantom
 			);
 			this.flush(mid);
-			this.zPending.push(CPoint.from(z));
+			this.zPending.push(z);
 		} else {
-			this.zPending.push(CPoint.from(z));
+			this.zPending.push(z);
 		}
 	}
 
-	private isPendingQuadratic() {
-		return (
-			this.zPending.length === 2 &&
-			this.zPending[1].type === Geometry.GlyphPointType.Quadratic
-		);
-	}
 	private flush(z: CPoint) {
 		if (this.isPendingQuadratic()) {
 			this.cResult.push(this.zPending[0]);
 			this.flushQuadraticInners(this.zPending[0], this.zPending[1], z);
+		} else if (this.isPendingLine()) {
+			const a = this.zPending[0];
+			this.cResult.push(a);
+			const arcLength = Math.hypot(a.x - z.x, a.y - z.y);
+			const stops = Math.round(arcLength / this.options.dicingLength);
+			for (let k = 1; k < stops; k++) {
+				const mid = new CPoint(
+					Support.mix(a.x, z.x, k / stops),
+					Support.mix(a.y, z.y, k / stops),
+					Geometry.GlyphPointType.OnCurvePhantom
+				);
+				this.cResult.push(mid);
+			}
 		} else {
 			for (const z1 of this.zPending) this.cResult.push(z1);
 		}

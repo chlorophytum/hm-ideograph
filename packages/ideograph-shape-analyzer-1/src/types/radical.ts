@@ -4,19 +4,43 @@ import { AdjPoint, Contour } from "@chlorophytum/ideograph-shape-analyzer-shared
 import { SegSpan } from "./seg";
 import Stem from "./stem";
 
-export default class Radical {
-	constructor(public outline: Contour) {}
+export class ContourIsland {
+	constructor(public boundary: Contour) {}
 	public holes: Contour[] = [];
-	public subs: Radical[] = [];
-	public segments: SegSpan[] = [];
-	public stems: Stem[] = [];
 
 	public includes(z: Geometry.Point) {
-		if (!this.outline.includesPoint(z)) return false;
+		if (!this.boundary.includesPoint(z)) return false;
 		for (let j = 0; j < this.holes.length; j++) {
 			if (this.holes[j].includesPoint(z)) return false;
 		}
 		return true;
+	}
+
+	public *contours() {
+		yield this.boundary;
+		yield* this.holes;
+	}
+}
+
+export default class Radical {
+	constructor(public readonly isTopLevel: boolean, public islands: ContourIsland[]) {}
+	public subs: Radical[] = [];
+
+	public segments: SegSpan[] = [];
+	public stems: Stem[] = [];
+
+	get outlineCcw() {
+		return this.islands[0].boundary.ccw;
+	}
+	public *contours() {
+		for (const island of this.islands) yield* island.contours();
+	}
+	public *points() {
+		for (const c of this.contours()) for (const z of c.points) yield z;
+	}
+	public includes(z: Geometry.Point) {
+		for (const island of this.islands) if (island.includes(z)) return true;
+		return false;
 	}
 
 	public includesEdge(z: Geometry.Point, mu: number, mv: number) {

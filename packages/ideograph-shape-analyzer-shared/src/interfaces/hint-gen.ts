@@ -4,7 +4,7 @@ export interface IShapeAnalyzer<S, G, A> {
 	createHintingStrategy(upm: number, ptParams: Partial<S>): S;
 	analyzeGlyph(strategy: S, glyph: G): A;
 	getGlyphHash(glyph: G, strategy: S): string;
-	createGlyph(input: Glyph.Geom): G;
+	createGlyph(input: Glyph.Geom, params: S): G;
 }
 
 export interface IHintGen<S, G, A> {

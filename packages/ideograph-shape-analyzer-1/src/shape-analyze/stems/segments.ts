@@ -7,7 +7,7 @@ import { SegSpan } from "../../types/seg";
 
 export default function findHorizontalSegments(radicals: Radical[], strategy: HintingStrategy) {
 	for (const radical of radicals) {
-		const radicalParts = [radical.outline].concat(radical.holes);
+		const radicalParts = Array.from(radical.contours());
 		const segments: SegSpan[] = [];
 		for (let j = 0; j < radicalParts.length; j++) {
 			const coupled = new Set<AdjPoint>();

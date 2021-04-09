@@ -29,10 +29,18 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 		private readonly gid: GID
 	) {}
 
+	private async getAnalysisInstance() {
+		return this.params.instanceForAnalysis
+			? (await this.font.convertUserInstanceToNormalized({
+					user: this.params.instanceForAnalysis
+			  })) || null
+			: null;
+	}
 	private async getGlyphCacheKey(gid: GID) {
-		const geometry = await this.font.getGeometry(gid, null);
+		const geometry = await this.font.getGeometry(gid, await this.getAnalysisInstance());
 		if (!geometry) return null;
-		const glyph = this.analyzer.createGlyph(geometry.eigen); // Care about outline glyphs only
+		// Care about outline glyphs only
+		const glyph = this.analyzer.createGlyph(geometry.eigen, this.params);
 		return this.analyzer.getGlyphHash(glyph, this.params);
 	}
 
@@ -44,11 +52,10 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 		if (cached) {
 			await this.ee.hintStore.setGlyphHints(gn, cached);
 		} else {
-			const glyphRep = await getGlyphRep(this.font, this.gid);
-			if (!glyphRep) return;
+			const shape = await this.font.getGeometry(this.gid, await this.getAnalysisInstance());
 			let hints: null | undefined | IHint = null;
 
-			const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, gn, glyphRep);
+			const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, gn, shape);
 			const runPct = arb.runParallelCoTask(pct);
 			if (runPct) {
 				hints = await runPct;
@@ -59,7 +66,7 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 					this.analyzer,
 					this.codeGen,
 					this.params,
-					glyphRep
+					shape
 				);
 				hints = await pt.executeImpl();
 			}
@@ -70,7 +77,7 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 	}
 
 	public async tryGetDifficulty() {
-		const geometry = await this.font.getGeometry(this.gid, null);
+		const geometry = await this.font.getGeometry(this.gid, await this.getAnalysisInstance());
 		if (!geometry) return 0;
 		let d = 0;
 		for (const c of geometry.eigen) d += c.length;
@@ -82,7 +89,7 @@ export type GlyphHintParallelArgRep<S> = {
 	readonly gn: string;
 	readonly fmd: IFontSourceMetadata;
 	readonly params: S;
-	readonly glyphRep: Glyph.Rep;
+	readonly shape: Glyph.Shape;
 };
 export type GlyphHintParallelResultRep = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +108,7 @@ export class ParallelGlyphHintCoTask<GID, S>
 		private readonly ee: IHintingModelExecEnv,
 		private readonly params: S,
 		private readonly gn: string,
-		private readonly glyphRep: Glyph.Rep
+		private readonly shape: Glyph.Shape
 	) {}
 	public readonly taskType = ParallelTaskType;
 
@@ -110,7 +117,7 @@ export class ParallelGlyphHintCoTask<GID, S>
 			gn: this.gn,
 			fmd: this.font.metadata,
 			params: this.params,
-			glyphRep: this.glyphRep
+			shape: this.shape
 		};
 	}
 	public async getResult(rep: GlyphHintParallelResultRep) {
@@ -127,7 +134,7 @@ export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,
 		private readonly codeGen: IHintGen<S, G, A>,
 		ptParams: Partial<S>,
-		private readonly glyphRep: Glyph.Rep
+		private readonly shape: Glyph.Shape
 	) {
 		this.params = this.analyzer.createHintingStrategy(fmd.upm, ptParams);
 	}
@@ -139,28 +146,13 @@ export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
 	}
 
 	public async executeImpl() {
-		const shapeMap = new Map(this.glyphRep.shapes);
-		const geometry = shapeMap.get(null);
-		if (!geometry) return new Empty.Hint();
-		return this.hintGlyphGeometry(geometry, this.params);
+		return this.hintGlyphGeometry(this.shape, this.params);
 	}
 
-	public hintGlyphGeometry(geometry: Glyph.Shape, params: S) {
-		const glyph = this.analyzer.createGlyph(geometry.eigen); // Care about outline glyphs only
+	public async hintGlyphGeometry(geometry: Glyph.Shape, params: S) {
+		// Care about outline glyphs only
+		const glyph = this.analyzer.createGlyph(geometry.eigen, params);
 		const analysis = this.analyzer.analyzeGlyph(params, glyph);
 		return this.codeGen.generateGlyphHints(params, glyph, analysis);
 	}
-}
-
-export async function getGlyphRep<GID>(
-	font: IFontSource<GID>,
-	gid: GID
-): Promise<null | Glyph.Rep> {
-	const shapes: [null | Variation.Master, Glyph.Shape][] = [];
-	const masters: (null | Variation.MasterRep)[] = [null, ...(await font.getGlyphMasters(gid))];
-	for (const m of masters) {
-		const shape = await font.getGeometry(gid, m ? m.peak : null);
-		shapes.push([m ? m.master : null, shape]);
-	}
-	return { shapes };
 }

@@ -274,11 +274,11 @@ function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: Hintin
 	}
 	for (let j = 0; j < segments.length; j++) {
 		const sj = segments[j];
-		const upperEdgeJ = radical.outline.ccw !== sj[0].x < sj[sj.length - 1].x;
+		const upperEdgeJ = radical.outlineCcw !== sj[0].x < sj[sj.length - 1].x;
 		up[j] = upperEdgeJ;
 		for (let k = 0; k < j; k++) {
 			const sk = segments[k];
-			const upperEdgeK = radical.outline.ccw !== sk[0].x < sk[sk.length - 1].x;
+			const upperEdgeK = radical.outlineCcw !== sk[0].x < sk[sk.length - 1].x;
 			if (upperEdgeJ === upperEdgeK) {
 				// Both upper
 				graph[j][k] = graph[k][j] = uuMatchable(sj, sk, radical, strategy)

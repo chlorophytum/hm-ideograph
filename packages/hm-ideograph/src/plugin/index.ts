@@ -54,7 +54,7 @@ export class CIdeographHintingPass1 implements IHintingPass {
 				IdeographShapeAnalyzer1,
 				IdeographHintGenerator1,
 				rep.params,
-				rep.glyphRep
+				rep.shape
 			);
 		}
 		return null;

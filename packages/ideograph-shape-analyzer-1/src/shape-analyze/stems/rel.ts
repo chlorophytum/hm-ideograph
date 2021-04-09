@@ -317,7 +317,7 @@ function analyzeRadicalPointsToStemRelationships(
 		bz = stem.high[stem.high.length - 1][stem.high[stem.high.length - 1].length - 1].x;
 	const xMin = Math.min(a0, b0, az, bz),
 		xMax = Math.max(a0, b0, az, bz);
-	const radicalParts = [radical.outline].concat(radical.holes);
+	const radicalParts = Array.from(radical.contours());
 	for (let j = 0; j < radicalParts.length; j++) {
 		for (let k = 0; k < radicalParts[j].points.length; k++) {
 			const point = radicalParts[j].points[k];
@@ -392,7 +392,7 @@ export function analyzeStemSpatialRelationships(
 
 function analyzePBS(u: Stem, v: Stem, radical: Radical, strategy: HintingStrategy) {
 	const yFuzz = strategy.Y_FUZZ * strategy.UPM || 15;
-	const radicalParts = [radical.outline].concat(radical.holes);
+	const radicalParts = Array.from(radical.contours());
 	let ans = 0;
 	for (let j = 0; j < radicalParts.length; j++) {
 		for (let k = 0; k < radicalParts[j].points.length; k++) {

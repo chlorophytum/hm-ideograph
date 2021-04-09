@@ -154,7 +154,6 @@ function considerPoint(
 
 function* OrderedContourPoints(g: CGlyph) {
 	for (const c of g.contours) {
-		const zs = c.points.slice(0, -1).sort((a, b) => a.y - b.y);
-		yield* zs;
+		yield* c.points.sort((a, b) => a.y - b.y);
 	}
 }

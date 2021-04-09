@@ -1,9 +1,12 @@
+import { Variation } from "@chlorophytum/arch";
+
 export interface IdeographHintingParams {
 	readonly groupName?: string;
 	readonly unicodeRanges: ReadonlyArray<[number, number]>;
 	readonly trackScripts: ReadonlyArray<string>;
 	readonly trackFeatures: ReadonlyArray<string>;
 	readonly acceptAllGlyphs: boolean;
+	readonly instanceForAnalysis?: null | undefined | Variation.Instance;
 }
 
 // prettier-ignore

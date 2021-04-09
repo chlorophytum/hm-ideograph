@@ -176,8 +176,8 @@ function linkRadicalSoleStemPoints(
 	radicalStems: Stem[],
 	priority: number
 ) {
-	const radicalParts = [radical.outline].concat(radical.holes);
-	const radicalPoints = _.flatten(radicalParts.map(c => c.points.slice(0, -1)));
+	const radicalParts = Array.from(radical.contours());
+	const radicalPoints = _.flatten(radicalParts.map(c => c.points));
 	for (let k = 0; k < radicalPoints.length; k++) {
 		const z = radicalPoints[k];
 		if (z.isKeyPoint || z.touched || z.dontTouch || !z.queryReference()) continue;
@@ -364,7 +364,7 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 	const records: IpSaRecord[] = [];
 
 	for (let j = 0; j < contours.length; j++) {
-		const contourPoints = contours[j].points.slice(0, -1);
+		const contourPoints = contours[j].points;
 		if (!contourPoints.length) continue;
 		const contourAlignPoints = contourPoints.filter(p => p.touched).sort(byPointY);
 		const contourExtrema = contourPoints.filter(p => p.xExtrema || p.yExtrema).sort(byPointY);
@@ -373,8 +373,8 @@ function analyzeIpSaRecords(contours: Contour[], shortAbsorptions: ShortAbsorpti
 			pMax: AdjPoint = contourPoints[0];
 		for (const z of contourPoints) {
 			if (!z.queryReference()) continue;
-			if (!pMin || z.y < pMin.y) pMin = z;
-			if (!pMax || z.y > pMax.y) pMax = z;
+			if (!pMin.queryReference() || z.y < pMin.y) pMin = z;
+			if (!pMax.queryReference() || z.y > pMax.y) pMax = z;
 		}
 
 		if (contourExtrema.length > 1) {
@@ -480,7 +480,7 @@ export default function AnalyzeIpSa(
 	const IP_STRICT = strategy.Y_FUZZ * strategy.UPM;
 	const IP_LOOSE = 0.5;
 	for (const radical of analysis.radicals) {
-		const radicalContours = [radical.outline, ...radical.holes];
+		const radicalContours = Array.from(radical.contours());
 		const radicalContourIndexes = radicalContours.map(c => contours.indexOf(c));
 		let xMin = 0xffff,
 			xMax = -0xffff;
