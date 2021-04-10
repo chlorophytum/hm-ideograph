@@ -1,9 +1,9 @@
-import { Geometry } from "@chlorophytum/arch";
+import { Geometry, Support } from "@chlorophytum/arch";
 import { AdjPoint } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import Stem from "../types/stem";
 
-import { slopeOf } from "./seg";
+import { minMaxOfSeg, slopeOf } from "./seg";
 
 function keyPointPriority(
 	incoming: Geometry.Point,
@@ -12,26 +12,39 @@ function keyPointPriority(
 	atr?: boolean
 ) {
 	if (atl) {
-		return current.x < incoming.x;
+		return incoming.x < current.x;
 	} else if (atr) {
-		return current.x > incoming.x;
+		return incoming.x > current.x;
 	} else {
 		if (current.y === incoming.y) {
-			return current.x > incoming.x;
+			return incoming.x < current.x;
 		} else {
-			return current.y > incoming.y;
+			return incoming.y < current.y;
 		}
 	}
 }
 
+// eslint-disable-next-line complexity
 export function findHighLowKeys(s: Stem) {
 	let highKey: AdjPoint | null = null,
 		lowKey: AdjPoint | null = null;
 
+	const mmHigh = minMaxOfSeg(s.high);
+	const mmLow = minMaxOfSeg(s.low);
+
+	const atLeft =
+		s.atLeft ||
+		mmHigh.max < Support.mix(mmLow.min, mmLow.max, 2 / 3) ||
+		mmLow.max < Support.mix(mmHigh.min, mmHigh.max, 2 / 3);
+	const atRight =
+		s.atRight ||
+		mmHigh.min > Support.mix(mmLow.min, mmLow.max, 1 / 3) ||
+		mmLow.min > Support.mix(mmHigh.min, mmHigh.max, 1 / 3);
+
 	for (let j = 0; j < s.high.length; j++) {
 		for (let k = 0; k < s.high[j].length; k++) {
 			if (!s.high[j][k].queryReference()) continue;
-			if (!highKey || keyPointPriority(s.high[j][k], highKey, s.atLeft, s.atRight)) {
+			if (!highKey || keyPointPriority(s.high[j][k], highKey, atLeft, atRight)) {
 				highKey = s.high[j][k];
 			}
 		}
@@ -39,7 +52,7 @@ export function findHighLowKeys(s: Stem) {
 	for (let j = 0; j < s.low.length; j++) {
 		for (let k = 0; k < s.low[j].length; k++) {
 			if (!s.low[j][k].queryReference()) continue;
-			if (!lowKey || keyPointPriority(s.low[j][k], lowKey, s.atLeft, s.atRight)) {
+			if (!lowKey || keyPointPriority(s.low[j][k], lowKey, atLeft, atRight)) {
 				lowKey = s.low[j][k];
 			}
 		}

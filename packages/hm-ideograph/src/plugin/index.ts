@@ -49,8 +49,6 @@ export class CIdeographHintingPass1 implements IHintingPass {
 		if (type === ParallelTaskType) {
 			const rep = _rep as GlyphHintParallelArgRep<IdeographHintingParams>;
 			return new ParallelGlyphHintTask(
-				rep.gn,
-				rep.fmd,
 				IdeographShapeAnalyzer1,
 				IdeographHintGenerator1,
 				rep.params,

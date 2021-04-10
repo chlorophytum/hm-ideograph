@@ -1,7 +1,8 @@
-import { Glyph, IHint, IHintFactory } from "@chlorophytum/arch";
+import { Glyph, IFontSource, IHint, IHintFactory } from "@chlorophytum/arch";
 
 export interface IShapeAnalyzer<S, G, A> {
-	createHintingStrategy(upm: number, ptParams: Partial<S>): S;
+	createHintingStrategy<GID>(font: IFontSource<GID>, ptParams: Partial<S>): Promise<S>;
+	fetchGeometry<GID>(font: IFontSource<GID>, params: S, gid: GID): Promise<Glyph.Shape>;
 	analyzeGlyph(strategy: S, glyph: G): A;
 	getGlyphHash(glyph: G, strategy: S): string;
 	createGlyph(input: Glyph.Geom, params: S): G;

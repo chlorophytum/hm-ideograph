@@ -15,22 +15,27 @@ export class IdeographHintingTask<GID, G, S extends IdeographHintingParams, A>
 		private readonly font: IFontSource<GID>,
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,
 		private readonly codeGen: IHintGen<S, G, A>,
-		ptParams: Partial<S>,
+		private readonly ptParams: Partial<S>,
 		private readonly ee: IHintingModelExecEnv
-	) {
-		this.params = this.analyzer.createHintingStrategy(font.metadata.upm, ptParams);
+	) {}
+
+	private m_params: null | S = null;
+
+	private async getParams() {
+		if (!this.m_params) {
+			this.m_params = await this.analyzer.createHintingStrategy(this.font, this.ptParams);
+		}
+		return this.m_params;
 	}
-
-	public readonly params: S;
-
 	public async execute(arb: IArbitratorProxy) {
+		const params = await this.getParams();
 		// Collect entries from the font source
 		const entries = await this.font.getEntries();
 
 		// Collect effective glyphs and the first EHR associated to it
 		const glyphs: Set<GID> = new Set();
 		for (const entry of entries) {
-			const ga = new EffectiveGlyphAnalysisTask(entry, this.params);
+			const ga = new EffectiveGlyphAnalysisTask(entry, params);
 			const gs = await arb.demand(ga);
 			for (const g of gs) glyphs.add(g);
 		}
@@ -38,12 +43,12 @@ export class IdeographHintingTask<GID, G, S extends IdeographHintingParams, A>
 		// Do per-glyph hinting
 		const perGlyphHinting = Array.from(glyphs).map(gid =>
 			arb.demand(
-				new GlyphHintTask(this.font, this.analyzer, this.codeGen, this.params, this.ee, gid)
+				new GlyphHintTask(this.font, this.analyzer, this.codeGen, params, this.ee, gid)
 			)
 		);
 		await Promise.all(perGlyphHinting);
 
 		// Do shared hinting
-		await arb.demand(new SharedHintTask(this.codeGen, this.params, this.ee));
+		await arb.demand(new SharedHintTask(this.codeGen, params, this.ee));
 	}
 }

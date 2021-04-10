@@ -161,7 +161,7 @@ function inPoly(point: Geometry.Point, vs: Geometry.Point[]) {
 	return !!inside;
 }
 
-export type ContourMakingOptions = { dicingLength: number };
+export type ContourMakingOptions = { dicingLength?: null | undefined | number };
 export class ContourMaker {
 	private constructor(private readonly options: ContourMakingOptions) {}
 	private cResult: CPoint[] = [];
@@ -229,24 +229,62 @@ export class ContourMaker {
 		} else if (this.isPendingLine()) {
 			const a = this.zPending[0];
 			this.cResult.push(a);
-			const arcLength = Math.hypot(a.x - z.x, a.y - z.y);
-			const stops = Math.round(arcLength / this.options.dicingLength);
-			for (let k = 1; k < stops; k++) {
-				const mid = new CPoint(
-					Support.mix(a.x, z.x, k / stops),
-					Support.mix(a.y, z.y, k / stops),
-					Geometry.GlyphPointType.OnCurvePhantom
-				);
-				this.cResult.push(mid);
-			}
+			this.flushLineInners(a, z);
 		} else {
 			for (const z1 of this.zPending) this.cResult.push(z1);
 		}
 		this.zPending.length = 1;
 		this.zPending[0] = z;
 	}
+	private flushLineInners(a: CPoint, b: CPoint) {
+		if (!this.options.dicingLength) return;
+		const arcLength = Math.hypot(a.x - b.x, a.y - b.y);
+		const stops = Math.round(arcLength / this.options.dicingLength);
+		for (let k = 1; k < stops; k++) {
+			const mid = new CPoint(
+				Support.mix(a.x, b.x, k / stops),
+				Support.mix(a.y, b.y, k / stops),
+				Geometry.GlyphPointType.OnCurvePhantom
+			);
+			this.cResult.push(mid);
+		}
+	}
 	private flushQuadraticInners(a: CPoint, b: CPoint, c: CPoint) {
-		// Use control polygon for better results
-		this.cResult.push(b);
+		if (!this.options.dicingLength) {
+			this.cResult.push(b);
+		} else {
+			// TODO: use a more accurate arc length
+			const mockArcLength =
+				Math.hypot(a.x - b.x, a.y - b.y) + Math.hypot(b.x - c.x, b.y - c.y);
+			const stops = Math.max(1, Math.round(mockArcLength / this.options.dicingLength));
+			if (stops > 1) {
+				for (let k = 0; k < stops; k++) {
+					const [p, q, r] = this.quadSplit(a, b, c, 1 / (stops - k));
+					if (k) this.cResult.push(a);
+					this.cResult.push(p);
+					(a = q), (b = r);
+				}
+			} else {
+				this.cResult.push(b);
+			}
+		}
+	}
+	private quadSplit(a: CPoint, b: CPoint, c: CPoint, t: number) {
+		const p = new CPoint(
+			(1 - t) * a.x + t * b.x,
+			(1 - t) * a.y + t * b.y,
+			Geometry.GlyphPointType.Quadratic
+		);
+		const q = new CPoint(
+			(1 - t) * (1 - t) * a.x + 2 * t * (1 - t) * b.x + t * t * c.x,
+			(1 - t) * (1 - t) * a.y + 2 * t * (1 - t) * b.y + t * t * c.y,
+			Geometry.GlyphPointType.OnCurvePhantom
+		);
+		const r = new CPoint(
+			(1 - t) * b.x + t * c.x,
+			(1 - t) * b.y + t * c.y,
+			Geometry.GlyphPointType.Quadratic
+		);
+		return [p, q, r];
 	}
 }

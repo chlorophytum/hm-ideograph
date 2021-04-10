@@ -1,4 +1,5 @@
 import {
+	Geometry,
 	Glyph,
 	IArbitratorProxy,
 	IFontSource,
@@ -7,10 +8,8 @@ import {
 	IHintingModelExecEnv,
 	IParallelCoTask,
 	IParallelTask,
-	ITask,
-	Variation
+	ITask
 } from "@chlorophytum/arch";
-import { Empty } from "@chlorophytum/hint-common";
 import {
 	IdeographHintingParams,
 	IHintGen,
@@ -29,56 +28,43 @@ export class GlyphHintTask<GID, S extends IdeographHintingParams, G, A> implemen
 		private readonly gid: GID
 	) {}
 
-	private async getAnalysisInstance() {
-		return this.params.instanceForAnalysis
-			? (await this.font.convertUserInstanceToNormalized({
-					user: this.params.instanceForAnalysis
-			  })) || null
-			: null;
-	}
-	private async getGlyphCacheKey(gid: GID) {
-		const geometry = await this.font.getGeometry(gid, await this.getAnalysisInstance());
-		if (!geometry) return null;
-		// Care about outline glyphs only
-		const glyph = this.analyzer.createGlyph(geometry.eigen, this.params);
-		return this.analyzer.getGlyphHash(glyph, this.params);
+	private async getGlyphCacheKey(shape: Glyph.Shape) {
+		const cGlyph = this.analyzer.createGlyph(shape.eigen, this.params);
+		return this.analyzer.getGlyphHash(cGlyph, this.params);
 	}
 
 	public async execute(arb: IArbitratorProxy) {
 		const gn = await this.font.getUniqueGlyphName(this.gid);
 		if (!gn) return;
-		const ck = await this.getGlyphCacheKey(this.gid);
+		const shape = await this.analyzer.fetchGeometry(this.font, this.params, this.gid);
+
+		// Check whether we have cache the glyph
+		const ck = await this.getGlyphCacheKey(shape);
 		const cached = !ck ? null : this.ee.cacheManager.getCache(ck);
 		if (cached) {
 			await this.ee.hintStore.setGlyphHints(gn, cached);
 		} else {
-			const shape = await this.font.getGeometry(this.gid, await this.getAnalysisInstance());
-			let hints: null | undefined | IHint = null;
-
-			const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, gn, shape);
-			const runPct = arb.runParallelCoTask(pct);
-			if (runPct) {
-				hints = await runPct;
-			} else {
-				const pt = new ParallelGlyphHintTask(
-					gn,
-					this.font.metadata,
-					this.analyzer,
-					this.codeGen,
-					this.params,
-					shape
-				);
-				hints = await pt.executeImpl();
-			}
-			if (!hints) return;
-			if (ck) this.ee.cacheManager.setCache(ck, hints);
-			await this.ee.hintStore.setGlyphHints(gn, hints);
+			await this.executeImpl(arb, gn, ck, shape);
 		}
 	}
 
+	private async executeImpl(arb: IArbitratorProxy, gn: string, ck: string, shape: Glyph.Shape) {
+		let hints: null | undefined | IHint = null;
+		const pct = new ParallelGlyphHintCoTask(this.font, this.ee, this.params, gn, shape);
+		const runPct = arb.runParallelCoTask(pct);
+		if (runPct) {
+			hints = await runPct;
+		} else {
+			const pt = new ParallelGlyphHintTask(this.analyzer, this.codeGen, this.params, shape);
+			hints = await pt.executeImpl();
+		}
+		if (!hints) return;
+		if (ck) this.ee.cacheManager.setCache(ck, hints);
+		await this.ee.hintStore.setGlyphHints(gn, hints);
+	}
+
 	public async tryGetDifficulty() {
-		const geometry = await this.font.getGeometry(this.gid, await this.getAnalysisInstance());
-		if (!geometry) return 0;
+		const geometry = await this.analyzer.fetchGeometry(this.font, this.params, this.gid);
 		let d = 0;
 		for (const c of geometry.eigen) d += c.length;
 		return d;
@@ -129,16 +115,11 @@ export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
 	implements IParallelTask<GlyphHintParallelResultRep> {
 	public readonly type = ParallelTaskType;
 	constructor(
-		private readonly gn: string,
-		fmd: IFontSourceMetadata,
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,
 		private readonly codeGen: IHintGen<S, G, A>,
-		ptParams: Partial<S>,
+		private readonly params: S,
 		private readonly shape: Glyph.Shape
-	) {
-		this.params = this.analyzer.createHintingStrategy(fmd.upm, ptParams);
-	}
-	private readonly params: S;
+	) {}
 
 	public async execute() {
 		const hints = await this.executeImpl();

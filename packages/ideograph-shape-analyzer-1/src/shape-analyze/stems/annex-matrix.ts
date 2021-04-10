@@ -98,10 +98,39 @@ class ACSComputer {
 	private offCenterTouchType(j: number, k: number) {
 		const sj = this.stems[j];
 		const sk = this.stems[k];
-		if (sk.xMaxP <= Support.mix(sj.xMinP, sj.xMaxP, 1 / 2)) return 1;
-		if (sk.xMinP >= Support.mix(sj.xMinP, sj.xMaxP, 1 / 2)) return 2;
-		if (sj.xMaxP <= Support.mix(sk.xMinP, sk.xMaxP, 1 / 2)) return 3;
-		if (sj.xMinP >= Support.mix(sk.xMinP, sk.xMaxP, 1 / 2)) return 4;
+		if (sk.xMaxP <= Support.mix(sj.xMinP, sj.xMaxP, 3 / 5)) return 1;
+		if (sk.xMinP >= Support.mix(sj.xMinP, sj.xMaxP, 2 / 5)) return 2;
+		if (sj.xMaxP <= Support.mix(sk.xMinP, sk.xMaxP, 3 / 5)) return 3;
+		if (sj.xMinP >= Support.mix(sk.xMinP, sk.xMaxP, 2 / 5)) return 4;
+		return 0;
+	}
+	private isOffCenterEdge(j: number, k: number) {
+		const sj = this.stems[j];
+		const sk = this.stems[k];
+		if (
+			sk.xMinP < sj.xMinP - this.strategy.X_FUZZ &&
+			sk.xMaxP > sj.xMinP - this.strategy.X_FUZZ &&
+			sk.xMaxP <= Support.mix(sj.xMinP, sj.xMaxP, 3 / 5)
+		)
+			return 1;
+		if (
+			sk.xMaxP > sj.xMaxP + this.strategy.X_FUZZ &&
+			sk.xMinP < sj.xMaxP + this.strategy.X_FUZZ &&
+			sk.xMinP >= Support.mix(sj.xMinP, sj.xMaxP, 2 / 5)
+		)
+			return 2;
+		if (
+			sj.xMinP < sk.xMinP - this.strategy.X_FUZZ &&
+			sj.xMaxP > sk.xMinP - this.strategy.X_FUZZ &&
+			sj.xMaxP <= Support.mix(sk.xMinP, sk.xMaxP, 3 / 5)
+		)
+			return 3;
+		if (
+			sj.xMaxP > sk.xMaxP + this.strategy.X_FUZZ &&
+			sj.xMinP < sk.xMaxP + this.strategy.X_FUZZ &&
+			sj.xMinP >= Support.mix(sk.xMinP, sk.xMaxP, 2 / 5)
+		)
+			return 4;
 		return 0;
 	}
 	private isOffCenterTouch(j: number, k: number) {
@@ -125,7 +154,6 @@ class ACSComputer {
 			}
 			return true;
 		}
-		return true;
 	}
 
 	public compute(j: number, k: number) {
@@ -160,7 +188,8 @@ class ACSComputer {
 			sk,
 			sjRadBot,
 			skRadTop,
-			this.isOffCenterTouch(j, k)
+			this.isOffCenterTouch(j, k),
+			this.isOffCenterEdge(j, k) > 0
 		);
 
 		let a = ovr * coefficientA * proximityCoefficient * slopesCoefficient;
@@ -180,7 +209,8 @@ class ACSComputer {
 		sk: Stem,
 		sjRadBot: boolean,
 		skRadTop: boolean,
-		offCenter: boolean
+		offCenter: boolean,
+		offCenterEdge: boolean
 	) {
 		let coefficientA = 1 + this.strategy.COEFF_S * this.S[j][k];
 		if (!nothingInBetween || tb) {
@@ -234,6 +264,7 @@ class ACSComputer {
 					coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
 			}
 		}
+		if (offCenterEdge) coefficientA *= this.strategy.COEFF_A_SHAPE_LOST_XR;
 		return coefficientA;
 	}
 

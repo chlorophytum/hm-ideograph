@@ -93,16 +93,20 @@ export class CPoint implements AdjPoint {
 		return p.next === q || p.prev === q || q.next === p || q.prev === p;
 	}
 
-	[Util.inspect.custom](depth: number, options: Util.InspectOptions) {
-		const posStr = `(${Util.inspect(this.x, options)}, ${Util.inspect(this.y, options)})`;
+	[Util.inspect.custom](depth: number, options: Util.InspectOptionsStylized) {
+		const posStr =
+			`(${options.stylize(this.formatCoord(this.x), "number")}, ` +
+			`${options.stylize(this.formatCoord(this.y), "number")})`;
 		if (this.references && this.references.length) {
-			const zidStr = Util.inspect(this.references[0].id, options);
-			return `${posStr}#${zidStr}`;
+			return `${posStr}${options.stylize("#" + this.references[0].id, "special")}`;
 		} else if (this.rawReferences && this.rawReferences.length) {
-			const zidStr = Util.inspect(this.rawReferences[0].id, options);
-			return `${posStr}(#${zidStr})`;
+			return `${posStr}${options.stylize(`(#${this.rawReferences[0].id})`, "special")}`;
 		} else {
 			return posStr;
 		}
+	}
+
+	private formatCoord(x: number) {
+		return x.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 	}
 }

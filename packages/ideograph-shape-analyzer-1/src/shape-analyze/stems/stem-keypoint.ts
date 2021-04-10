@@ -10,7 +10,7 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 		highKey.touched = lowKey.touched = true;
 
 		// get non-key points
-		let highNonKey: AdjPoint[] = [],
+		const highNonKey: AdjPoint[] = [],
 			lowNonKey: AdjPoint[] = [];
 		let jh = -1,
 			jl = -1;
@@ -24,15 +24,15 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 				if (!stem.high[j][k].queryReference()) {
 					continue;
 				}
-				if (k === 0) {
-					highNonKey[j] = stem.high[j][k];
+				if (k === 0 || k === stem.high[j].length - 1) {
+					highNonKey.push(stem.high[j][k]);
 					stem.high[j][k].touched = true;
 				} else {
 					stem.high[j][k].dontTouch = true;
 				}
 			}
 		}
-		highNonKey = highNonKey.filter((v, j) => j !== jh);
+
 		for (let j = 0; j < stem.low.length; j++) {
 			for (let k = 0; k < stem.low[j].length; k++) {
 				if (stem.low[j][k] === lowKey) {
@@ -43,15 +43,14 @@ export function analyzeStemKeyPoints(stems: Stem[]) {
 				if (!stem.low[j][k].queryReference()) {
 					continue;
 				}
-				if (k === stem.low[j].length - 1) {
-					lowNonKey[j] = stem.low[j][k];
+				if (k === 0 || k === stem.low[j].length - 1) {
+					lowNonKey.push(stem.low[j][k]);
 					stem.low[j][k].touched = true;
 				} else {
 					stem.low[j][k].dontTouch = true;
 				}
 			}
 		}
-		lowNonKey = lowNonKey.filter((v, j) => j !== jl);
 
 		stem.highKey = highKey;
 		stem.lowKey = lowKey;

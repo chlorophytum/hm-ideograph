@@ -1,4 +1,8 @@
-import { DefaultIdeographHintingParams } from "@chlorophytum/ideograph-shape-analyzer-shared";
+import { IFontSource, Variation } from "@chlorophytum/arch";
+import {
+	DefaultIdeographHintingParams,
+	IdeographHintingParams
+} from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 const PREVENT_ANNEX = 1e12;
 
@@ -22,12 +26,7 @@ export const DefaultEmBoxProps: EmBoxProps = {
 	SmallSizeExpansionRate: 1
 };
 
-const DefaultStrategy = {
-	// Coverage
-	groupName: "Ideographs",
-
-	...DefaultIdeographHintingParams,
-
+const DefaultAnalyzerStrategy = {
 	// Em-box
 	EmBox: DefaultEmBoxProps,
 
@@ -75,12 +74,26 @@ const DefaultStrategy = {
 	TOP_BOT_MIN_UNBALANCE_AS_SHAPE_LOSS: 0.25,
 	SYMMETRY_TEST_PPEM: 32,
 	BOTH_OVERLAP_H: 0.8,
-	BOTH_OVERLAP_V: 0.85
+	BOTH_OVERLAP_V: 0.85,
+
+	// Outline dicing control
+	DoOutlineDicing: false
 };
 
-export type HintingStrategy = Readonly<typeof DefaultStrategy> & { readonly UPM: number };
+export type HintingStrategy = IdeographHintingParams &
+	Readonly<typeof DefaultAnalyzerStrategy> & {
+		readonly UPM: number;
+		readonly instanceForAnalysis?: null | undefined | Variation.Instance;
+	};
 
-export function createHintingStrategy(upm: number, partialStrategy?: Partial<HintingStrategy>) {
-	if (!partialStrategy) return { ...DefaultStrategy, UPM: upm };
-	return { ...DefaultStrategy, ...partialStrategy, UPM: upm };
+export async function createHintingStrategy<GID>(
+	font: IFontSource<GID>,
+	partialStrategy: null | undefined | Partial<HintingStrategy>
+) {
+	return {
+		...DefaultIdeographHintingParams,
+		...DefaultAnalyzerStrategy,
+		...partialStrategy,
+		UPM: font.metadata.upm
+	};
 }

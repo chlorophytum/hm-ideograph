@@ -1,12 +1,9 @@
-import { Variation } from "@chlorophytum/arch";
-
 export interface IdeographHintingParams {
-	readonly groupName?: string;
+	readonly groupName: string;
 	readonly unicodeRanges: ReadonlyArray<[number, number]>;
 	readonly trackScripts: ReadonlyArray<string>;
 	readonly trackFeatures: ReadonlyArray<string>;
 	readonly acceptAllGlyphs: boolean;
-	readonly instanceForAnalysis?: null | undefined | Variation.Instance;
 }
 
 // prettier-ignore
@@ -33,6 +30,7 @@ for (let cv = 0; cv <= 99; cv++) {
 }
 
 export const DefaultIdeographHintingParams: IdeographHintingParams = {
+	groupName: "Ideograph",
 	acceptAllGlyphs: false,
 	unicodeRanges: DefaultUnicodeRanges,
 	trackScripts: DefaultScriptTags,
