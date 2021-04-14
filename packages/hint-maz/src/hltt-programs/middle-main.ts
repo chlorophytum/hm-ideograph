@@ -127,28 +127,28 @@ const UpdateNewProps = Func(
 	Bool,
 	Int,
 	Bool,
+	Store(GlyphPoint),
 	Store(Frac),
 	Store(Frac),
 	Store(Frac),
 	Store(GlyphPoint),
 	Store(Frac),
 	Store(Frac),
-	Store(Frac),
-	Store(GlyphPoint)
+	Store(Frac)
 ).def(function* (
 	$,
 	N,
 	collideMode,
 	mergeIndex,
 	mergeDown,
+	pZMids,
 	pOGapMD,
 	pGapMD,
 	pInkMD,
-	pZMids,
+	pZMids1,
 	pOGapMD1,
 	pGapMD1,
-	pInkMD1,
-	pZMids1
+	pInkMD1
 ) {
 	const dropGapIndex = $.Local(Int);
 	const dropInkIndex = $.Local(Int);
@@ -229,124 +229,6 @@ const THintMultipleStrokes_DoMerge_ConsequenceEdge = Template((Tb: THandle, Tt: 
 	})
 );
 
-type DoMergeTF = (
-	N: number,
-	Tb: THandle,
-	Tt: THandle
-) => CallableFunc<
-	[
-		Bool,
-		Bool,
-		THandle,
-		THandle,
-		Store<Frac>,
-		Store<GlyphPoint>,
-		Store<Frac>,
-		Store<Frac>,
-		Store<Int>,
-		Store<Int>,
-		Int
-	],
-	Bool
->;
-
-const THintMultipleStrokes_DoMerge: DoMergeTF = Template((N: number, Tb: THandle, Tt: THandle) =>
-	Func(
-		Bool,
-		Bool,
-		Tb,
-		Tt,
-		Store(Frac),
-		Store(GlyphPoint),
-		Store(Frac),
-		Store(Frac),
-		Store(Int),
-		Store(Int),
-		Int
-	)
-		.returns(Bool)
-		.def(function* (
-			$,
-			forceRoundBottom,
-			forceRoundTop,
-			zBot,
-			zTop,
-			pOGapMD,
-			pZMids,
-			pGapMD,
-			pInkMD,
-			pRecPath,
-			pRecPathCollide,
-			giveUpMode
-		) {
-			const recValue = pRecPath.deRef;
-			yield If(eq(recValue, 0)).Then(function* () {
-				yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
-				yield $.Return(false);
-			});
-
-			const mergeIndex = $.Local(Int);
-			const mergeDown = $.Local(Bool);
-			yield mergeIndex.set(sub(abs(recValue), 1));
-			yield mergeDown.set(lt(recValue, 0));
-
-			const pOGapMD1 = $.LocalArray(Frac, N);
-			const pZMids1 = $.LocalArray(GlyphPoint, 2 * N - 2);
-			const pGapMD1 = $.LocalArray(Frac, N);
-			const pInkMD1 = $.LocalArray(Frac, N - 1);
-			yield UpdateNewProps(
-				N,
-				false,
-				mergeIndex,
-				mergeDown,
-				pOGapMD,
-				pGapMD,
-				pInkMD,
-				pZMids,
-				pOGapMD1,
-				pGapMD1,
-				pInkMD1,
-				pZMids1
-			);
-
-			yield THintMultipleStrokes_DoMerge_ConsequenceEdge(Tb, Tt)(
-				N,
-				mergeIndex,
-				zBot,
-				zTop,
-				pZMids
-			);
-			yield If(
-				THintMultipleStrokesMainImpl(N - 1, Tb, Tt)(
-					forceRoundBottom,
-					forceRoundTop,
-					zBot,
-					zTop,
-					pOGapMD1,
-					pZMids1,
-					pGapMD1,
-					pInkMD1,
-					pRecPath.part(1).ptr,
-					pRecPathCollide.part(1).ptr,
-					giveUpMode
-				)
-			)
-				.Then(function* () {
-					yield THintMultipleStrokes_DoMerge_Consequence(
-						N,
-						mergeIndex,
-						mergeDown,
-						pZMids
-					);
-					yield $.Return(true);
-				})
-				.Else(function* () {
-					yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
-					yield $.Return(false);
-				});
-		})
-);
-
 const THintMultipleStrokes_DoCollideMerge_Consequence = Func(Int, Int, Bool, Store(GlyphPoint)).def(
 	function* ($, N, mergeIndex, mergeDown, pZMids) {
 		yield If(and(lt(0, mergeIndex), lt(mergeIndex, N))).Then(
@@ -380,105 +262,6 @@ const THintMultipleStrokes_DoCollideMerge_ConsequenceEdge = Template((Tb: THandl
 			CollideHangTop(Tt)(zTop, pZMids.part(TwoN_M2(N)), pZMids.part(TwoN_M1(N)))
 		);
 	})
-);
-
-const THintMultipleStrokes_DoCollideMerge: DoMergeTF = Template(
-	(N: number, Tb: THandle, Tt: THandle) =>
-		Func(
-			Bool,
-			Bool,
-			Tb,
-			Tt,
-			Store(Frac),
-			Store(GlyphPoint),
-			Store(Frac),
-			Store(Frac),
-			Store(Int),
-			Store(Int),
-			Int
-		)
-			.returns(Bool)
-			.def(function* (
-				$,
-				forceRoundBottom,
-				forceRoundTop,
-				zBot,
-				zTop,
-				pOGapMD,
-				pZMids,
-				pGapMD,
-				pInkMD,
-				pRecPath,
-				pRecPathCollide,
-				giveUpMode
-			) {
-				const pRecValue = pRecPathCollide.deRef;
-
-				yield If(eq(pRecValue, 0)).Then(function* () {
-					yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
-					yield $.Return(false);
-				});
-
-				const collideIndex = $.Local(Int);
-				const collideDown = $.Local(Bool);
-				yield collideIndex.set(sub(abs(pRecValue), 1));
-				yield collideDown.set(lt(pRecValue, 0));
-
-				const pOGapMD1 = $.LocalArray(Frac, N);
-				const pZMids1 = $.LocalArray(GlyphPoint, 2 * N - 2);
-				const pGapMD1 = $.LocalArray(Frac, N);
-				const pInkMD1 = $.LocalArray(Frac, N - 1);
-				yield UpdateNewProps(
-					N,
-					true,
-					collideIndex,
-					collideDown,
-					pOGapMD,
-					pGapMD,
-					pInkMD,
-					pZMids,
-					pOGapMD1,
-					pGapMD1,
-					pInkMD1,
-					pZMids1
-				);
-
-				yield THintMultipleStrokes_DoCollideMerge_ConsequenceEdge(Tb, Tt)(
-					N,
-					collideIndex,
-					zBot,
-					zTop,
-					pZMids
-				);
-				yield If(
-					THintMultipleStrokesMainImpl(N - 1, Tb, Tt)(
-						forceRoundBottom,
-						forceRoundTop,
-						zBot,
-						zTop,
-						pOGapMD1,
-						pZMids1,
-						pGapMD1,
-						pInkMD1,
-						pRecPath.part(1).ptr,
-						pRecPathCollide.part(1).ptr,
-						giveUpMode
-					)
-				)
-					.Then(function* () {
-						yield THintMultipleStrokes_DoCollideMerge_Consequence(
-							N,
-							collideIndex,
-							collideDown,
-							pZMids
-						);
-						yield $.Return(true);
-					})
-					.Else(function* () {
-						yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
-						yield $.Return(false);
-					});
-			})
 );
 
 const HasLargeGap = Func(Int, Store(Frac), Store(Frac)).returns(Bool);
@@ -539,12 +322,14 @@ TryShrinkGapMD.def(function* ($, N, pOGapMD, pGapMD) {
 	yield $.Return(hasShrinkableGap);
 });
 
-const THintMultipleStrokes_OmitImpl = Template((N: number, Tb: THandle, Tt: THandle) =>
+const THintMultipleStrokes_OmitImpl = Template((NMax: number, Tb: THandle, Tt: THandle) =>
 	Func(
-		Frac,
-		Frac,
+		Int,
 		Bool,
 		Bool,
+		Int,
+		Frac,
+		Frac,
 		Tb,
 		Tt,
 		Store(Frac),
@@ -552,16 +337,17 @@ const THintMultipleStrokes_OmitImpl = Template((N: number, Tb: THandle, Tt: THan
 		Store(Frac),
 		Store(Frac),
 		Store(Int),
-		Store(Int),
-		Int
+		Store(Int)
 	)
 		.returns(Bool)
 		.def(function* (
 			$,
-			dist,
-			reqDist,
+			N,
 			forceRoundBottom,
 			forceRoundTop,
+			giveUpMode,
+			dist,
+			reqDist,
 			zBot,
 			zTop,
 			pOGapMD,
@@ -569,14 +355,13 @@ const THintMultipleStrokes_OmitImpl = Template((N: number, Tb: THandle, Tt: THan
 			pGapMD,
 			pInkMD,
 			pRecPath,
-			pRecPathCollide,
-			giveUpMode
+			pRecPathCollide
 		) {
-			if (N <= 1) {
+			yield If(lteq(N, 1)).Then(function* () {
 				yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
 				yield $.Return(false);
 				return;
-			}
+			});
 
 			const isCollision = $.Local(Bool);
 			const hasLargerGap = $.Local(Bool);
@@ -584,42 +369,98 @@ const THintMultipleStrokes_OmitImpl = Template((N: number, Tb: THandle, Tt: THan
 			yield hasLargerGap.set(false);
 
 			yield If(isCollision).Then(hasLargerGap.set(HasLargeGap(N, pOGapMD, pGapMD)));
+			yield isCollision.set(and(isCollision, not(hasLargerGap)));
 
-			yield If(and(isCollision, not(hasLargerGap)))
+			const pRecValue = $.Local(Int);
+			yield If(isCollision)
+				.Then(pRecValue.set(pRecPathCollide.deRef))
+				.Else(pRecValue.set(pRecPath.deRef));
+
+			const mergeIndex = $.Local(Int);
+			const mergeDown = $.Local(Bool);
+			yield mergeIndex.set(sub(abs(pRecValue), 1));
+			yield mergeDown.set(lt(pRecValue, 0));
+
+			const pZMids1 = $.LocalArray(GlyphPoint, 2 * NMax);
+			const pOGapMD1 = $.LocalArray(Frac, 1 + NMax);
+			const pGapMD1 = $.LocalArray(Frac, 1 + NMax);
+			const pInkMD1 = $.LocalArray(Frac, NMax);
+
+			yield UpdateNewProps(
+				N,
+				isCollision,
+				mergeIndex,
+				mergeDown,
+				pZMids,
+				pOGapMD,
+				pGapMD,
+				pInkMD,
+				pZMids1,
+				pOGapMD1,
+				pGapMD1,
+				pInkMD1
+			);
+
+			yield If(isCollision)
 				.Then(
-					$.Return(
-						THintMultipleStrokes_DoCollideMerge(N, Tb, Tt)(
-							forceRoundBottom,
-							forceRoundTop,
-							zBot,
-							zTop,
-							pOGapMD,
-							pZMids,
-							pGapMD,
-							pInkMD,
-							pRecPath,
-							pRecPathCollide,
-							giveUpMode
-						)
+					THintMultipleStrokes_DoCollideMerge_ConsequenceEdge(Tb, Tt)(
+						N,
+						mergeIndex,
+						zBot,
+						zTop,
+						pZMids
 					)
 				)
 				.Else(
-					$.Return(
-						THintMultipleStrokes_DoMerge(N, Tb, Tt)(
-							forceRoundBottom,
-							forceRoundTop,
-							zBot,
-							zTop,
-							pOGapMD,
-							pZMids,
-							pGapMD,
-							pInkMD,
-							pRecPath,
-							pRecPathCollide,
-							giveUpMode
-						)
+					THintMultipleStrokes_DoMerge_ConsequenceEdge(Tb, Tt)(
+						N,
+						mergeIndex,
+						zBot,
+						zTop,
+						pZMids
 					)
 				);
+
+			yield If(
+				THintMultipleStrokesMainImpl(NMax, Tb, Tt)(
+					sub(N, 1),
+					forceRoundBottom,
+					forceRoundTop,
+					giveUpMode,
+					zBot,
+					zTop,
+					pZMids1,
+					pOGapMD1,
+					pGapMD1,
+					pInkMD1,
+					pRecPath.part(1).ptr,
+					pRecPathCollide.part(1).ptr
+				)
+			)
+				.Then(function* () {
+					yield If(isCollision)
+						.Then(
+							THintMultipleStrokes_DoCollideMerge_Consequence(
+								N,
+								mergeIndex,
+								mergeDown,
+								pZMids
+							)
+						)
+						.Else(
+							THintMultipleStrokes_DoMerge_Consequence(
+								N,
+								mergeIndex,
+								mergeDown,
+								pZMids
+							)
+						);
+					yield $.Return(true);
+				})
+				.Else(function* () {
+					yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
+					yield $.Return(false);
+				});
 		})
 );
 
@@ -629,49 +470,52 @@ type TMainSig = (
 	Tt: THandle
 ) => CallableFunc<
 	[
+		Int,
 		Bool,
 		Bool,
+		Int,
 		THandle,
 		THandle,
-		Store<Frac>,
 		Store<GlyphPoint>,
 		Store<Frac>,
 		Store<Frac>,
+		Store<Frac>,
 		Store<Int>,
-		Store<Int>,
-		Int
+		Store<Int>
 	],
 	Bool
 >;
 
-export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
+export const THintMultipleStrokesMainImpl: TMainSig = Template((NMax, Tb, Tt) =>
 	Func(
+		Int,
 		Bool,
 		Bool,
+		Int,
 		Tb,
 		Tt,
-		Store(Frac),
 		Store(GlyphPoint),
 		Store(Frac),
 		Store(Frac),
+		Store(Frac),
 		Store(Int),
-		Store(Int),
-		Int
+		Store(Int)
 	)
 		.returns(Bool)
 		.def(function* (
 			$,
+			N,
 			forceRoundBottom,
 			forceRoundTop,
+			giveUpMode,
 			zBot,
 			zTop,
-			pOGapMD,
 			pZMids,
+			pOGapMD,
 			pGapMD,
 			pInkMD,
 			pRecPath,
-			pRecPathCollide,
-			giveUpMode
+			pRecPathCollide
 		) {
 			const dist = $.Local(Frac);
 			const frBot = $.Local(Frac);
@@ -684,8 +528,8 @@ export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
 			const pxReqGapOrig = $.Local(Frac);
 			const pxReqInk = $.Local(Frac);
 
-			yield pxReqGap.set(DecideRequiredGap(N + 1, pGapMD));
-			yield pxReqGapOrig.set(DecideRequiredGap(N + 1, pOGapMD));
+			yield pxReqGap.set(DecideRequiredGap(add(N, 1), pGapMD));
+			yield pxReqGapOrig.set(DecideRequiredGap(add(N, 1), pOGapMD));
 			yield pxReqInk.set(DecideRequiredGap(N, pInkMD));
 
 			// We have an one-pixel collide? Try to shrink a large gap
@@ -693,7 +537,7 @@ export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
 				yield If(and(eq(pRecPath.deRef, 0), eq(pRecPathCollide.deRef, 0))).Then(
 					function* () {
 						yield TryShrinkGapMD(N, pOGapMD, pGapMD);
-						yield pxReqGap.set(DecideRequiredGap(N + 1, pGapMD));
+						yield pxReqGap.set(DecideRequiredGap(add(N, 1), pGapMD));
 					}
 				);
 			});
@@ -701,11 +545,13 @@ export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
 			// If we have small space, do the omit path
 			yield If(lt(dist, add(pxReqGap, pxReqInk))).Then(
 				$.Return(
-					THintMultipleStrokes_OmitImpl(N, Tb, Tt)(
-						dist,
-						add(pxReqGap, pxReqInk),
+					THintMultipleStrokes_OmitImpl(NMax, Tb, Tt)(
+						N,
 						forceRoundBottom,
 						forceRoundTop,
+						giveUpMode,
+						dist,
+						add(pxReqGap, pxReqInk),
 						zBot,
 						zTop,
 						pOGapMD,
@@ -713,8 +559,7 @@ export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
 						pGapMD,
 						pInkMD,
 						pRecPath,
-						pRecPathCollide,
-						giveUpMode
+						pRecPathCollide
 					)
 				)
 			);
@@ -732,9 +577,8 @@ export const THintMultipleStrokesMainImpl: TMainSig = Template((N, Tb, Tt) =>
 				yield $.Return(true);
 			});
 
-			const allocN = 8 * Math.ceil(N / 8);
-
-			yield THintMultipleStrokesMidSize(allocN, Tb, Tt)(
+			// Otherwise, it is mid-size.
+			yield THintMultipleStrokesMidSize(NMax, Tb, Tt)(
 				N,
 				dist,
 				forceRoundBottom,

@@ -103,18 +103,19 @@ export const THintMultipleStrokesExplicit = Template((N: number, Tb: THandle, Tt
 			aGapMD
 		);
 
-		yield THintMultipleStrokesMainImpl(N, Tb, Tt)(
+		yield THintMultipleStrokesMainImpl(8 * Math.ceil(N / 8), Tb, Tt)(
+			N,
 			iBotFree,
 			iTopFree,
+			giveUpMode,
 			zBot,
 			zTop,
-			oGapMD,
 			aZMids,
+			oGapMD,
 			aGapMD,
 			aInkMD,
 			aRecPath,
-			aRecPathCollide,
-			giveUpMode
+			aRecPathCollide
 		);
 	})
 );
