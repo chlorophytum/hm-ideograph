@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-embox",
-	"version": "0.32.4",
+	"version": "0.32.5",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
 	"dependencies": {
 		"@chlorophytum/arch": "^0.32.1",
 		"@chlorophytum/final-hint-format-hltt": "^0.32.1",
-		"@chlorophytum/hint-programs-stoke-adjust": "0.32.4",
+		"@chlorophytum/hint-programs-stoke-adjust": "0.32.5",
 		"@chlorophytum/hltt-next": "^0.32.1",
 		"@chlorophytum/hltt-next-expr": "^0.32.1",
 		"@chlorophytum/hltt-next-stmt": "^0.32.1",
