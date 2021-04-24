@@ -19,7 +19,7 @@ export function createGlyph(input: Glyph.Geom, params: HintingStrategy) {
 	const dicingParams = {
 		dicingLength:
 			params.DoOutlineDicing || params.instanceForAnalysis
-				? 0.5 * params.UPM * params.CANONICAL_STEM_WIDTH
+				? params.UPM * (params.OutlineDicingStepLength ?? 0.5 * params.CANONICAL_STEM_WIDTH)
 				: undefined
 	};
 	for (let j = 0; j < input.length; j++) {

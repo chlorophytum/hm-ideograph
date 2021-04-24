@@ -26,6 +26,60 @@ export const DefaultEmBoxProps: EmBoxProps = {
 	SmallSizeExpansionRate: 1
 };
 
+export type HintingStrategy = IdeographHintingParams & {
+	readonly UPM: number;
+	readonly instanceForAnalysis?: null | undefined | Variation.Instance;
+
+	readonly EmBox: EmBoxProps;
+
+	readonly CANONICAL_STEM_WIDTH: number;
+	readonly MAX_STEM_WDTH_X: number;
+	readonly ABSORPTION_LIMIT: number;
+	readonly STEM_SIDE_MIN_RISE: number;
+	readonly STEM_SIDE_MIN_DESCENT: number;
+	readonly STEM_CENTER_MIN_RISE: number;
+	readonly STEM_CENTER_MIN_DESCENT: number;
+	readonly STEM_SIDE_MIN_DIST_RISE: number;
+	readonly STEM_SIDE_MIN_DIST_DESCENT: number;
+
+	readonly X_FUZZ: number;
+	readonly Y_FUZZ: number;
+	readonly Y_FUZZ_DIAG: number;
+	readonly SLOPE_FUZZ: number;
+	readonly SLOPE_FUZZ_POS: number;
+	readonly SLOPE_FUZZ_POST: number;
+	readonly SLOPE_FUZZ_NEG: number;
+	readonly SLOPE_FUZZ_K: number;
+	readonly SLOPE_FUZZ_R: number;
+	readonly SLOPE_FUZZ_P: number;
+	readonly COEFF_A_SAME_RADICAL: number;
+	readonly COEFF_A_SHAPE_LOST: number;
+	readonly COEFF_A_SHAPE_LOST_B: number;
+	readonly COEFF_A_SHAPE_LOST_XX: number;
+	readonly COEFF_A_SHAPE_LOST_XR: number;
+	readonly COEFF_A_TOP_BOT_MERGED: number;
+	readonly COEFF_A_TOP_BOT_MERGED_SR: number;
+	readonly COEFF_A_FEATURE_LOSS: number;
+	readonly COEFF_A_FEATURE_LOSS_XR: number;
+	readonly COEFF_A_RADICAL_MERGE: number;
+	readonly COEFF_A_REPEAT_PATTERN: number;
+	readonly COEFF_S: number;
+	readonly COEFF_DISTORT: number;
+	readonly COEFF_PROXIMITY_SQUASH_HAPPENED: number;
+	readonly COEFF_TOP_BOT_PROXIMITY: number;
+	readonly COEFF_STRICT_TOP_BOT_PROXIMITY: number;
+	readonly STROKE_SEGMENTS_MIN_OVERLAP: number;
+	readonly COLLISION_MIN_OVERLAP_RATIO: number;
+	readonly SIDE_TOUCH_LIMIT: number;
+	readonly TOP_BOT_MIN_UNBALANCE_AS_SHAPE_LOSS: number;
+	readonly SYMMETRY_TEST_PPEM: number;
+	readonly BOTH_OVERLAP_H: number;
+	readonly BOTH_OVERLAP_V: number;
+
+	readonly DoOutlineDicing: boolean;
+	readonly OutlineDicingStepLength?: undefined | null | number;
+};
+
 const DefaultAnalyzerStrategy = {
 	// Em-box
 	EmBox: DefaultEmBoxProps,
@@ -80,16 +134,10 @@ const DefaultAnalyzerStrategy = {
 	DoOutlineDicing: false
 };
 
-export type HintingStrategy = IdeographHintingParams &
-	Readonly<typeof DefaultAnalyzerStrategy> & {
-		readonly UPM: number;
-		readonly instanceForAnalysis?: null | undefined | Variation.Instance;
-	};
-
 export async function createHintingStrategy<GID>(
 	font: IFontSource<GID>,
 	partialStrategy: null | undefined | Partial<HintingStrategy>
-) {
+): Promise<HintingStrategy> {
 	return {
 		...DefaultIdeographHintingParams,
 		...DefaultAnalyzerStrategy,
