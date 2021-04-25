@@ -360,7 +360,6 @@ const THintMultipleStrokes_OmitImpl = Template((NMax: number, Tb: THandle, Tt: T
 			yield If(lteq(N, 1)).Then(function* () {
 				yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
 				yield $.Return(false);
-				return;
 			});
 
 			const isCollision = $.Local(Bool);
@@ -375,6 +374,11 @@ const THintMultipleStrokes_OmitImpl = Template((NMax: number, Tb: THandle, Tt: T
 			yield If(isCollision)
 				.Then(pRecValue.set(pRecPathCollide.deRef))
 				.Else(pRecValue.set(pRecPath.deRef));
+
+			yield If(eq(pRecValue, 0)).Then(function* () {
+				yield HintMultipleStrokesGiveUp(Tb, Tt)(N, zBot, zTop, pZMids, giveUpMode);
+				yield $.Return(false);
+			});
 
 			const mergeIndex = $.Local(Int);
 			const mergeDown = $.Local(Bool);
