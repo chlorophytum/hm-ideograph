@@ -133,7 +133,7 @@ function segmentJoinable(pivot: SegSpan, segment: SegSpan, radical: Radical) {
 }
 
 function udMatchable(sj: SegSpan, sk: SegSpan, radical: Radical, strategy: HintingStrategy) {
-	if (!radical.includesTetragon(sj, sk, strategy.X_FUZZ * strategy.UPM)) return false;
+	if (!radical.includesDiSegment(sj, sk) || !radical.includesDiSegment(sk, sj)) return false;
 	const slopeJ = slopeOf([sj]);
 	const slopeK = slopeOf([sk]);
 	if (!!slopeJ !== !!slopeK && Math.abs(slopeJ - slopeK) >= strategy.SLOPE_FUZZ / 2) return false;
@@ -279,6 +279,7 @@ function pairSegmentsForRadical(radicals: Radical[], r: number, strategy: Hintin
 		for (let k = 0; k < j; k++) {
 			const sk = segments[k];
 			const upperEdgeK = radical.outlineCcw !== sk[0].x < sk[sk.length - 1].x;
+
 			if (upperEdgeJ === upperEdgeK) {
 				// Both upper
 				graph[j][k] = graph[k][j] = uuMatchable(sj, sk, radical, strategy)

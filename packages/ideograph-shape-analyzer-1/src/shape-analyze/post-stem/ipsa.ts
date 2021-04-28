@@ -482,6 +482,9 @@ export default function AnalyzeIpSa(
 	for (const radical of analysis.radicals) {
 		const radicalContours = Array.from(radical.contours());
 		const radicalContourIndexes = radicalContours.map(c => contours.indexOf(c));
+		const radicalOutlines = Array.from(radical.outlineContours());
+		const radicalOutlineIndexes = radicalOutlines.map(c => contours.indexOf(c));
+
 		let xMin = 0xffff,
 			xMax = -0xffff;
 		const radicalPoints = new Set<AdjPoint>();
@@ -497,11 +500,20 @@ export default function AnalyzeIpSa(
 
 		// Outline top-bottom
 		{
-			const j = radicalContourIndexes[0];
-			if (j < 0) continue;
-			interpolateByKeys(IpKnotTB, targets, records[j].topBot, glyphKeyPoints, 7, IP_STRICT);
-			interpolateByKeys(IpKnotTB, targets, records[j].topBot, glyphKeyPoints, 7, IP_LOOSE);
-			b = b.concat(records[j].topBot.filter(z => z.touched));
+			let globalTop: null | AdjPoint = null,
+				globalBot: null | AdjPoint = null;
+			for (const j of radicalOutlineIndexes) {
+				const [b, t] = records[j].topBot;
+				if (!globalBot || b.y < globalBot.y) globalBot = b;
+				if (!globalTop || t.y > globalTop.y) globalTop = t;
+			}
+			const pts: AdjPoint[] = [];
+			if (globalBot) pts.push(globalBot);
+			if (globalTop) pts.push(globalTop);
+
+			interpolateByKeys(IpKnotTB, targets, pts, glyphKeyPoints, 7, IP_STRICT);
+			interpolateByKeys(IpKnotTB, targets, pts, glyphKeyPoints, 7, IP_LOOSE);
+			b = b.concat(pts.filter(z => z.touched));
 		}
 
 		// Amend phantoms

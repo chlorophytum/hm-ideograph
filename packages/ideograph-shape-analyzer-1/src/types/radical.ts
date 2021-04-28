@@ -35,6 +35,9 @@ export default class Radical {
 	public *contours() {
 		for (const island of this.islands) yield* island.contours();
 	}
+	public *outlineContours() {
+		for (const island of this.islands) yield island.boundary;
+	}
 	public *points() {
 		for (const c of this.contours()) for (const z of c.points) yield z;
 	}
@@ -91,48 +94,28 @@ export default class Radical {
 	}
 
 	// eslint-disable-next-line complexity
-	public includesTetragon(s1: AdjPoint[], s2: AdjPoint[], _dS: number) {
-		let xMin1 = s1[0].x,
-			xMax1 = s1[0].x,
-			xMin2 = s2[0].x,
-			xMax2 = s2[0].x;
-		for (let u = 0; u < s1.length; u++) {
-			if (s1[u].x < xMin1) xMin1 = s1[u].x;
-			if (s1[u].x > xMax1) xMax1 = s1[u].x;
-		}
-		for (let u = 0; u < s2.length; u++) {
-			if (s2[u].x < xMin2) xMin2 = s2[u].x;
-			if (s2[u].x > xMax2) xMax2 = s2[u].x;
-		}
-		const dS = Math.min(_dS, (xMax1 - xMin1) / 3, (xMax2 - xMin2) / 3);
-		for (let u = 0; u < s1.length - 1; u++) {
-			for (let v = 0; v < s2.length - 1; v++) {
-				let p = s1[u],
-					q = s1[u + 1];
-				let r = s2[v],
-					s = s2[v + 1];
-				if (p.x > q.x) {
-					const t = p;
-					p = q;
-					q = t;
-				}
-				if (r.x > s.x) {
-					const t = r;
-					r = s;
-					s = t;
-				}
-				const N = 8;
-				for (let sg = 0; sg <= N; sg++) {
-					const zTop = Support.mixZ(p, q, sg / N);
-					const zBot = Support.mixZ(r, s, sg / N);
-					if (!p.isTurnAround && zTop.x < xMin1 + dS) continue;
-					if (!q.isTurnAround && zTop.x > xMax1 - dS) continue;
-					if (!r.isTurnAround && zBot.x < xMin2 + dS) continue;
-					if (!s.isTurnAround && zBot.x > xMax2 - dS) continue;
-					if (!this.includesSegmentEdge(zTop, zBot, 1, 1, 1, 1)) return false;
+	public includesDiSegment(s1: AdjPoint[], s2: AdjPoint[]) {
+		for (let k = 0; k < s1.length; k++) {
+			const zTopic = s1[k];
+			let zClose = s2[0],
+				dClose = Math.hypot(zTopic.x - zClose.x, zTopic.y - zClose.y);
+			for (let m = 1; m < s2.length; m++) {
+				const zTest = s2[m];
+				const dTest = Math.hypot(zTopic.x - zTest.x, zTopic.y - zTest.y);
+				if (dTest < dClose) {
+					zClose = zTest;
+					dClose = dTest;
 				}
 			}
+			if (k > 0 && !this.includeTriangleImpl(zTopic, s1[k - 1], zClose)) return false;
+			if (k + 1 < s1.length && !this.includeTriangleImpl(zTopic, s1[k + 1], zClose))
+				return false;
 		}
 		return true;
+	}
+	private includeTriangleImpl(a: AdjPoint, b: AdjPoint, c: AdjPoint) {
+		return (
+			this.includesSegmentEdge(a, c, 1, 1, 1, 1) && this.includesSegmentEdge(b, c, 1, 1, 1, 1)
+		);
 	}
 }

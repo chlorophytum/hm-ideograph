@@ -65,11 +65,11 @@ export class GlyphHintGenBackEnd {
 	}
 
 	private addInterpolateOrLink(fn: HintAnalysis.InterpolationOrLink) {
-		if (fn.ref2) {
-			this.subHints.push(new Interpolate.Hint(ref(fn.ref1), ref(fn.ref2), [ref(fn.subject)]));
-		} else {
-			this.subHints.push(new LinkChain.Hint([ref(fn.ref1), ref(fn.subject)]));
-		}
+		this.subHints.push(
+			fn.ref2
+				? new Interpolate.Hint(ref(fn.ref1), ref(fn.ref2), [ref(fn.subject)])
+				: new LinkChain.Hint([ref(fn.ref1), ref(fn.subject)])
+		);
 	}
 
 	private addBoundaryStem(boundary: HintAnalysis.BoundaryStem) {

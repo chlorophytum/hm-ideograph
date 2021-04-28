@@ -12,9 +12,6 @@
 	"license": "MIT",
 	"dependencies": {
 		"@chlorophytum/arch": "^0.32.1",
-		"@chlorophytum/hint-common": "^0.32.1",
-		"@chlorophytum/hint-embox": "0.32.7",
-		"@chlorophytum/hint-maz": "0.32.7",
 		"@chlorophytum/ideograph-hint-generator-1": "0.32.7",
 		"@chlorophytum/ideograph-shape-analyzer-1": "0.32.7",
 		"@chlorophytum/ideograph-shape-analyzer-shared": "0.32.7",
