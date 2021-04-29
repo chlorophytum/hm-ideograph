@@ -1,4 +1,5 @@
 import { Geometry, Support } from "@chlorophytum/arch";
+import { mixZ } from "@chlorophytum/arch/lib/support";
 import { AdjPoint, Contour } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
 import { SegSpan } from "./seg";
@@ -114,8 +115,11 @@ export default class Radical {
 		return true;
 	}
 	private includeTriangleImpl(a: AdjPoint, b: AdjPoint, c: AdjPoint) {
-		return (
-			this.includesSegmentEdge(a, c, 1, 1, 1, 1) && this.includesSegmentEdge(b, c, 1, 1, 1, 1)
-		);
+		const midAB = mixZ(a, b, 0.5);
+		let n = 0;
+		if (this.includesSegmentEdge(a, c, 1, 1, 1, 1)) n++;
+		if (this.includesSegmentEdge(midAB, c, 1, 1, 1, 1)) n++;
+		if (this.includesSegmentEdge(b, c, 1, 1, 1, 1)) n++;
+		return n > 1;
 	}
 }
