@@ -36,7 +36,7 @@ export const VisFloorT = Template((consideredDark: number) =>
 		.returns(Frac)
 		.def(function* ($, x, fillRate) {
 			yield If(gteq(sub(x, floor(x)), consideredDark))
-				.Then($.Return(floor(add(1, floor(x)))))
+				.Then($.Return(add(1, floor(x))))
 				.Else($.Return(floor(x)));
 		})
 );
@@ -45,8 +45,8 @@ export const VisCeilT = Template((consideredDark: number) =>
 	Func(Frac, Frac)
 		.returns(Frac)
 		.def(function* ($, x, fillRate) {
-			yield If(gteq(sub(x, ceiling(x)), consideredDark))
-				.Then($.Return(ceiling(sub(ceiling(x), 1))))
+			yield If(gteq(sub(ceiling(x), x), consideredDark))
+				.Then($.Return(sub(ceiling(x), 1)))
 				.Else($.Return(ceiling(x)));
 		})
 );
