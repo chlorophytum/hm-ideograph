@@ -6,7 +6,7 @@ import { Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-t
 
 import { midBot, midTop } from "./macros";
 
-export const ConsideredDark = 3 / 4;
+export const ConsideredDark = 4 / 5;
 
 export const GetFillRateT = Template((Tb: THandle, Tt: THandle) =>
 	Func(Int, Tb, Tt, Store(GlyphPoint))
