@@ -10,7 +10,8 @@ import { GlyphHintTask } from "./glyph-hint";
 import { SharedHintTask } from "./shared-hint";
 
 export class IdeographHintingTask<GID, G, S extends IdeographHintingParams, A>
-	implements ITask<void> {
+	implements ITask<void>
+{
 	constructor(
 		private readonly font: IFontSource<GID>,
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,

@@ -88,7 +88,8 @@ export class ParallelGlyphHintCoTask<GID, S>
 			null | undefined | IHint,
 			GlyphHintParallelArgRep<S>,
 			GlyphHintParallelResultRep
-		> {
+		>
+{
 	constructor(
 		private readonly font: IFontSource<GID>,
 		private readonly ee: IHintingModelExecEnv,
@@ -112,7 +113,8 @@ export class ParallelGlyphHintCoTask<GID, S>
 }
 
 export class ParallelGlyphHintTask<S extends IdeographHintingParams, G, A>
-	implements IParallelTask<GlyphHintParallelResultRep> {
+	implements IParallelTask<GlyphHintParallelResultRep>
+{
 	public readonly type = ParallelTaskType;
 	constructor(
 		private readonly analyzer: IShapeAnalyzer<S, G, A>,
