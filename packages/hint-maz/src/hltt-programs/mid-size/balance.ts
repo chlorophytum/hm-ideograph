@@ -37,7 +37,8 @@ enum InkOcc {
 	Both
 }
 
-const DARKNESS_ADJUST_PIXELS_MAX = 1 / 4;
+const DARKNESS_DECIDING_ENTRY_TYPE = 1 / 4;
+const DARKNESS_ADJUST_PIXELS_MAX = 2 / 5;
 
 const DecideGapOcc = Func(Int, Int, Frac, Frac, Frac).returns(Int);
 DecideGapOcc.def(function* ($, N, strokeIndex, gap, bottomSeize, topSeize) {
@@ -48,42 +49,42 @@ DecideGapOcc.def(function* ($, N, strokeIndex, gap, bottomSeize, topSeize) {
 
 const DecideGapOccBottom = Func(Frac, Frac).returns(Int);
 DecideGapOccBottom.def(function* ($, gap, bottomSeize) {
-	yield If(lt(gap, 1 + 1 / 5)).Then(
-		If(lt(bottomSeize, 1 / 5))
+	yield If(lt(gap, 1 + DARKNESS_DECIDING_ENTRY_TYPE)).Then(
+		If(lt(bottomSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 			.Then($.Return(GapOcc.OneClear))
 			.Else($.Return(GapOcc.OneBlur))
 	);
-	yield If(lt(gap, 2 + 1 / 5)).Then(
-		If(lt(bottomSeize, 1 / 5))
+	yield If(lt(gap, 2 + DARKNESS_DECIDING_ENTRY_TYPE)).Then(
+		If(lt(bottomSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 			.Then($.Return(GapOcc.TwoClear))
 			.Else($.Return(GapOcc.TwoDown))
 	);
-	yield If(lt(bottomSeize, 1 / 5))
+	yield If(lt(bottomSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 		.Then($.Return(GapOcc.MoreClear))
 		.Else($.Return(GapOcc.MoreDown));
 });
 
 const DecideGapOccTop = Func(Frac, Frac).returns(Int);
 DecideGapOccTop.def(function* ($, gap, topSeize) {
-	yield If(lt(gap, 1 + 1 / 5)).Then(
-		If(lt(topSeize, 1 / 5))
+	yield If(lt(gap, 1 + DARKNESS_DECIDING_ENTRY_TYPE)).Then(
+		If(lt(topSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 			.Then($.Return(GapOcc.OneClear))
 			.Else($.Return(GapOcc.OneBlur))
 	);
-	yield If(lt(gap, 2 + 1 / 5)).Then(
-		If(lt(topSeize, 1 / 5))
+	yield If(lt(gap, 2 + DARKNESS_DECIDING_ENTRY_TYPE)).Then(
+		If(lt(topSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 			.Then($.Return(GapOcc.TwoClear))
 			.Else($.Return(GapOcc.TwoUp))
 	);
-	yield If(lt(topSeize, 1 / 5))
+	yield If(lt(topSeize, DARKNESS_DECIDING_ENTRY_TYPE))
 		.Then($.Return(GapOcc.MoreClear))
 		.Else($.Return(GapOcc.MoreUp));
 });
 
 const DecideGapOccMiddle = Func(Frac).returns(Int);
 DecideGapOccMiddle.def(function* ($, gap) {
-	yield If(lt(gap, 1 + 1 / 5)).Then($.Return(GapOcc.OneClear));
-	yield If(lt(gap, 2 + 1 / 5)).Then($.Return(GapOcc.TwoClear));
+	yield If(lt(gap, 1 + DARKNESS_DECIDING_ENTRY_TYPE)).Then($.Return(GapOcc.OneClear));
+	yield If(lt(gap, 2 + DARKNESS_DECIDING_ENTRY_TYPE)).Then($.Return(GapOcc.TwoClear));
 	yield $.Return(GapOcc.MoreClear);
 });
 
