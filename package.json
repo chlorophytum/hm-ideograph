@@ -30,7 +30,8 @@
 		"rebuild": "npm run reset && npm run build",
 		"prepack": "npm run init && npm run build",
 		"add-dep": "lerna add",
-		"publish": "lerna publish --force-publish=* --exact",
+		"publish": "lerna publish --exact",
+		"publish-all": "lerna publish --force-publish=* --exact",
 		"publish:canary": "lerna publish --force-publish=* --exact",
 		"sync-external-links": "node common/sync-external-links"
 	}
