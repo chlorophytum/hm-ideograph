@@ -12,47 +12,16 @@ To use this hint model you need to introduce it as a hint pass in the configurat
 
 ```json
 {
-	......,
-	"hintPasses": [
-		{
-			"plugin": "@chlorophytum/hm-ideograph",
-			"options": { ...... }
-		}
-	]
+	"plugin": "@chlorophytum/hm-ideograph",
+	"options": { ...... }
 }
 ```
+
+Since version 0.33.0 this hint model applies to all glyphs. It is recommended to be put inside a `@chlorophytum/hm-select-glyphs`.
 
 The options include:
 
 - `emboxSystemName`: String. Name of the Em-box system the glyphs follow. Defaults to “Ideograph”.
-
-- `acceptAllGlyphs`: Boolean. Whether apply to all glyphs in the font. When set to `false`, the hinting pass would use a Unicode-based tracking process.
-
-- `unicodeRanges`: Unicode ranges to track. Defaults to
-
-  ```typescript
-   [
-  	[0x2e80, 0x2fff], // Radicals
-  	[0x31c0, 0x31e3], // Strokes
-  	[0x3400, 0x4dbf], // ExtA
-  	[0x4e00, 0x9fff], // URO
-  	[0xf900, 0xfa6f], // Compatibility
-  	[0x20000, 0x2ffff], // SIP
-  	[0xac00, 0xd7af] // Hangul
-  ];
-  ```
-
-- `trackScripts`: Scripts to track OpenType variants of Unicode glyphs. Defaults to
-
-  ```json
-  ["hani", "hang"]
-  ```
-  
-- `trackFeatures`: Features to track OpenType variants of Unicode glyphs. Defaults to
-
-  ```json
-  ["locl", "smpl", "trad", "tnam", "jp78", "jp83", "jp90", "jp04", "hojo", "nlck", "expt"]
-  ```
 
 - `EmBox`: Vertical position of the Em-box. Defaults to
 
