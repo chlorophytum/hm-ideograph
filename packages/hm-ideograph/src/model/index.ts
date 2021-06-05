@@ -5,7 +5,6 @@ import {
 	IShapeAnalyzer
 } from "@chlorophytum/ideograph-shape-analyzer-shared";
 
-import { EffectiveGlyphAnalysisTask } from "./effective-glyph-analysis";
 import { GlyphHintTask } from "./glyph-hint";
 import { SharedHintTask } from "./shared-hint";
 
@@ -36,8 +35,7 @@ export class IdeographHintingTask<GID, G, S extends IdeographHintingParams, A>
 		// Collect effective glyphs and the first EHR associated to it
 		const glyphs: Set<GID> = new Set();
 		for (const entry of entries) {
-			const ga = new EffectiveGlyphAnalysisTask(entry, params);
-			const gs = await arb.demand(ga);
+			const gs = new Set(await entry.getGlyphSet());
 			for (const g of gs) glyphs.add(g);
 		}
 
