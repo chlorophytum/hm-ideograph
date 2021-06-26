@@ -8,6 +8,13 @@ import Stem, { StemSharedBoolKeys, StemSharedNumberKeys } from "../../types/stem
 
 import { calculateMinMax } from "./calc";
 
+function pointAboveStemDist(point: Geometry.Point, stem: Stem) {
+	return point.y - (stem.y + (point.x - stem.highKey.x) * stem.slope);
+}
+function pointBelowStemDist(point: Geometry.Point, stem: Stem) {
+	return stem.y + (point.x - stem.highKey.x) * stem.slope - stem.width - point.y;
+}
+
 function pointBelowStem(point: Geometry.Point, stem: Stem, fuzz: number) {
 	return point.y < stem.y - stem.width - fuzz;
 }
@@ -20,12 +27,13 @@ function PtAbove(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (point.y > stem.y && point.x < xMax - yFuzz && point.x > xMin + yFuzz) {
+	const dy = pointAboveStemDist(point, stem);
+	if (dy > yFuzz && point.x < xMax - yFuzz && point.x > xMin + yFuzz) {
 		stem.hasGlyphPointAbove = true;
-		stem.glyphCenterRise = Math.max(stem.glyphCenterRise || 0, point.y - stem.y);
+		stem.glyphCenterRise = Math.max(stem.glyphCenterRise || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalPointAbove = true;
-			stem.radicalCenterRise = Math.max(stem.radicalCenterRise || 0, point.y - stem.y);
+			stem.radicalCenterRise = Math.max(stem.radicalCenterRise || 0, dy);
 		}
 	}
 }
@@ -37,15 +45,13 @@ function PtRightAdjAbove(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (point.y > stem.y && point.x >= xMax - yFuzz && point.x <= xMax + yFuzz) {
+	const dy = pointAboveStemDist(point, stem);
+	if (dy > yFuzz && point.x >= xMax - yFuzz && point.x <= xMax + yFuzz) {
 		stem.hasGlyphRightAdjacentPointAbove = true;
-		stem.glyphRightAdjacentRise = Math.max(stem.glyphRightAdjacentRise || 0, point.y - stem.y);
+		stem.glyphRightAdjacentRise = Math.max(stem.glyphRightAdjacentRise || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalRightAdjacentPointAbove = true;
-			stem.radicalRightAdjacentRise = Math.max(
-				stem.radicalRightAdjacentRise || 0,
-				point.y - stem.y
-			);
+			stem.radicalRightAdjacentRise = Math.max(stem.radicalRightAdjacentRise || 0, dy);
 		}
 	}
 }
@@ -57,15 +63,13 @@ function PtLeftAdjAbove(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (point.y > stem.y && point.x <= xMin + yFuzz && point.x >= xMin - yFuzz) {
+	const dy = pointAboveStemDist(point, stem);
+	if (dy > yFuzz && point.x <= xMin + yFuzz && point.x >= xMin - yFuzz) {
 		stem.hasGlyphLeftAdjacentPointAbove = true;
-		stem.glyphLeftAdjacentRise = Math.max(stem.glyphLeftAdjacentRise || 0, point.y - stem.y);
+		stem.glyphLeftAdjacentRise = Math.max(stem.glyphLeftAdjacentRise || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalLeftAdjacentPointAbove = true;
-			stem.radicalLeftAdjacentRise = Math.max(
-				stem.radicalLeftAdjacentRise || 0,
-				point.y - stem.y
-			);
+			stem.radicalLeftAdjacentRise = Math.max(stem.radicalLeftAdjacentRise || 0, dy);
 		}
 	}
 }
@@ -77,18 +81,13 @@ function PtRightDistAbove(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (point.y > stem.y && point.x >= xMax + yFuzz) {
+	const dy = pointAboveStemDist(point, stem);
+	if (dy > yFuzz && point.x >= xMax + yFuzz) {
 		stem.hasGlyphRightDistancedPointAbove = true;
-		stem.glyphRightDistancedRise = Math.max(
-			stem.glyphRightDistancedRise || 0,
-			point.y - stem.y
-		);
+		stem.glyphRightDistancedRise = Math.max(stem.glyphRightDistancedRise || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalRightDistancedPointAbove = true;
-			stem.radicalRightDistancedRise = Math.max(
-				stem.radicalRightDistancedRise || 0,
-				point.y - stem.y
-			);
+			stem.radicalRightDistancedRise = Math.max(stem.radicalRightDistancedRise || 0, dy);
 		}
 	}
 }
@@ -100,15 +99,13 @@ function PtLeftDistAbove(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (point.y > stem.y && point.x <= xMin - yFuzz) {
+	const dy = pointAboveStemDist(point, stem);
+	if (dy > yFuzz && point.x <= xMin - yFuzz) {
 		stem.hasGlyphLeftDistancedPointAbove = true;
-		stem.glyphLeftDistancedRise = Math.max(stem.glyphLeftDistancedRise || 0, point.y - stem.y);
+		stem.glyphLeftDistancedRise = Math.max(stem.glyphLeftDistancedRise || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalLeftDistancedPointAbove = true;
-			stem.radicalLeftDistancedRise = Math.max(
-				stem.radicalLeftDistancedRise || 0,
-				point.y - stem.y
-			);
+			stem.radicalLeftDistancedRise = Math.max(stem.radicalLeftDistancedRise || 0, dy);
 		}
 	}
 }
@@ -157,18 +154,13 @@ function PtBelow(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (pointBelowStem(point, stem, yFuzz) && point.x < xMax - yFuzz && point.x > xMin + yFuzz) {
+	const dy = pointBelowStemDist(point, stem);
+	if (dy > yFuzz && point.x < xMax - yFuzz && point.x > xMin + yFuzz) {
 		stem.hasGlyphPointBelow = true;
-		stem.glyphCenterDescent = Math.max(
-			stem.glyphCenterDescent || 0,
-			stem.y - stem.width - point.y
-		);
+		stem.glyphCenterDescent = Math.max(stem.glyphCenterDescent || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalPointBelow = true;
-			stem.radicalCenterDescent = Math.max(
-				stem.radicalCenterDescent || 0,
-				stem.y - stem.width - point.y
-			);
+			stem.radicalCenterDescent = Math.max(stem.radicalCenterDescent || 0, dy);
 		}
 		if (point.yStrongExtrema) {
 			stem.hasGlyphVFoldBelow = true;
@@ -186,18 +178,13 @@ function PtRightAdjBelow(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (pointBelowStem(point, stem, yFuzz) && point.x >= xMax - yFuzz && point.x <= xMax + yFuzz) {
+	const dy = pointBelowStemDist(point, stem);
+	if (dy > yFuzz && point.x >= xMax - yFuzz && point.x <= xMax + yFuzz) {
 		stem.hasGlyphRightAdjacentPointBelow = true;
-		stem.glyphRightAdjacentDescent = Math.max(
-			stem.glyphRightAdjacentDescent || 0,
-			stem.y - stem.width - point.y
-		);
+		stem.glyphRightAdjacentDescent = Math.max(stem.glyphRightAdjacentDescent || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalRightAdjacentPointBelow = true;
-			stem.radicalRightAdjacentDescent = Math.max(
-				stem.radicalRightAdjacentDescent || 0,
-				stem.y - stem.width - point.y
-			);
+			stem.radicalRightAdjacentDescent = Math.max(stem.radicalRightAdjacentDescent || 0, dy);
 		}
 	}
 }
@@ -209,18 +196,13 @@ function PtLeftAdjBelow(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (pointBelowStem(point, stem, yFuzz) && point.x <= xMin + yFuzz && point.x >= xMin - yFuzz) {
+	const dy = pointBelowStemDist(point, stem);
+	if (dy > yFuzz && point.x <= xMin + yFuzz && point.x >= xMin - yFuzz) {
 		stem.hasGlyphLeftAdjacentPointBelow = true;
-		stem.glyphLeftAdjacentDescent = Math.max(
-			stem.glyphLeftAdjacentDescent || 0,
-			stem.y - stem.width - point.y
-		);
+		stem.glyphLeftAdjacentDescent = Math.max(stem.glyphLeftAdjacentDescent || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalLeftAdjacentPointBelow = true;
-			stem.radicalLeftAdjacentDescent = Math.max(
-				stem.radicalLeftAdjacentDescent || 0,
-				stem.y - stem.width - point.y
-			);
+			stem.radicalLeftAdjacentDescent = Math.max(stem.radicalLeftAdjacentDescent || 0, dy);
 		}
 	}
 }
@@ -232,17 +214,15 @@ function PtRightDistBelow(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (pointBelowStem(point, stem, yFuzz) && point.x >= xMax + yFuzz) {
+	const dy = pointBelowStemDist(point, stem);
+	if (dy > yFuzz && point.x >= xMax + yFuzz) {
 		stem.hasGlyphRightDistancedPointBelow = true;
-		stem.glyphRightDistancedDescent = Math.max(
-			stem.glyphRightDistancedDescent || 0,
-			stem.y - stem.width - point.y
-		);
+		stem.glyphRightDistancedDescent = Math.max(stem.glyphRightDistancedDescent || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalRightDistancedPointBelow = true;
 			stem.radicalRightDistancedDescent = Math.max(
 				stem.radicalRightDistancedDescent || 0,
-				stem.y - stem.width - point.y
+				dy
 			);
 		}
 	}
@@ -255,18 +235,13 @@ function PtLeftDistBelow(
 	yFuzz: number,
 	sameRadical: boolean
 ) {
-	if (pointBelowStem(point, stem, yFuzz) && point.x <= xMin - yFuzz) {
+	const dy = pointBelowStemDist(point, stem);
+	if (dy > yFuzz && point.x <= xMin - yFuzz) {
 		stem.hasGlyphLeftDistancedPointBelow = true;
-		stem.glyphLeftDistancedDescent = Math.max(
-			stem.glyphLeftDistancedDescent || 0,
-			stem.y - stem.width - point.y
-		);
+		stem.glyphLeftDistancedDescent = Math.max(stem.glyphLeftDistancedDescent || 0, dy);
 		if (sameRadical) {
 			stem.hasRadicalLeftDistancedPointBelow = true;
-			stem.radicalLeftDistancedDescent = Math.max(
-				stem.radicalLeftDistancedDescent || 0,
-				stem.y - stem.width - point.y
-			);
+			stem.radicalLeftDistancedDescent = Math.max(stem.radicalLeftDistancedDescent || 0, dy);
 		}
 	}
 }
