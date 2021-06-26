@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/ideograph-hint-generator-1",
-	"version": "0.33.0",
+	"version": "0.33.1",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
 		"@chlorophytum/hint-common": "^0.33.0",
 		"@chlorophytum/hint-embox": "0.33.0",
 		"@chlorophytum/hint-maz": "0.33.0",
-		"@chlorophytum/ideograph-shape-analyzer-1": "0.33.0",
+		"@chlorophytum/ideograph-shape-analyzer-1": "0.33.1",
 		"@chlorophytum/ideograph-shape-analyzer-shared": "0.33.0",
 		"tslib": "^2.0.1"
 	},
