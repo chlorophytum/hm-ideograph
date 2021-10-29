@@ -11,7 +11,6 @@ import {
 	max,
 	min,
 	mul,
-	neg,
 	not,
 	or,
 	sub
@@ -111,20 +110,20 @@ const InitBalanceMultiStrokeHints = Func(
 	});
 });
 
-const BalanceOneStrokeExtDown = Func(
-	Int,
-	Frac,
-	Frac,
-	Store(Int),
-	Store(Int),
-	Store(Frac),
-	Store(Frac)
-)
-	.returns(Bool)
-	.def(function* ($, j, desired, current, pGapOcc, pInkOcc, pGaps, pInks) {
+enum BalancePlan {
+	Unknown,
+	ExtDown,
+	ExtUp,
+	Shrink
+}
+
+const ExtDownScore = Func(Int, Frac, Frac, Store(Int), Store(Int))
+	.returns(Frac)
+	.def(function* ($, j, aInk, cInk, pGapOcc, pInkOcc) {
 		const occBelow = pGapOcc.part(j),
 			occInk = pInkOcc.part(j);
-		const delta = $.Local(Frac);
+
+		yield If(lt(aInk, cInk)).Then($.Return(0));
 
 		yield If(
 			not(
@@ -136,11 +135,49 @@ const BalanceOneStrokeExtDown = Func(
 					)
 				)
 			)
-		).Then($.Return(false));
+		).Then($.Return(0));
 
 		yield If(eq(GapOcc.OneClear, occBelow))
-			.Then(delta.set(min(1 / 5, sub(desired, current))))
-			.Else(delta.set(min(4 / 5, sub(desired, current))));
+			.Then($.Return(min(1 / 5, sub(aInk, cInk))))
+			.Else($.Return(min(4 / 5, sub(aInk, cInk))));
+	});
+
+const ExtUpScore = Func(Int, Frac, Frac, Store(Int), Store(Int))
+	.returns(Frac)
+	.def(function* ($, j, aInk, cInk, pGapOcc, pInkOcc) {
+		const occInk = pInkOcc.part(j),
+			occAbove = pGapOcc.part(add(j, 1));
+
+		yield If(lt(aInk, cInk)).Then($.Return(0));
+
+		yield If(
+			not(
+				and(
+					or(eq(InkOcc.Clear, occInk), eq(InkOcc.Down, occInk)),
+					or(
+						or(eq(GapOcc.OneClear, occAbove), eq(GapOcc.TwoClear, occAbove)),
+						or(eq(GapOcc.MoreClear, occAbove), eq(GapOcc.MoreUp, occAbove))
+					)
+				)
+			)
+		).Then($.Return(0));
+
+		yield If(eq(GapOcc.OneClear, occAbove))
+			.Then($.Return(min(1 / 5, sub(aInk, cInk))))
+			.Else($.Return(min(4 / 5, sub(aInk, cInk))));
+	});
+
+const ShrinkScore = Func(Frac, Frac)
+	.returns(Frac)
+	.def(function* ($, aInk, cInk) {
+		yield $.Return(max(sub(cInk, aInk), 0));
+	});
+
+const ExtDownExec = Func(Int, Frac, Store(Int), Store(Int), Store(Frac), Store(Frac))
+	.returns(Bool)
+	.def(function* ($, j, delta, pGapOcc, pInkOcc, pGaps, pInks) {
+		const occBelow = pGapOcc.part(j),
+			occInk = pInkOcc.part(j);
 
 		yield pInks.part(j).set(add(pInks.part(j), delta));
 		yield pGaps.part(j).set(sub(pGaps.part(j), delta));
@@ -154,36 +191,11 @@ const BalanceOneStrokeExtDown = Func(
 		yield $.Return(true);
 	});
 
-const BalanceOneStrokeExtUp = Func(
-	Int,
-	Frac,
-	Frac,
-	Store(Int),
-	Store(Int),
-	Store(Frac),
-	Store(Frac)
-)
+const ExtUpExec = Func(Int, Frac, Store(Int), Store(Int), Store(Frac), Store(Frac))
 	.returns(Bool)
-	.def(function* ($, j, desired, current, pGapOcc, pInkOcc, pGaps, pInks) {
+	.def(function* ($, j, delta, pGapOcc, pInkOcc, pGaps, pInks) {
 		const occInk = pInkOcc.part(j),
 			occAbove = pGapOcc.part(add(j, 1));
-		const delta = $.Local(Frac);
-
-		yield If(
-			not(
-				and(
-					or(eq(InkOcc.Clear, occInk), eq(InkOcc.Down, occInk)),
-					or(
-						or(eq(GapOcc.OneClear, occAbove), eq(GapOcc.TwoClear, occAbove)),
-						or(eq(GapOcc.MoreClear, occAbove), eq(GapOcc.MoreUp, occAbove))
-					)
-				)
-			)
-		).Then($.Return(false));
-
-		yield If(eq(GapOcc.OneClear, occAbove))
-			.Then(delta.set(min(1 / 5, sub(desired, current))))
-			.Else(delta.set(min(4 / 5, sub(desired, current))));
 
 		yield pInks.part(j).set(add(pInks.part(j), delta));
 		yield pGaps.part(add(1, j)).set(sub(pGaps.part(add(1, j)), delta));
@@ -198,29 +210,19 @@ const BalanceOneStrokeExtUp = Func(
 		yield $.Return(true);
 	});
 
-const ShrinkDelta = Func(Frac, Frac)
-	.returns(Frac)
-	.def(function* ($, aInk, cInk) {
-		yield $.Return(neg(sub(cInk, max(3 / 5, aInk))));
-	});
-
-const BalanceShrinkOneStrokeDown = Func(Int, Frac, Frac, Store(Frac), Store(Frac))
+const ShrinkDownExec = Func(Int, Frac, Store(Frac), Store(Frac))
 	.returns(Bool)
-	.def(function* ($, j, aInk, cInk, pInks, pGaps) {
-		const delta = $.Local(Frac);
-		yield delta.set(ShrinkDelta(aInk, cInk));
-		yield pInks.part(j).set(add(pInks.part(j), delta));
-		yield pGaps.part(j).set(sub(pGaps.part(j), delta));
+	.def(function* ($, j, delta, pGaps, pInks) {
+		yield pInks.part(j).set(sub(pInks.part(j), delta));
+		yield pGaps.part(j).set(add(pGaps.part(j), delta));
 		yield $.Return(true);
 	});
 
-const BalanceShrinkOneStrokeUp = Func(Int, Frac, Frac, Store(Frac), Store(Frac))
+const ShrinkUpExec = Func(Int, Frac, Store(Frac), Store(Frac))
 	.returns(Bool)
-	.def(function* ($, j, aInk, cInk, pInks, pGaps) {
-		const delta = $.Local(Frac);
-		yield delta.set(ShrinkDelta(aInk, cInk));
-		yield pInks.part(j).set(add(pInks.part(j), delta));
-		yield pGaps.part(add(1, j)).set(sub(pGaps.part(add(1, j)), delta));
+	.def(function* ($, j, delta, pGaps, pInks) {
+		yield pInks.part(j).set(sub(pInks.part(j), delta));
+		yield pGaps.part(add(1, j)).set(add(pGaps.part(add(1, j)), delta));
 		yield $.Return(true);
 	});
 
@@ -231,6 +233,14 @@ const ComputeDarknessAdjustedStrokeWidth = Func(Frac, Frac)
 			min(add(aInk, div(DARKNESS_ADJUST_PIXELS_MAX, max(1, aInk))), max(aInk, adjInk))
 		);
 	});
+
+const CompareAndMax = Func(Store(Frac), Frac, Store(Int), Int);
+CompareAndMax.def(function* ($, pMax, v, pIndex, i) {
+	yield If(gt(v, pMax.deRef)).Then(function* () {
+		yield pMax.deRef.set(v);
+		yield pIndex.deRef.set(i);
+	});
+});
 
 const BalanceOneStroke = Func(
 	Int,
@@ -243,7 +253,7 @@ const BalanceOneStroke = Func(
 	Store(Frac),
 	Store(Frac)
 ).def(function* (
-	e,
+	$,
 	j,
 	forceRoundBottom,
 	forceRoundTop,
@@ -251,32 +261,28 @@ const BalanceOneStroke = Func(
 	pInkOcc,
 	pCGaps,
 	pCInks,
-	pAGap,
-	pAInk
+	pAGaps,
+	pAInks
 ) {
-	const aInk = e.Local(Frac),
-		cInk = e.Local(Frac),
-		aGapBelow = e.Local(Frac),
-		cGapBelow = e.Local(Frac),
-		aGapAbove = e.Local(Frac),
-		cGapAbove = e.Local(Frac);
+	const aInk = $.Local(Frac),
+		cInk = $.Local(Frac),
+		aGapBelow = $.Local(Frac),
+		cGapBelow = $.Local(Frac),
+		aGapAbove = $.Local(Frac),
+		cGapAbove = $.Local(Frac);
 
 	yield cInk.set(pCInks.part(j));
-	yield aInk.set(pAInk.part(j));
+	yield aInk.set(pAInks.part(j));
 	yield cGapBelow.set(pCGaps.part(j));
-	yield aGapBelow.set(pAGap.part(j));
+	yield aGapBelow.set(pAGaps.part(j));
 	yield cGapAbove.set(pCGaps.part(add(1, j)));
-	yield aGapAbove.set(pAGap.part(add(1, j)));
+	yield aGapAbove.set(pAGaps.part(add(1, j)));
 
-	yield If(lt(aInk, 1 / 8)).Then(e.Exit());
+	yield If(lt(aInk, 1 / 8)).Then($.Exit());
 
-	const hasMoreSpaceBelow = e.Local(Bool),
-		canExtendDown = e.Local(Bool),
-		canExtendUp = e.Local(Bool),
-		canShrinkDown = e.Local(Bool),
-		canShrinkUp = e.Local(Bool),
-		inkDownDesired = e.Local(Frac),
-		inkUpDesired = e.Local(Frac);
+	const hasMoreSpaceBelow = $.Local(Bool),
+		inkDownDesired = $.Local(Frac),
+		inkUpDesired = $.Local(Frac);
 
 	yield hasMoreSpaceBelow.set(
 		or(gt(cGapBelow, cGapAbove), and(eq(cGapBelow, cGapAbove), gteq(aGapBelow, aGapAbove)))
@@ -295,71 +301,53 @@ const BalanceOneStroke = Func(
 		)
 	);
 
-	yield canExtendDown.set(and(not(forceRoundBottom), lt(cInk, inkDownDesired)));
-	yield canExtendUp.set(and(not(forceRoundTop), lt(cInk, inkUpDesired)));
-	yield canShrinkDown.set(
-		and(not(forceRoundBottom), and(gt(aGapBelow, 1 / 8), gt(cInk, inkDownDesired)))
-	);
-	yield canShrinkUp.set(
-		and(not(forceRoundTop), and(gt(aGapAbove, 1 / 8), gt(cInk, inkUpDesired)))
-	);
+	const planToExecute = $.Local(Int);
+	yield planToExecute.set(BalancePlan.Unknown);
 
-	const progress = e.Local(Bool);
-	yield progress.set(false);
+	const deltaToApply = $.Local(Frac);
+	yield deltaToApply.set(0);
 
+	yield CompareAndMax(
+		deltaToApply.ptr,
+		ExtDownScore(j, inkDownDesired, cInk, pGapOcc, pInkOcc),
+		planToExecute.ptr,
+		BalancePlan.ExtDown
+	);
+	yield CompareAndMax(
+		deltaToApply.ptr,
+		ExtUpScore(j, inkUpDesired, cInk, pGapOcc, pInkOcc),
+		planToExecute.ptr,
+		BalancePlan.ExtUp
+	);
 	yield If(hasMoreSpaceBelow)
-		.Then(function* () {
-			yield If(and(not(progress), canExtendDown)).Then(
-				progress.set(
-					BalanceOneStrokeExtDown(
-						j,
-						inkDownDesired,
-						cInk,
-						pGapOcc,
-						pInkOcc,
-						pCGaps,
-						pCInks
-					)
-				)
-			);
-			yield If(and(not(progress), canExtendUp)).Then(
-				progress.set(
-					BalanceOneStrokeExtUp(j, inkUpDesired, cInk, pGapOcc, pInkOcc, pCGaps, pCInks)
-				)
-			);
-			yield If(and(not(progress), canShrinkUp)).Then(
-				progress.set(BalanceShrinkOneStrokeUp(j, inkUpDesired, cInk, pCInks, pCGaps))
-			);
-			yield If(and(not(progress), canShrinkDown)).Then(
-				progress.set(BalanceShrinkOneStrokeDown(j, inkDownDesired, cInk, pCInks, pCGaps))
-			);
-		})
-		.Else(function* () {
-			yield If(and(not(progress), canExtendUp)).Then(
-				progress.set(
-					BalanceOneStrokeExtUp(j, inkUpDesired, cInk, pGapOcc, pInkOcc, pCGaps, pCInks)
-				)
-			);
-			yield If(and(not(progress), canExtendDown)).Then(
-				progress.set(
-					BalanceOneStrokeExtDown(
-						j,
-						inkDownDesired,
-						cInk,
-						pGapOcc,
-						pInkOcc,
-						pCGaps,
-						pCInks
-					)
-				)
-			);
-			yield If(and(not(progress), canShrinkDown)).Then(
-				progress.set(BalanceShrinkOneStrokeDown(j, inkDownDesired, cInk, pCInks, pCGaps))
-			);
-			yield If(and(not(progress), canShrinkUp)).Then(
-				progress.set(BalanceShrinkOneStrokeUp(j, inkUpDesired, cInk, pCInks, pCGaps))
-			);
-		});
+		.Then(
+			CompareAndMax(
+				deltaToApply.ptr,
+				ShrinkScore(inkDownDesired, cInk),
+				planToExecute.ptr,
+				BalancePlan.Shrink
+			)
+		)
+		.Else(
+			CompareAndMax(
+				deltaToApply.ptr,
+				ShrinkScore(inkUpDesired, cInk),
+				planToExecute.ptr,
+				BalancePlan.Shrink
+			)
+		);
+
+	yield If(eq(planToExecute, BalancePlan.ExtDown)).Then(
+		ExtDownExec(j, deltaToApply, pGapOcc, pInkOcc, pCGaps, pCInks)
+	);
+	yield If(eq(planToExecute, BalancePlan.ExtUp)).Then(
+		ExtUpExec(j, deltaToApply, pGapOcc, pInkOcc, pCGaps, pCInks)
+	);
+	yield If(eq(planToExecute, BalancePlan.Shrink)).Then(
+		If(hasMoreSpaceBelow)
+			.Then(ShrinkUpExec(j, deltaToApply, pCGaps, pCInks))
+			.Else(ShrinkDownExec(j, deltaToApply, pCGaps, pCInks))
+	);
 });
 
 export const BalanceStrokes = Func(
@@ -390,6 +378,8 @@ export const BalanceStrokes = Func(
 	pAInks,
 	pfStrokeBalanced
 ) {
+	const processStrokeIndex = $.Local(Int);
+
 	yield InitBalanceMultiStrokeHints(
 		N,
 		bottomSeize,
@@ -400,8 +390,8 @@ export const BalanceStrokes = Func(
 		pfStrokeBalanced
 	);
 
-	yield If(gt(N, 0)).Then(
-		BalanceOneStroke(
+	yield If(gt(N, 0)).Then(function* () {
+		yield BalanceOneStroke(
 			0,
 			forceRoundBottom,
 			forceRoundTop,
@@ -411,10 +401,11 @@ export const BalanceStrokes = Func(
 			pCInks,
 			pAGaps,
 			pAInks
-		)
-	);
-	yield If(gt(N, 1)).Then(
-		BalanceOneStroke(
+		);
+		yield pfStrokeBalanced.part(0).set(true);
+	});
+	yield If(gt(N, 1)).Then(function* () {
+		yield BalanceOneStroke(
 			sub(N, 1),
 			forceRoundBottom,
 			forceRoundTop,
@@ -424,31 +415,31 @@ export const BalanceStrokes = Func(
 			pCInks,
 			pAGaps,
 			pAInks
-		)
-	);
+		);
+		yield pfStrokeBalanced.part(sub(N, 1)).set(true);
+	});
 
 	const jj = $.Local(Int);
-	const find = $.Local(Bool);
-	const processStrokeIndex = $.Local(Int);
+	const found = $.Local(Bool);
 	const maxStrokeWidth = $.Local(Frac);
 
-	yield find.set(true);
+	yield found.set(true);
 	yield processStrokeIndex.set(0);
-	yield While(find, function* () {
-		yield find.set(false);
+	yield While(found, function* () {
+		yield found.set(false);
 		yield jj.set(1);
 		yield maxStrokeWidth.set(0);
 		yield While(lt(add(1, jj), N), function* () {
 			yield If(and(not(pfStrokeBalanced.part(jj)), gt(pAInks.part(jj), maxStrokeWidth))).Then(
 				function* () {
-					yield find.set(true);
+					yield found.set(true);
 					yield processStrokeIndex.set(jj);
 					yield maxStrokeWidth.set(pAInks.part(jj));
 				}
 			);
 			yield jj.set(add(jj, 1));
 		});
-		yield If(find).Then(function* () {
+		yield If(found).Then(function* () {
 			yield BalanceOneStroke(
 				processStrokeIndex,
 				forceRoundBottom,
