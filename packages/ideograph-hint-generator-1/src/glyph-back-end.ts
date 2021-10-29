@@ -156,6 +156,8 @@ export class GlyphHintGenBackEnd {
 				emBoxName: this.params.groupName,
 				gapMinDist: gapMD,
 				inkMinDist: inkMD,
+				bottomBalanceForbidden: botSame,
+				topBalanceForbidden: topSame,
 				mergePriority: pile.annex,
 				allowCollide,
 				bottomPoint: zBot,
