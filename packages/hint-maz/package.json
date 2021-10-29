@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-maz",
-	"version": "0.40.2",
+	"version": "0.40.3",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
