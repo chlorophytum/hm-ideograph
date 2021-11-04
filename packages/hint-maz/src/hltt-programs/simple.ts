@@ -1,5 +1,5 @@
 import { Func, Template } from "@chlorophytum/hltt-next";
-import { abs, add, and, gc, lt, mul, not, or, round, sub } from "@chlorophytum/hltt-next-expr";
+import { abs, add, and, gc, lt, mul, not, or, round, sub, eq } from "@chlorophytum/hltt-next-expr";
 import { If, Ip, Mdap, Scfs, While } from "@chlorophytum/hltt-next-stmt";
 import { Bool, Frac, GlyphPoint, Int, Store, THandle } from "@chlorophytum/hltt-next-type-system";
 
@@ -50,8 +50,8 @@ export const HintMultipleStrokesSimple = Template((Tb: THandle, Tt: THandle) =>
 		yield j.set(0);
 		yield While(lt(j, N), function* () {
 			yield IpClose(Tb, Tt)(
-				forceRoundBottom,
-				forceRoundTop,
+				and(forceRoundBottom, eq(j, 0)),
+				and(forceRoundTop, eq(add(j, 1), N)),
 				zBot,
 				zTop,
 				pZMids.part(mul(2, j)),

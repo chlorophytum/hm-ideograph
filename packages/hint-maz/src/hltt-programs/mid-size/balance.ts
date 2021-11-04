@@ -281,13 +281,8 @@ const BalanceOneStroke = Func(
 
 	yield If(lt(aInk, 1 / 8)).Then($.Exit());
 
-	const hasMoreSpaceBelow = $.Local(Bool),
-		inkDownDesired = $.Local(Frac),
+	const inkDownDesired = $.Local(Frac),
 		inkUpDesired = $.Local(Frac);
-
-	yield hasMoreSpaceBelow.set(
-		or(gt(cGapBelow, cGapAbove), and(eq(cGapBelow, cGapAbove), gteq(aGapBelow, aGapAbove)))
-	);
 
 	yield inkDownDesired.set(
 		ComputeDarknessAdjustedStrokeWidth(
@@ -311,28 +306,28 @@ const BalanceOneStroke = Func(
 	yield CompareAndMax(
 		forceRoundBottom,
 		deltaToApply.ptr,
-		ExtDownScore(j, aInk, cInk, pGapOcc, pInkOcc),
+		ExtDownScore(j, inkDownDesired, cInk, pGapOcc, pInkOcc),
 		planToExecute.ptr,
 		BalancePlan.ExtDown
 	);
 	yield CompareAndMax(
 		forceRoundTop,
 		deltaToApply.ptr,
-		ExtUpScore(j, aInk, cInk, pGapOcc, pInkOcc),
+		ExtUpScore(j, inkUpDesired, cInk, pGapOcc, pInkOcc),
 		planToExecute.ptr,
 		BalancePlan.ExtUp
 	);
 	yield CompareAndMax(
 		forceRoundBottom,
 		deltaToApply.ptr,
-		ShrinkScore(aInk, cInk),
+		ShrinkScore(inkDownDesired, cInk),
 		planToExecute.ptr,
 		BalancePlan.ShrinkDown
 	);
 	yield CompareAndMax(
 		forceRoundTop,
 		deltaToApply.ptr,
-		ShrinkScore(aInk, cInk),
+		ShrinkScore(inkUpDesired, cInk),
 		planToExecute.ptr,
 		BalancePlan.ShrinkUp
 	);
