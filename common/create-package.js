@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
+
 const stringify = require("json-stringify-pretty-compact");
 
 const PACKAGES_DIR = path.join(__dirname, "../packages");
@@ -21,16 +23,7 @@ fs.mkdirSync(path.join(PACKAGES_DIR, libName, "src"));
 fs.writeFileSync(path.join(PACKAGES_DIR, libName, ".npmrc"), "package-lock=false");
 fs.writeFileSync(path.join(PACKAGES_DIR, libName, "src", "index.ts"), "export default {};");
 fs.writeFileSync(
-	path.join(PACKAGES_DIR, libName, "src", "dummy.test.ts"),
-	`import test from "ava";
-
-test("Dummy test :: ${libName}", t => {
-	t.is(1, 1);
-});
-`
-);
-fs.writeFileSync(
-	path.join(PACKAGES_DIR, libName, ".npmignore"),
+	path.join(PACKAGES_DIR, libName, "src", ".npmignore"),
 	`src/
 lib/**/*.map
 tsconfig.json
@@ -53,13 +46,10 @@ fs.writeFileSync(
 		author: "Renzhi Li (aka. Belleve Invis)",
 		license: "MIT",
 		dependencies: {
-			tslib: "^1.9.3"
+			tslib: "^2.0.1"
 		},
 		devDependencies: {
-			ava: "^1.4.1"
-		},
-		ava: {
-			files: ["lib/**/*.test.js"]
+			ava: "^4.1.0"
 		},
 		publishConfig: {
 			access: "public"
