@@ -1,6 +1,6 @@
 {
 	"extends": "../../config/tsconfig.settings.json",
-	"references": [{"path": "../hint-programs-stoke-adjust"}],
+	"references": [{"path": "../hint-programs-stroke-adjust"}],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "lib",

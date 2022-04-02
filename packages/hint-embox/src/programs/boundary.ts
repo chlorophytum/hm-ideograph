@@ -1,4 +1,4 @@
-import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { AdjustStrokeDistT } from "@chlorophytum/hint-programs-stroke-adjust";
 import { Func } from "@chlorophytum/hltt-next";
 import { add, div, floor, gc, gteq, max, mul, sub } from "@chlorophytum/hltt-next-expr";
 import { If, Scfs } from "@chlorophytum/hltt-next-stmt";

@@ -1,4 +1,4 @@
-import { AdjustStrokeDistT, OctDistOrigT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { AdjustStrokeDistT, OctDistOrigT } from "@chlorophytum/hint-programs-stroke-adjust";
 import { Func, Template } from "@chlorophytum/hltt-next";
 import { add, div, lt, lteq, max, mul } from "@chlorophytum/hltt-next-expr";
 import { While } from "@chlorophytum/hltt-next-stmt";

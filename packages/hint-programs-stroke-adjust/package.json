@@ -1,5 +1,5 @@
 {
-	"name": "@chlorophytum/hint-programs-stoke-adjust",
+	"name": "@chlorophytum/hint-programs-stroke-adjust",
 	"version": "0.41.0",
 	"description": "",
 	"main": "lib/index.js",

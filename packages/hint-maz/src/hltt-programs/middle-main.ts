@@ -1,4 +1,4 @@
-import { VisDistT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { VisDistT } from "@chlorophytum/hint-programs-stroke-adjust";
 import { CallableFunc, Func, Template } from "@chlorophytum/hltt-next";
 import {
 	abs,

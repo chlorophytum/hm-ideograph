@@ -1,4 +1,4 @@
-import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stoke-adjust";
+import { VisCeilT, VisFloorT } from "@chlorophytum/hint-programs-stroke-adjust";
 import { Func, Template } from "@chlorophytum/hltt-next";
 import { add, div, gc, lt, mul, sub } from "@chlorophytum/hltt-next-expr";
 import { While } from "@chlorophytum/hltt-next-stmt";

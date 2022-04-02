@@ -2,7 +2,7 @@
 	"extends": "../../config/tsconfig.settings.json",
 	"references": [
 		{"path": "../hint-embox"},
-		{"path": "../hint-programs-stoke-adjust"}
+		{"path": "../hint-programs-stroke-adjust"}
 	],
 	"compilerOptions": {
 		"rootDir": "src",
