@@ -1,6 +1,6 @@
 {
 	"name": "@chlorophytum/hint-programs-stroke-adjust",
-	"version": "0.41.0",
+	"version": "0.41.1",
 	"description": "",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
